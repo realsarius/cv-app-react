@@ -65,7 +65,39 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
     redirect('/dashboard?error=Resume+bulunamadi');
   }
 
-  const { content } = editorState;
+  const { content, settings } = editorState;
+  const isCompactTemplate = settings.templateKey === 'ats-compact';
+  const palette =
+    settings.colorScheme === 'mono'
+      ? {
+          border: 'border-zinc-300',
+          title: 'text-zinc-900',
+          body: 'text-zinc-800',
+          muted: 'text-zinc-600',
+          sectionLabel: 'text-zinc-500',
+        }
+      : settings.colorScheme === 'slate'
+        ? {
+            border: 'border-slate-300',
+            title: 'text-slate-950',
+            body: 'text-slate-800',
+            muted: 'text-slate-600',
+            sectionLabel: 'text-slate-500',
+          }
+        : {
+            border: 'border-slate-200',
+            title: 'text-slate-900',
+            body: 'text-slate-800',
+            muted: 'text-slate-600',
+            sectionLabel: 'text-slate-500',
+          };
+  const sectionSpacing = isCompactTemplate ? 'mt-4' : 'mt-6';
+  const contentSpacing = isCompactTemplate ? 'space-y-3' : 'space-y-4';
+  const paragraphSpacing = isCompactTemplate ? 'leading-5' : 'leading-6';
+  const articleLineHeight = Math.max(
+    1.3,
+    Math.min(2, Number((1.55 * settings.spacingScale).toFixed(2)))
+  );
 
   return (
     <section className='space-y-4 print:space-y-0'>
@@ -81,15 +113,23 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
         </div>
       </header>
 
-      <article className='mx-auto w-full max-w-[210mm] rounded-xl border border-slate-200 bg-white p-8 shadow-sm print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none'>
-        <header className='border-b border-slate-200 pb-4'>
-          <h2 className='text-3xl font-bold text-slate-900'>
+      <article
+        style={{
+          fontSize: `${settings.fontScale}rem`,
+          lineHeight: articleLineHeight,
+        }}
+        className={`mx-auto w-full max-w-[210mm] rounded-xl border bg-white shadow-sm print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none ${palette.border} ${isCompactTemplate ? 'p-6' : 'p-8'}`}
+      >
+        <header className={`border-b pb-4 ${palette.border}`}>
+          <h2
+            className={`${isCompactTemplate ? 'text-2xl' : 'text-3xl'} font-bold ${palette.title}`}
+          >
             {content.personalDetails.fullName || 'Isim Soyisim'}
           </h2>
-          <p className='mt-1 text-base text-slate-700'>
+          <p className={`mt-1 text-base ${palette.body}`}>
             {content.personalDetails.jobTitle || 'Pozisyon'}
           </p>
-          <p className='mt-2 text-sm text-slate-600'>
+          <p className={`mt-2 text-sm ${palette.muted}`}>
             {[
               content.personalDetails.email,
               content.personalDetails.phone,
@@ -101,42 +141,46 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
         </header>
 
         {content.profile ? (
-          <section className='mt-6'>
-            <h3 className='text-sm font-bold uppercase tracking-wide text-slate-500'>
+          <section className={sectionSpacing}>
+            <h3
+              className={`text-sm font-bold uppercase tracking-wide ${palette.sectionLabel}`}
+            >
               Profil
             </h3>
-            <p className='mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-800'>
+            <p className={`mt-2 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
               {content.profile}
             </p>
           </section>
         ) : null}
 
         {content.experiences.length > 0 ? (
-          <section className='mt-6'>
-            <h3 className='text-sm font-bold uppercase tracking-wide text-slate-500'>
+          <section className={sectionSpacing}>
+            <h3
+              className={`text-sm font-bold uppercase tracking-wide ${palette.sectionLabel}`}
+            >
               Deneyim
             </h3>
-            <div className='mt-3 space-y-4'>
+            <div className={`mt-3 ${contentSpacing}`}>
               {content.experiences.map((item) => (
                 <div key={item.id}>
                   <div className='flex flex-wrap items-center justify-between gap-2'>
-                    <p className='text-sm font-semibold text-slate-900'>
+                    <p className={`text-sm font-semibold ${palette.title}`}>
                       {item.title || 'Pozisyon'}
                       {item.company ? ` - ${item.company}` : ''}
                     </p>
                     {formatRange(item.startDate, item.endDate) ? (
-                      <p className='text-xs text-slate-500'>
+                      <p className={`text-xs ${palette.sectionLabel}`}>
                         {formatRange(item.startDate, item.endDate)}
                       </p>
                     ) : null}
                   </div>
                   {item.city || item.country ? (
-                    <p className='text-xs text-slate-500'>
+                    <p className={`text-xs ${palette.sectionLabel}`}>
                       {[item.city, item.country].filter(Boolean).join(', ')}
                     </p>
                   ) : null}
                   {item.description ? (
-                    <p className='mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-800'>
+                    <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
                       {item.description}
                     </p>
                   ) : null}
@@ -147,31 +191,33 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
         ) : null}
 
         {content.educations.length > 0 ? (
-          <section className='mt-6'>
-            <h3 className='text-sm font-bold uppercase tracking-wide text-slate-500'>
+          <section className={sectionSpacing}>
+            <h3
+              className={`text-sm font-bold uppercase tracking-wide ${palette.sectionLabel}`}
+            >
               Egitim
             </h3>
-            <div className='mt-3 space-y-4'>
+            <div className={`mt-3 ${contentSpacing}`}>
               {content.educations.map((item) => (
                 <div key={item.id}>
                   <div className='flex flex-wrap items-center justify-between gap-2'>
-                    <p className='text-sm font-semibold text-slate-900'>
+                    <p className={`text-sm font-semibold ${palette.title}`}>
                       {item.school || 'Okul'}
                       {item.degree ? ` - ${item.degree}` : ''}
                     </p>
                     {formatRange(item.startDate, item.endDate) ? (
-                      <p className='text-xs text-slate-500'>
+                      <p className={`text-xs ${palette.sectionLabel}`}>
                         {formatRange(item.startDate, item.endDate)}
                       </p>
                     ) : null}
                   </div>
                   {item.city || item.country ? (
-                    <p className='text-xs text-slate-500'>
+                    <p className={`text-xs ${palette.sectionLabel}`}>
                       {[item.city, item.country].filter(Boolean).join(', ')}
                     </p>
                   ) : null}
                   {item.description ? (
-                    <p className='mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-800'>
+                    <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
                       {item.description}
                     </p>
                   ) : null}
@@ -182,27 +228,29 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
         ) : null}
 
         {content.projects.length > 0 ? (
-          <section className='mt-6'>
-            <h3 className='text-sm font-bold uppercase tracking-wide text-slate-500'>
+          <section className={sectionSpacing}>
+            <h3
+              className={`text-sm font-bold uppercase tracking-wide ${palette.sectionLabel}`}
+            >
               Projeler
             </h3>
-            <div className='mt-3 space-y-4'>
+            <div className={`mt-3 ${contentSpacing}`}>
               {content.projects.map((item) => (
                 <div key={item.id}>
-                  <p className='text-sm font-semibold text-slate-900'>
+                  <p className={`text-sm font-semibold ${palette.title}`}>
                     {item.title || 'Proje'}
                     {item.subtitle ? ` - ${item.subtitle}` : ''}
                   </p>
                   {item.stack ? (
-                    <p className='text-xs text-slate-500'>{item.stack}</p>
+                    <p className={`text-xs ${palette.sectionLabel}`}>{item.stack}</p>
                   ) : null}
                   {item.city || item.country ? (
-                    <p className='text-xs text-slate-500'>
+                    <p className={`text-xs ${palette.sectionLabel}`}>
                       {[item.city, item.country].filter(Boolean).join(', ')}
                     </p>
                   ) : null}
                   {item.description ? (
-                    <p className='mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-800'>
+                    <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
                       {item.description}
                     </p>
                   ) : null}

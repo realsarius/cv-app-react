@@ -86,6 +86,10 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
         initialTitle={editorState.resume.title}
         initialContent={editorState.content}
         initialUpdatedAt={editorState.resume.updatedAt.toISOString()}
+        initialSettings={{
+          ...editorState.settings,
+          updatedAt: editorState.settings.updatedAt.toISOString(),
+        }}
         initialAtsHistory={jobTargetHistory.map((item) => ({
           ...item,
           updatedAt: item.updatedAt.toISOString(),

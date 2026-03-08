@@ -109,3 +109,30 @@ export const jobTargets = pgTable(
     updatedAtIndex: index('job_targets_updated_at_idx').on(table.updatedAt),
   })
 );
+
+export const resumeSettings = pgTable(
+  'resume_settings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    resumeId: uuid('resume_id')
+      .notNull()
+      .references(() => resumes.id, { onDelete: 'cascade' }),
+    templateKey: text('template_key').notNull().default('ats-classic'),
+    fontScale: numeric('font_scale', { precision: 4, scale: 2 })
+      .notNull()
+      .default('1.00'),
+    spacingScale: numeric('spacing_scale', { precision: 4, scale: 2 })
+      .notNull()
+      .default('1.00'),
+    colorScheme: text('color_scheme').notNull().default('neutral'),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    resumeIdUnique: uniqueIndex('resume_settings_resume_id_unique').on(
+      table.resumeId
+    ),
+    updatedAtIndex: index('resume_settings_updated_at_idx').on(table.updatedAt),
+  })
+);

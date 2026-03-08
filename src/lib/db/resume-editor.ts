@@ -1,9 +1,13 @@
 import { and, eq, sql } from 'drizzle-orm';
-import { resumeVersions, resumes } from '@/db/schema';
+import { resumeSettings, resumeVersions, resumes } from '@/db/schema';
 import {
   parseResumeContent,
   type ResumeContent,
 } from '@/features/resume-editor/content';
+import {
+  DEFAULT_RESUME_SETTINGS,
+  type ResumeVisualSettings,
+} from './resume-settings';
 import { withUserRls } from './rls';
 
 export type ResumeEditorState = {
@@ -15,6 +19,7 @@ export type ResumeEditorState = {
     updatedAt: Date;
   };
   content: ResumeContent;
+  settings: ResumeVisualSettings;
 };
 
 export type SaveResumeEditorInput = {
@@ -56,9 +61,34 @@ export async function getResumeEditorState(
       )
       .limit(1);
 
+    const [settings] = await tx
+      .select({
+        templateKey: resumeSettings.templateKey,
+        fontScale: resumeSettings.fontScale,
+        spacingScale: resumeSettings.spacingScale,
+        colorScheme: resumeSettings.colorScheme,
+        updatedAt: resumeSettings.updatedAt,
+      })
+      .from(resumeSettings)
+      .where(eq(resumeSettings.resumeId, resume.id))
+      .limit(1);
+
     return {
       resume,
       content: parseResumeContent(version?.content),
+      settings: {
+        templateKey:
+          settings?.templateKey === 'ats-compact' ? 'ats-compact' : 'ats-classic',
+        fontScale: Number(settings?.fontScale ?? DEFAULT_RESUME_SETTINGS.fontScale),
+        spacingScale: Number(
+          settings?.spacingScale ?? DEFAULT_RESUME_SETTINGS.spacingScale
+        ),
+        colorScheme:
+          settings?.colorScheme === 'slate' || settings?.colorScheme === 'mono'
+            ? settings.colorScheme
+            : 'neutral',
+        updatedAt: settings?.updatedAt ?? DEFAULT_RESUME_SETTINGS.updatedAt,
+      },
     };
   });
 }

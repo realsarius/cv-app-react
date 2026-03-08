@@ -13,6 +13,7 @@ type ResumeEditorClientProps = {
   initialTitle: string;
   initialContent: ResumeContent;
   initialUpdatedAt: string;
+  initialSettings: ResumeVisualSettings;
   initialAtsHistory: AtsHistoryItem[];
 };
 
@@ -50,6 +51,19 @@ type AtsHistoryItem = {
   suggestions: string[];
   algorithmVersion: string | null;
   updatedAt: string;
+};
+
+type ResumeVisualSettings = {
+  templateKey: 'ats-classic' | 'ats-compact';
+  fontScale: number;
+  spacingScale: number;
+  colorScheme: 'neutral' | 'slate' | 'mono';
+  updatedAt: string;
+};
+
+type ResumeSettingsResponse = {
+  ok: boolean;
+  settings: ResumeVisualSettings;
 };
 
 function createItemId() {
@@ -103,6 +117,7 @@ export default function ResumeEditorClient({
   initialTitle,
   initialContent,
   initialUpdatedAt,
+  initialSettings,
   initialAtsHistory,
 }: ResumeEditorClientProps) {
   const [title, setTitle] = useState(initialTitle);
@@ -110,6 +125,12 @@ export default function ResumeEditorClient({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState(initialUpdatedAt);
+  const [settings, setSettings] = useState<ResumeVisualSettings>(initialSettings);
+  const [settingsSaveStatus, setSettingsSaveStatus] = useState<SaveStatus>('idle');
+  const [settingsSaveError, setSettingsSaveError] = useState<string | null>(null);
+  const [settingsLastSavedAt, setSettingsLastSavedAt] = useState(
+    initialSettings.updatedAt
+  );
   const [jobDescription, setJobDescription] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [company, setCompany] = useState('');
@@ -125,6 +146,14 @@ export default function ResumeEditorClient({
       content: initialContent,
     })
   );
+  const lastSavedSettingsRef = useRef(
+    JSON.stringify({
+      templateKey: initialSettings.templateKey,
+      fontScale: initialSettings.fontScale,
+      spacingScale: initialSettings.spacingScale,
+      colorScheme: initialSettings.colorScheme,
+    })
+  );
 
   const payload = useMemo(
     () => ({
@@ -135,6 +164,24 @@ export default function ResumeEditorClient({
   );
 
   const payloadString = useMemo(() => JSON.stringify(payload), [payload]);
+  const settingsPayload = useMemo(
+    () => ({
+      templateKey: settings.templateKey,
+      fontScale: settings.fontScale,
+      spacingScale: settings.spacingScale,
+      colorScheme: settings.colorScheme,
+    }),
+    [
+      settings.colorScheme,
+      settings.fontScale,
+      settings.spacingScale,
+      settings.templateKey,
+    ]
+  );
+  const settingsPayloadString = useMemo(
+    () => JSON.stringify(settingsPayload),
+    [settingsPayload]
+  );
 
   const savePayload = useCallback(
     async (nextPayloadString: string) => {
@@ -224,6 +271,52 @@ export default function ResumeEditorClient({
     }
   }, [company, content, jobDescription, jobTitle, resumeId]);
 
+  const runSettingsSave = useCallback(async () => {
+    if (settingsPayloadString === lastSavedSettingsRef.current) {
+      setSettingsSaveStatus('saved');
+      return;
+    }
+
+    setSettingsSaveStatus('saving');
+    setSettingsSaveError(null);
+
+    try {
+      const response = await fetch(`/api/resumes/${resumeId}/settings`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: settingsPayloadString,
+      });
+
+      if (!response.ok) {
+        const errorPayload = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(errorPayload?.error || 'Ayarlar kaydedilemedi.');
+      }
+
+      const responseData = (await response.json()) as ResumeSettingsResponse;
+      const persistedSettings = responseData.settings;
+
+      lastSavedSettingsRef.current = JSON.stringify({
+        templateKey: persistedSettings.templateKey,
+        fontScale: persistedSettings.fontScale,
+        spacingScale: persistedSettings.spacingScale,
+        colorScheme: persistedSettings.colorScheme,
+      });
+
+      setSettings(persistedSettings);
+      setSettingsLastSavedAt(persistedSettings.updatedAt);
+      setSettingsSaveStatus('saved');
+    } catch (error) {
+      setSettingsSaveStatus('error');
+      setSettingsSaveError(
+        error instanceof Error ? error.message : 'Ayarlar kaydedilemedi.'
+      );
+    }
+  }, [resumeId, settingsPayloadString]);
+
   const addExperience = useCallback(() => {
     setContent((prev) => ({
       ...prev,
@@ -285,6 +378,7 @@ export default function ResumeEditorClient({
   }, [payloadString, runSaveNow, saveStatus]);
 
   const isDirty = payloadString !== lastSavedPayloadRef.current;
+  const isSettingsDirty = settingsPayloadString !== lastSavedSettingsRef.current;
   const canRunAtsAnalysis = jobDescription.trim().length >= 50;
 
   return (
@@ -299,6 +393,131 @@ export default function ResumeEditorClient({
           className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
           placeholder='Ornek: Frontend Developer CV'
         />
+      </div>
+
+      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <h2 className='text-lg font-semibold text-slate-900'>
+            Resume gorunum ayarlari
+          </h2>
+          <button
+            type='button'
+            onClick={() => {
+              void runSettingsSave();
+            }}
+            disabled={!isSettingsDirty || settingsSaveStatus === 'saving'}
+            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400'
+          >
+            {settingsSaveStatus === 'saving' ? 'Kaydediliyor' : 'Ayarlari kaydet'}
+          </button>
+        </div>
+
+        <p className='mt-2 text-sm text-slate-600'>
+          Onizleme sayfasinda kullanilacak sablon, renk ve bosluk ayarlarini yonet.
+        </p>
+
+        <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
+          <label className='space-y-2 text-sm text-slate-700'>
+            <span className='font-medium text-slate-900'>Sablon</span>
+            <select
+              value={settings.templateKey}
+              onChange={(event) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  templateKey:
+                    event.target.value === 'ats-compact'
+                      ? 'ats-compact'
+                      : 'ats-classic',
+                }))
+              }
+              className='w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            >
+              <option value='ats-classic'>ATS Classic</option>
+              <option value='ats-compact'>ATS Compact</option>
+            </select>
+          </label>
+
+          <label className='space-y-2 text-sm text-slate-700'>
+            <span className='font-medium text-slate-900'>Renk duzeni</span>
+            <select
+              value={settings.colorScheme}
+              onChange={(event) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  colorScheme:
+                    event.target.value === 'slate' || event.target.value === 'mono'
+                      ? event.target.value
+                      : 'neutral',
+                }))
+              }
+              className='w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            >
+              <option value='neutral'>Neutral</option>
+              <option value='slate'>Slate</option>
+              <option value='mono'>Mono</option>
+            </select>
+          </label>
+
+          <label className='space-y-2 text-sm text-slate-700 sm:col-span-2'>
+            <span className='font-medium text-slate-900'>
+              Font olcegi ({settings.fontScale.toFixed(2)}x)
+            </span>
+            <input
+              type='range'
+              min='0.85'
+              max='1.30'
+              step='0.05'
+              value={settings.fontScale}
+              onChange={(event) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  fontScale: Number.parseFloat(event.target.value),
+                }))
+              }
+              className='w-full accent-slate-700'
+            />
+          </label>
+
+          <label className='space-y-2 text-sm text-slate-700 sm:col-span-2'>
+            <span className='font-medium text-slate-900'>
+              Satir ve bolum boslugu ({settings.spacingScale.toFixed(2)}x)
+            </span>
+            <input
+              type='range'
+              min='0.80'
+              max='1.40'
+              step='0.05'
+              value={settings.spacingScale}
+              onChange={(event) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  spacingScale: Number.parseFloat(event.target.value),
+                }))
+              }
+              className='w-full accent-slate-700'
+            />
+          </label>
+        </div>
+
+        <div className='mt-3 flex flex-wrap items-center gap-2 text-sm'>
+          <span className='font-medium text-slate-900'>Durum:</span>
+          <span className='rounded bg-slate-100 px-2 py-0.5 text-slate-700'>
+            {settingsSaveStatus === 'saving' && 'Kaydediliyor'}
+            {settingsSaveStatus === 'saved' && 'Kaydedildi'}
+            {settingsSaveStatus === 'error' && 'Hata'}
+            {settingsSaveStatus === 'idle' &&
+              (isSettingsDirty ? 'Degisiklik var' : 'Hazir')}
+          </span>
+          <span className='text-slate-500'>
+            Son kayit: {new Date(settingsLastSavedAt).toLocaleString('tr-TR')}
+          </span>
+        </div>
+
+        {settingsSaveError ? (
+          <p className='mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700'>
+            {settingsSaveError}
+          </p>
+        ) : null}
       </div>
 
       <div className='rounded-xl border border-slate-200 bg-white p-5'>

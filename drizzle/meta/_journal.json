@@ -15,6 +15,13 @@
       "when": 1772965300854,
       "tag": "0001_unknown_dormammu",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772966377768,
+      "tag": "0002_handy_marvel_zombies",
+      "breakpoints": true
     }
   ]
 }
