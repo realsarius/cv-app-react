@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import ResumeEditorClient from '@/features/resume-editor/ResumeEditorClient';
+import { listJobTargetHistory } from '@/lib/db/job-targets';
 import { getResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -47,6 +48,12 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
     redirect('/dashboard?error=Resume+bulunamadi');
   }
 
+  const jobTargetHistory = await listJobTargetHistory(
+    user.id,
+    editorState.resume.id,
+    8
+  );
+
   return (
     <section className='space-y-5'>
       <header className='rounded-xl border border-slate-200 bg-white p-5'>
@@ -71,6 +78,10 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
         initialTitle={editorState.resume.title}
         initialContent={editorState.content}
         initialUpdatedAt={editorState.resume.updatedAt.toISOString()}
+        initialAtsHistory={jobTargetHistory.map((item) => ({
+          ...item,
+          updatedAt: item.updatedAt.toISOString(),
+        }))}
       />
     </section>
   );

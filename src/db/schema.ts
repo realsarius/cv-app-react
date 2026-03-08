@@ -84,3 +84,28 @@ export const resumeVersions = pgTable(
     ),
   })
 );
+
+export const jobTargets = pgTable(
+  'job_targets',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    resumeId: uuid('resume_id')
+      .notNull()
+      .references(() => resumes.id, { onDelete: 'cascade' }),
+    jobTitle: text('job_title'),
+    company: text('company'),
+    jobDescription: text('job_description').notNull(),
+    lastScore: numeric('last_score', { precision: 5, scale: 2 }),
+    matchedKeywords: jsonb('matched_keywords').$type<string[]>(),
+    missingKeywords: jsonb('missing_keywords').$type<string[]>(),
+    suggestions: jsonb('suggestions').$type<string[]>(),
+    algorithmVersion: text('algorithm_version'),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    resumeIdIndex: index('job_targets_resume_id_idx').on(table.resumeId),
+    updatedAtIndex: index('job_targets_updated_at_idx').on(table.updatedAt),
+  })
+);

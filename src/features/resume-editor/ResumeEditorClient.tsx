@@ -13,6 +13,7 @@ type ResumeEditorClientProps = {
   initialTitle: string;
   initialContent: ResumeContent;
   initialUpdatedAt: string;
+  initialAtsHistory: AtsHistoryItem[];
 };
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -35,6 +36,20 @@ type AtsScoreResponse = {
     readability: number;
     roleAlignment: number;
   };
+  savedTarget?: AtsHistoryItem | null;
+};
+
+type AtsHistoryItem = {
+  id: string;
+  resumeId: string;
+  jobTitle: string | null;
+  company: string | null;
+  lastScore: number | null;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  suggestions: string[];
+  algorithmVersion: string | null;
+  updatedAt: string;
 };
 
 function createItemId() {
@@ -88,6 +103,7 @@ export default function ResumeEditorClient({
   initialTitle,
   initialContent,
   initialUpdatedAt,
+  initialAtsHistory,
 }: ResumeEditorClientProps) {
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
@@ -95,9 +111,12 @@ export default function ResumeEditorClient({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState(initialUpdatedAt);
   const [jobDescription, setJobDescription] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [company, setCompany] = useState('');
   const [atsLoading, setAtsLoading] = useState(false);
   const [atsError, setAtsError] = useState<string | null>(null);
   const [atsResult, setAtsResult] = useState<AtsScoreResponse | null>(null);
+  const [atsHistory, setAtsHistory] = useState<AtsHistoryItem[]>(initialAtsHistory);
 
   const saveSequenceRef = useRef(0);
   const lastSavedPayloadRef = useRef(
@@ -173,6 +192,9 @@ export default function ResumeEditorClient({
           'content-type': 'application/json',
         },
         body: JSON.stringify({
+          resumeId,
+          jobTitle,
+          company,
           jobDescription,
           content,
         }),
@@ -187,6 +209,12 @@ export default function ResumeEditorClient({
 
       const scoreData = (await response.json()) as AtsScoreResponse;
       setAtsResult(scoreData);
+
+      if (scoreData.savedTarget) {
+        setAtsHistory((prev) =>
+          [scoreData.savedTarget!, ...prev.filter((item) => item.id !== scoreData.savedTarget!.id)].slice(0, 8)
+        );
+      }
     } catch (error) {
       setAtsError(
         error instanceof Error ? error.message : 'ATS analizi basarisiz oldu.'
@@ -194,7 +222,7 @@ export default function ResumeEditorClient({
     } finally {
       setAtsLoading(false);
     }
-  }, [content, jobDescription]);
+  }, [company, content, jobDescription, jobTitle, resumeId]);
 
   const addExperience = useCallback(() => {
     setContent((prev) => ({
@@ -842,6 +870,25 @@ export default function ResumeEditorClient({
           hesapla.
         </p>
 
+        <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+          <input
+            type='text'
+            value={jobTitle}
+            onChange={(event) => setJobTitle(event.target.value)}
+            maxLength={120}
+            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            placeholder='Is unvani (opsiyonel)'
+          />
+          <input
+            type='text'
+            value={company}
+            onChange={(event) => setCompany(event.target.value)}
+            maxLength={120}
+            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            placeholder='Sirket (opsiyonel)'
+          />
+        </div>
+
         <textarea
           value={jobDescription}
           onChange={(event) => setJobDescription(event.target.value)}
@@ -924,6 +971,41 @@ export default function ResumeEditorClient({
             ) : null}
           </div>
         ) : null}
+
+        <div className='mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4'>
+          <h3 className='text-sm font-semibold text-slate-800'>ATS gecmisi</h3>
+          {atsHistory.length === 0 ? (
+            <p className='mt-2 text-sm text-slate-600'>
+              Henuz kayitli ATS analizi bulunmuyor.
+            </p>
+          ) : (
+            <ul className='mt-3 space-y-2'>
+              {atsHistory.map((item) => (
+                <li
+                  key={item.id}
+                  className='rounded border border-slate-200 bg-white px-3 py-2'
+                >
+                  <div className='flex flex-wrap items-center justify-between gap-2'>
+                    <div>
+                      <p className='text-sm font-semibold text-slate-900'>
+                        {item.jobTitle || 'Is unvani belirtilmedi'}
+                      </p>
+                      <p className='text-xs text-slate-500'>
+                        {item.company || 'Sirket belirtilmedi'}
+                      </p>
+                    </div>
+                    <span className='rounded bg-slate-900 px-2 py-0.5 text-xs font-semibold text-white'>
+                      {item.lastScore ?? 0}/100
+                    </span>
+                  </div>
+                  <p className='mt-1 text-xs text-slate-500'>
+                    {new Date(item.updatedAt).toLocaleString('tr-TR')}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <div className='rounded-xl border border-slate-200 bg-white p-5'>

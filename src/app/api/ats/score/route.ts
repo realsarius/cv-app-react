@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { calculateAtsScore } from '@/lib/ats/scoring';
+import {
+  saveJobTargetAnalysis,
+  trimJobTargetHistory,
+} from '@/lib/db/job-targets';
+import { isDatabaseConfigured } from '@/lib/db/env';
 import { resumeContentSchema } from '@/features/resume-editor/content';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 const requestSchema = z.object({
+  resumeId: z.string().uuid().optional(),
+  jobTitle: z.string().trim().max(120).optional(),
+  company: z.string().trim().max(120).optional(),
   jobDescription: z.string().trim().min(50).max(30000),
   content: resumeContentSchema,
 });
@@ -48,5 +56,23 @@ export async function POST(request: NextRequest) {
 
   const score = calculateAtsScore(parsed.data.content, parsed.data.jobDescription);
 
-  return NextResponse.json(score);
+  let savedTarget = null;
+  if (parsed.data.resumeId && isDatabaseConfigured()) {
+    savedTarget = await saveJobTargetAnalysis(user.id, {
+      resumeId: parsed.data.resumeId,
+      jobTitle: parsed.data.jobTitle,
+      company: parsed.data.company,
+      jobDescription: parsed.data.jobDescription,
+      score,
+    });
+
+    if (savedTarget) {
+      await trimJobTargetHistory(user.id, parsed.data.resumeId, 20);
+    }
+  }
+
+  return NextResponse.json({
+    ...score,
+    savedTarget,
+  });
 }
