@@ -17,6 +17,7 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 - Rule-based ATS skor endpointi eklendi: `/api/ats/score`.
 - Editor kapsaminda `experience`, `education` ve `projects` bolumleri dinamik olarak eklendi.
 - ATS analizleri `job_targets` tablosuna kaydedilerek editorde gecmis listesi gosterildi.
+- Yazdirilabilir ATS-uyumlu onizleme sayfasi eklendi: `/resumes/[resumeId]/preview`.
 
 ## Kurulum
 

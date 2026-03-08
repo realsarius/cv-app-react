@@ -64,12 +64,20 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
               {editorState.resume.title}
             </h1>
           </div>
-          <Link
-            href='/dashboard'
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
-          >
-            Dashboarda don
-          </Link>
+          <div className='flex flex-wrap items-center gap-2'>
+            <Link
+              href='/dashboard'
+              className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+            >
+              Dashboarda don
+            </Link>
+            <Link
+              href={`/resumes/${editorState.resume.id}/preview`}
+              className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+            >
+              Onizle / Yazdir
+            </Link>
+          </div>
         </div>
       </header>
 

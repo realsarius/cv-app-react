@@ -23,3 +23,9 @@ body {
 a {
   color: inherit;
 }
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+}
