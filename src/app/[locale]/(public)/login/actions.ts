@@ -7,7 +7,9 @@ import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 
-function redirectWithError(pathname: string, message: string, locale: string) {
+type AppLocale = Awaited<ReturnType<typeof getLocale>>;
+
+function redirectWithError(pathname: string, message: string, locale: AppLocale) {
   const query = new URLSearchParams({ error: message }).toString();
   redirect({
     href: `${pathname}?${query}`,

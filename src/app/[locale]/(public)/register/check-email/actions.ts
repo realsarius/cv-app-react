@@ -34,7 +34,9 @@ function buildCheckEmailRedirect(email: string, error: string) {
   return `/register/check-email?${query.toString()}`;
 }
 
-function redirectToLoginWithError(message: string, locale: string) {
+type AppLocale = Awaited<ReturnType<typeof getLocale>>;
+
+function redirectToLoginWithError(message: string, locale: AppLocale) {
   const query = new URLSearchParams({ error: message }).toString();
   redirect({
     href: `/login?${query}`,

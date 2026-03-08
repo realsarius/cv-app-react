@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 
+type AppLocale = (typeof routing.locales)[number];
+
 type LocaleLayoutProps = {
   children: React.ReactNode;
   params: {
@@ -11,10 +13,14 @@ type LocaleLayoutProps = {
   };
 };
 
+function isValidLocale(locale: string): locale is AppLocale {
+  return routing.locales.includes(locale as AppLocale);
+}
+
 export async function generateMetadata({
   params: { locale },
 }: Pick<LocaleLayoutProps, 'params'>): Promise<Metadata> {
-  if (!routing.locales.includes(locale as 'tr' | 'en')) {
+  if (!isValidLocale(locale)) {
     notFound();
   }
 
@@ -30,7 +36,7 @@ export default async function LocaleLayout({
   children,
   params: { locale },
 }: LocaleLayoutProps) {
-  if (!routing.locales.includes(locale as 'tr' | 'en')) {
+  if (!isValidLocale(locale)) {
     notFound();
   }
 
@@ -44,4 +50,3 @@ export default async function LocaleLayout({
     </NextIntlClientProvider>
   );
 }
-
