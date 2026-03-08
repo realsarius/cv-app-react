@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { messages } from '@/constants/messages';
 import { calculateAtsScore } from '@/lib/ats/scoring';
 import {
   buildRateLimitHeaders,
@@ -13,6 +12,7 @@ import {
 } from '@/lib/db/job-targets';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { resumeContentSchema } from '@/features/resume-editor/content';
+import { getRequestMessages } from '@/lib/i18n/request-messages';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -25,10 +25,12 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const messages = getRequestMessages(request);
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: `${messages.common.supabaseEnvMissing}.`,
+        error: messages.common.supabaseEnvMissing,
       },
       { status: 503 }
     );
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       {
-        error: messages.ats.rateLimited,
+        error: messages.ats.errors.rateLimited,
       },
       {
         status: 429,

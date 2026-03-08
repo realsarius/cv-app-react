@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { messages } from '@/constants/messages';
 import { isDatabaseConfigured } from '@/lib/db/env';
+import { getRequestMessages } from '@/lib/i18n/request-messages';
 import { upsertResumeSettings } from '@/lib/db/resume-settings';
 import {
   buildRateLimitHeaders,
@@ -29,10 +29,12 @@ type RouteContext = {
 };
 
 export async function POST(request: NextRequest, context: RouteContext) {
+  const messages = getRequestMessages(request);
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: `${messages.common.supabaseEnvMissing}.`,
+        error: messages.common.supabaseEnvMissing,
       },
       { status: 503 }
     );
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'DATABASE_URL veya DATABASE_DEV_URL tanımlı değil.',
+        error: messages.common.databaseUrlMissing,
       },
       { status: 503 }
     );
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsedParams.success) {
     return NextResponse.json(
       {
-        error: messages.resume.exportIdInvalid,
+        error: messages.resume.errors.exportIdInvalid,
       },
       { status: 400 }
     );
@@ -82,8 +84,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       {
-        error:
-          'Çok fazla ayar kaydetme isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.',
+        error: messages.resume.errors.settingsRateLimited,
       },
       {
         status: 429,
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsedBody.success) {
     return NextResponse.json(
       {
-        error: 'Gönderilen ayar formatı geçersiz.',
+        error: messages.resume.errors.settingsInvalidPayload,
       },
       { status: 400 }
     );
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!savedSettings) {
     return NextResponse.json(
       {
-        error: `${messages.resume.notFound}.`,
+        error: messages.resume.errors.notFound,
       },
       { status: 404 }
     );

@@ -254,7 +254,9 @@
       "updatedInAnotherSession": "Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyin.",
       "updatedInAnotherSessionDetailed": "Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyip değişiklikleri tekrar uygulayın.",
       "exportRateLimited": "Çok fazla PDF export isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.",
-      "exportIdInvalid": "resumeId formatı geçersiz."
+      "exportIdInvalid": "resumeId formatı geçersiz.",
+      "settingsRateLimited": "Çok fazla ayar kaydetme isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.",
+      "settingsInvalidPayload": "Gönderilen ayar formatı geçersiz."
     }
   },
   "profile": {

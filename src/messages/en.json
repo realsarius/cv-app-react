@@ -254,7 +254,9 @@
       "updatedInAnotherSession": "Resume was updated in another session. Please refresh the page.",
       "updatedInAnotherSessionDetailed": "Resume was updated in another session. Please refresh and apply your changes again.",
       "exportRateLimited": "Too many PDF export requests sent. Please try again shortly.",
-      "exportIdInvalid": "resumeId format is invalid."
+      "exportIdInvalid": "resumeId format is invalid.",
+      "settingsRateLimited": "Too many save settings requests sent. Please try again shortly.",
+      "settingsInvalidPayload": "Submitted settings payload format is invalid."
     }
   },
   "profile": {
