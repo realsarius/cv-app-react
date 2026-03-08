@@ -1,6 +1,5 @@
 import { Link, redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { messages } from '@/constants/messages';
 import { ensureUserProfile } from '@/lib/db/profiles';
 import { listUserResumes } from '@/lib/db/resumes';
 import { isDatabaseConfigured } from '@/lib/db/env';
@@ -16,9 +15,14 @@ type DashboardPageProps = {
 
 export const dynamic = 'force-dynamic';
 
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const [t, locale] = await Promise.all([
+  const [t, tCommon, locale] = await Promise.all([
     getTranslations('dashboard'),
+    getTranslations('common'),
     getLocale(),
   ]);
   const dateLocale = locale === 'tr' ? 'tr-TR' : 'en-US';
@@ -27,7 +31,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     redirect(
       {
         href: `/login?${new URLSearchParams({
-          error: messages.common.supabaseEnvMissing,
+          error: trimTrailingDot(tCommon('supabaseEnvMissing')),
         }).toString()}`,
         locale,
       }

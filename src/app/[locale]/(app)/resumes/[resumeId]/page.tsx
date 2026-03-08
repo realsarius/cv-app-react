@@ -1,7 +1,6 @@
 import { Link, redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { z } from 'zod';
-import { messages } from '@/constants/messages';
 import ResumeEditorClient from '@/features/resume-editor/ResumeEditorClient';
 import { listJobTargetHistory } from '@/lib/db/job-targets';
 import { getResumeEditorState } from '@/lib/db/resume-editor';
@@ -21,9 +20,15 @@ type ResumeEditorPageProps = {
 
 export const dynamic = 'force-dynamic';
 
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
 export default async function ResumeEditorPage({ params }: ResumeEditorPageProps) {
-  const [t, locale] = await Promise.all([
+  const [t, tCommon, tResumeErrors, locale] = await Promise.all([
     getTranslations('resume.editor'),
+    getTranslations('common'),
+    getTranslations('resume.errors'),
     getLocale(),
   ]);
 
@@ -31,7 +36,7 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
     redirect(
       {
         href: `/login?${new URLSearchParams({
-          error: messages.common.supabaseEnvMissing,
+          error: trimTrailingDot(tCommon('supabaseEnvMissing')),
         }).toString()}`,
         locale,
       }
@@ -43,7 +48,7 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
     redirect(
       {
         href: `/dashboard?${new URLSearchParams({
-          error: messages.common.databaseUrlMissing,
+          error: trimTrailingDot(tCommon('databaseUrlMissing')),
         }).toString()}`,
         locale,
       }
@@ -56,7 +61,7 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
     redirect(
       {
         href: `/dashboard?${new URLSearchParams({
-          error: messages.resume.idInvalid,
+          error: trimTrailingDot(tResumeErrors('idInvalid')),
         }).toString()}`,
         locale,
       }
@@ -79,7 +84,7 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
     redirect(
       {
         href: `/dashboard?${new URLSearchParams({
-          error: messages.resume.notFound,
+          error: trimTrailingDot(tResumeErrors('notFound')),
         }).toString()}`,
         locale,
       }

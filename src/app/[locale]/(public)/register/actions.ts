@@ -1,9 +1,8 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { getPathname, redirect } from '@/i18n/navigation';
-import { messages } from '@/constants/messages';
 import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -14,6 +13,10 @@ function redirectWithError(pathname: string, message: string, locale: string) {
     href: `${pathname}?${query}`,
     locale,
   });
+}
+
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
 }
 
 function resolveBaseUrl(requestHeaders: Headers) {
@@ -32,10 +35,14 @@ function resolveBaseUrl(requestHeaders: Headers) {
 }
 
 export async function registerAction(formData: FormData) {
-  const locale = await getLocale();
+  const [locale, tCommon, tAuthErrors] = await Promise.all([
+    getLocale(),
+    getTranslations('common'),
+    getTranslations('auth.errors'),
+  ]);
 
   if (!isSupabaseConfigured()) {
-    redirectWithError('/register', messages.common.supabaseEnvMissing, locale);
+    redirectWithError('/register', trimTrailingDot(tCommon('supabaseEnvMissing')), locale);
     return;
   }
 
@@ -43,7 +50,7 @@ export async function registerAction(formData: FormData) {
   const password = formData.get('password');
 
   if (typeof email !== 'string' || typeof password !== 'string') {
-    redirectWithError('/register', messages.auth.registerInvalidInput, locale);
+    redirectWithError('/register', trimTrailingDot(tAuthErrors('registerInvalidInput')), locale);
     return;
   }
 
@@ -57,7 +64,7 @@ export async function registerAction(formData: FormData) {
   });
 
   if (!rateLimitResult.allowed) {
-    redirectWithError('/register', messages.auth.registerRateLimited, locale);
+    redirectWithError('/register', trimTrailingDot(tAuthErrors('registerRateLimited')), locale);
     return;
   }
 

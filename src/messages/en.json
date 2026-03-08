@@ -76,6 +76,7 @@
     "dbMissing": "Resume list cannot be loaded because `DATABASE_URL` is missing.",
     "newDraftTitle": "Create a new draft",
     "newDraftPlaceholder": "Example: Frontend Developer Resume",
+    "newDraftDefaultTitle": "Untitled Resume",
     "newDraftSubmit": "Create draft",
     "resumeListTitle": "Resume list",
     "emptyResumes": "You do not have any resumes yet. Start by creating your first draft.",

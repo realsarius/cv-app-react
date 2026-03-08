@@ -10,6 +10,30 @@ const mockCreateServerSupabaseClient = vi.fn();
 const mockIsSupabaseConfigured = vi.fn();
 const mockVerifyOtp = vi.fn();
 const mockGetLocale = vi.fn();
+const mockGetTranslations = vi.fn();
+
+const translationMap = {
+  common: {
+    supabaseEnvMissing: 'Supabase ortam değişkenleri eksik.',
+  },
+  'auth.errors': {
+    verificationCodeRequired: 'E-posta ve doğrulama kodu zorunludur.',
+    verificationCodeInvalidOrExpired: 'Doğrulama kodu geçersiz veya süresi dolmuş.',
+  },
+} as const;
+
+function createTranslator(
+  namespace: keyof typeof translationMap
+): (key: string) => string {
+  return (key: string) => {
+    const value = translationMap[namespace][key as keyof (typeof translationMap)[typeof namespace]];
+    if (typeof value !== 'string') {
+      throw new Error(`Missing translation key: ${namespace}.${key}`);
+    }
+
+    return value;
+  };
+}
 
 function buildFormData(email?: string, code?: string) {
   const formData = new FormData();
@@ -33,6 +57,7 @@ async function loadActionModule() {
   }));
   vi.doMock('next-intl/server', () => ({
     getLocale: mockGetLocale,
+    getTranslations: mockGetTranslations,
   }));
   vi.doMock('@/lib/supabase/server', () => ({
     createServerSupabaseClient: mockCreateServerSupabaseClient,
@@ -50,6 +75,9 @@ describe('verifyEmailCodeAction', () => {
 
     mockIsSupabaseConfigured.mockReturnValue(true);
     mockGetLocale.mockResolvedValue('tr');
+    mockGetTranslations.mockImplementation((namespace: keyof typeof translationMap) =>
+      Promise.resolve(createTranslator(namespace))
+    );
     mockVerifyOtp.mockResolvedValue({
       error: null,
     });

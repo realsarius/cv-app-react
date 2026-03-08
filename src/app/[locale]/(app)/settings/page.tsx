@@ -1,6 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
-import { messages } from '@/constants/messages';
 import { ensureUserProfile, getOwnProfile } from '@/lib/db/profiles';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -33,6 +32,10 @@ function formatDateTime(
   return parsed.toLocaleString(locale);
 }
 
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const [t, tCommon, locale] = await Promise.all([
     getTranslations('settings'),
@@ -45,7 +48,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     redirect(
       {
         href: `/login?${new URLSearchParams({
-          error: messages.common.supabaseEnvMissing,
+          error: trimTrailingDot(tCommon('supabaseEnvMissing')),
         }).toString()}`,
         locale,
       }
@@ -67,7 +70,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     redirect(
       {
         href: `/dashboard?${new URLSearchParams({
-          error: messages.common.databaseUrlMissing,
+          error: trimTrailingDot(tCommon('databaseUrlMissing')),
         }).toString()}`,
         locale,
       }

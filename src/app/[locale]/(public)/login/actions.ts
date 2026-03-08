@@ -1,9 +1,8 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
-import { messages } from '@/constants/messages';
 import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -16,20 +15,28 @@ function redirectWithError(pathname: string, message: string, locale: string) {
   });
 }
 
-function mapAuthErrorMessage(message: string) {
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
+function mapAuthErrorMessage(message: string, emailNotConfirmedMessage: string) {
   const normalizedMessage = message.toLowerCase();
   if (normalizedMessage.includes('email not confirmed')) {
-    return messages.auth.emailNotConfirmed;
+    return emailNotConfirmedMessage;
   }
 
   return message;
 }
 
 export async function loginAction(formData: FormData) {
-  const locale = await getLocale();
+  const [locale, tCommon, tAuthErrors] = await Promise.all([
+    getLocale(),
+    getTranslations('common'),
+    getTranslations('auth.errors'),
+  ]);
 
   if (!isSupabaseConfigured()) {
-    redirectWithError('/login', messages.common.supabaseEnvMissing, locale);
+    redirectWithError('/login', trimTrailingDot(tCommon('supabaseEnvMissing')), locale);
     return;
   }
 
@@ -37,7 +44,7 @@ export async function loginAction(formData: FormData) {
   const password = formData.get('password');
 
   if (typeof email !== 'string' || typeof password !== 'string') {
-    redirectWithError('/login', messages.auth.invalidLoginCredentials, locale);
+    redirectWithError('/login', trimTrailingDot(tAuthErrors('invalidLoginCredentials')), locale);
     return;
   }
 
@@ -51,7 +58,7 @@ export async function loginAction(formData: FormData) {
   });
 
   if (!rateLimitResult.allowed) {
-    redirectWithError('/login', messages.auth.loginRateLimited, locale);
+    redirectWithError('/login', trimTrailingDot(tAuthErrors('loginRateLimited')), locale);
     return;
   }
 
@@ -63,7 +70,7 @@ export async function loginAction(formData: FormData) {
   });
 
   if (error) {
-    const mappedMessage = mapAuthErrorMessage(error.message);
+    const mappedMessage = mapAuthErrorMessage(error.message, tAuthErrors('emailNotConfirmed'));
     redirectWithError('/login', mappedMessage, locale);
     return;
   }

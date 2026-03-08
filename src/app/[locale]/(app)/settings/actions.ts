@@ -1,9 +1,8 @@
 'use server';
 
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
 import { z } from 'zod';
-import { messages } from '@/constants/messages';
 import { ensureUserProfile, updateOwnProfile } from '@/lib/db/profiles';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -12,11 +11,28 @@ const profileSchema = z.object({
   fullName: z.string().trim().max(120),
 });
 
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
 export async function updateProfileAction(formData: FormData) {
-  const locale = await getLocale();
+  const [locale, tCommon, tProfileErrors, tProfileSuccess] = await Promise.all([
+    getLocale(),
+    getTranslations('common'),
+    getTranslations('profile.errors'),
+    getTranslations('profile.success'),
+  ]);
 
   if (!isDatabaseConfigured()) {
-    redirect({ href: '/settings?error=DATABASE_URL+veya+DATABASE_DEV_URL+eksik', locale });
+    redirect(
+      {
+        href: `/settings?${new URLSearchParams({
+          error: trimTrailingDot(tCommon('databaseUrlMissing')),
+        }).toString()}`,
+        locale,
+      }
+    );
+    return;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -37,7 +53,7 @@ export async function updateProfileAction(formData: FormData) {
     redirect(
       {
         href: `/settings?${new URLSearchParams({
-          error: messages.profile.fullNameTooLong,
+          error: trimTrailingDot(tProfileErrors('fullNameTooLong')),
         }).toString()}`,
         locale,
       }
@@ -51,7 +67,7 @@ export async function updateProfileAction(formData: FormData) {
   redirect(
     {
       href: `/settings?${new URLSearchParams({
-        success: messages.profile.profileUpdated,
+        success: trimTrailingDot(tProfileSuccess('profileUpdated')),
       }).toString()}`,
       locale,
     }

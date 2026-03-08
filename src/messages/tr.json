@@ -76,6 +76,7 @@
     "dbMissing": "`DATABASE_URL` eksik olduğu için özgeçmiş listesi yüklenemiyor.",
     "newDraftTitle": "Yeni taslak oluştur",
     "newDraftPlaceholder": "Örnek: Frontend Developer CV",
+    "newDraftDefaultTitle": "Adsız Özgeçmiş",
     "newDraftSubmit": "Taslak oluştur",
     "resumeListTitle": "Özgeçmiş listesi",
     "emptyResumes": "Henüz özgeçmiş yok. İlk taslağını oluşturarak başlayabilirsin.",

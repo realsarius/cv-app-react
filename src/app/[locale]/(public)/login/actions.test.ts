@@ -12,6 +12,31 @@ const mockIsSupabaseConfigured = vi.fn();
 const mockCheckRateLimit = vi.fn();
 const mockExtractClientIp = vi.fn();
 const mockGetLocale = vi.fn();
+const mockGetTranslations = vi.fn();
+
+const translationMap = {
+  common: {
+    supabaseEnvMissing: 'Supabase ortam değişkenleri eksik.',
+  },
+  'auth.errors': {
+    invalidLoginCredentials: 'Giriş bilgileri geçersiz.',
+    loginRateLimited: 'Çok fazla giriş denemesi algılandı. Lütfen biraz sonra tekrar deneyin.',
+    emailNotConfirmed: 'E-posta adresi doğrulanmadı. Lütfen e-posta kutunuzu kontrol edin.',
+  },
+} as const;
+
+function createTranslator(
+  namespace: keyof typeof translationMap
+): (key: string) => string {
+  return (key: string) => {
+    const value = translationMap[namespace][key as keyof (typeof translationMap)[typeof namespace]];
+    if (typeof value !== 'string') {
+      throw new Error(`Missing translation key: ${namespace}.${key}`);
+    }
+
+    return value;
+  };
+}
 
 function buildFormData(email?: string, password?: string) {
   const formData = new FormData();
@@ -33,6 +58,7 @@ async function loadActionModule() {
   }));
   vi.doMock('next-intl/server', () => ({
     getLocale: mockGetLocale,
+    getTranslations: mockGetTranslations,
   }));
   vi.doMock('next/headers', () => ({
     headers: mockHeaders,
@@ -57,6 +83,9 @@ describe('loginAction', () => {
 
     mockIsSupabaseConfigured.mockReturnValue(true);
     mockGetLocale.mockResolvedValue('tr');
+    mockGetTranslations.mockImplementation((namespace: keyof typeof translationMap) =>
+      Promise.resolve(createTranslator(namespace))
+    );
     mockHeaders.mockResolvedValue({
       get: vi.fn().mockReturnValue('203.0.113.10'),
     });

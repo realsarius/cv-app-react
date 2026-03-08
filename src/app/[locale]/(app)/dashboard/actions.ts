@@ -1,9 +1,8 @@
 'use server';
 
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
 import { z } from 'zod';
-import { messages } from '@/constants/messages';
 import { createDraftResume } from '@/lib/db/resumes';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -12,11 +11,28 @@ const createResumeSchema = z.object({
   title: z.string().trim().max(120).optional(),
 });
 
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
 export async function createDraftResumeAction(formData: FormData) {
-  const locale = await getLocale();
+  const [locale, tCommon, tResumeErrors, tDashboard] = await Promise.all([
+    getLocale(),
+    getTranslations('common'),
+    getTranslations('resume.errors'),
+    getTranslations('dashboard'),
+  ]);
 
   if (!isDatabaseConfigured()) {
-    redirect({ href: '/dashboard?error=DATABASE_URL+eksik', locale });
+    redirect(
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: trimTrailingDot(tCommon('databaseUrlMissing')),
+        }).toString()}`,
+        locale,
+      }
+    );
+    return;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -38,7 +54,7 @@ export async function createDraftResumeAction(formData: FormData) {
     redirect(
       {
         href: `/dashboard?${new URLSearchParams({
-          error: messages.resume.titleTooLong,
+          error: trimTrailingDot(tResumeErrors('titleTooLong')),
         }).toString()}`,
         locale,
       }
@@ -46,6 +62,24 @@ export async function createDraftResumeAction(formData: FormData) {
     return;
   }
 
-  const createdResume = await createDraftResume(user.id, parsed.data.title);
+  let createdResume: Awaited<ReturnType<typeof createDraftResume>>;
+  try {
+    const resolvedTitle =
+      typeof parsed.data.title === 'string' && parsed.data.title.length > 0
+        ? parsed.data.title
+        : tDashboard('newDraftDefaultTitle');
+    createdResume = await createDraftResume(user.id, resolvedTitle);
+  } catch {
+    redirect(
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: tResumeErrors('createFailed'),
+        }).toString()}`,
+        locale,
+      }
+    );
+    return;
+  }
+
   redirect({ href: `/resumes/${createdResume.id}`, locale });
 }

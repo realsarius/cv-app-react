@@ -1,11 +1,10 @@
 'use server';
 
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import type { EmailOtpType } from '@supabase/supabase-js';
-import { messages } from '@/constants/messages';
 
 function normalizeEmail(value: FormDataEntryValue | null) {
   if (typeof value !== 'string') {
@@ -43,11 +42,19 @@ function redirectToLoginWithError(message: string, locale: string) {
   });
 }
 
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
 export async function verifyEmailCodeAction(formData: FormData) {
-  const locale = await getLocale();
+  const [locale, tCommon, tAuthErrors] = await Promise.all([
+    getLocale(),
+    getTranslations('common'),
+    getTranslations('auth.errors'),
+  ]);
 
   if (!isSupabaseConfigured()) {
-    redirectToLoginWithError(messages.common.supabaseEnvMissing, locale);
+    redirectToLoginWithError(trimTrailingDot(tCommon('supabaseEnvMissing')), locale);
     return;
   }
 
@@ -58,7 +65,7 @@ export async function verifyEmailCodeAction(formData: FormData) {
     redirect({
       href: buildCheckEmailRedirect(
         email,
-        messages.auth.verificationCodeRequired
+        tAuthErrors('verificationCodeRequired')
       ),
       locale,
     });
@@ -86,7 +93,7 @@ export async function verifyEmailCodeAction(formData: FormData) {
     redirect({
       href: buildCheckEmailRedirect(
         email,
-        messages.auth.verificationCodeInvalidOrExpired
+        tAuthErrors('verificationCodeInvalidOrExpired')
       ),
       locale,
     });
