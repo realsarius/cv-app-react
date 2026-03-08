@@ -104,7 +104,7 @@ export default function AtlanticBlueTemplate({
       }}
       className={articleClassName}
     >
-      <header className={`${theme.headerBg} p-6`}>
+      <header className={`cv-header ${theme.headerBg} p-6`}>
         <h2 className='text-[2.2em] font-bold leading-[1.05] text-white'>
           {content.personalDetails.fullName || title || t('fullNameFallback')}
         </h2>
@@ -129,7 +129,7 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.experiences.length > 0 ? (
-          <section className={`cv-section border-b pb-4 ${theme.sectionDivider}`}>
+          <section className={`border-b pb-4 ${theme.sectionDivider}`}>
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.experience')}
             </h3>
@@ -164,7 +164,7 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.educations.length > 0 ? (
-          <section className={`cv-section border-b pb-4 ${theme.sectionDivider}`}>
+          <section className={`border-b pb-4 ${theme.sectionDivider}`}>
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.education')}
             </h3>
@@ -199,7 +199,7 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.projects.length > 0 ? (
-          <section className='cv-section'>
+          <section>
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.projects')}
             </h3>

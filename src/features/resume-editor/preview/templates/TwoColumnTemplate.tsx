@@ -106,17 +106,19 @@ export default function TwoColumnTemplate({
     >
       <div className='grid min-h-full grid-cols-1 md:grid-cols-[35%_65%]'>
         <aside className={`border-b p-5 md:border-b-0 md:border-r ${theme.asideBg} ${theme.asideBorder}`}>
-          <h2 className={`text-[1.65em] font-bold leading-tight ${theme.heading}`}>
-            {content.personalDetails.fullName || title || t('fullNameFallback')}
-          </h2>
-          <p className={`mt-1 text-[0.95em] ${theme.body}`}>
-            {content.personalDetails.jobTitle || t('positionFallback')}
-          </p>
+          <div className='cv-header'>
+            <h2 className={`text-[1.65em] font-bold leading-tight ${theme.heading}`}>
+              {content.personalDetails.fullName || title || t('fullNameFallback')}
+            </h2>
+            <p className={`mt-1 text-[0.95em] ${theme.body}`}>
+              {content.personalDetails.jobTitle || t('positionFallback')}
+            </p>
 
-          <div className={`mt-4 space-y-1 text-[0.8em] ${theme.muted}`}>
-            {content.personalDetails.email ? <p>{content.personalDetails.email}</p> : null}
-            {content.personalDetails.phone ? <p>{content.personalDetails.phone}</p> : null}
-            {content.personalDetails.address ? <p>{content.personalDetails.address}</p> : null}
+            <div className={`mt-4 space-y-1 text-[0.8em] ${theme.muted}`}>
+              {content.personalDetails.email ? <p>{content.personalDetails.email}</p> : null}
+              {content.personalDetails.phone ? <p>{content.personalDetails.phone}</p> : null}
+              {content.personalDetails.address ? <p>{content.personalDetails.address}</p> : null}
+            </div>
           </div>
 
           {content.profile ? (
@@ -133,7 +135,7 @@ export default function TwoColumnTemplate({
 
         <main className='space-y-5 p-6'>
           {content.experiences.length > 0 ? (
-            <section className={`cv-section border-b pb-4 ${theme.sectionDivider}`}>
+            <section className={`border-b pb-4 ${theme.sectionDivider}`}>
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.experience')}
               </h3>
@@ -168,7 +170,7 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.educations.length > 0 ? (
-            <section className={`cv-section border-b pb-4 ${theme.sectionDivider}`}>
+            <section className={`border-b pb-4 ${theme.sectionDivider}`}>
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.education')}
               </h3>
@@ -203,7 +205,7 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.projects.length > 0 ? (
-            <section className='cv-section'>
+            <section>
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.projects')}
               </h3>

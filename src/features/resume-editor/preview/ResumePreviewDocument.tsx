@@ -148,7 +148,7 @@ export default function ResumePreviewDocument({
       }}
       className={articleClassName}
     >
-      <header className={`border-b pb-4 ${palette.border}`}>
+      <header className={`cv-header border-b pb-4 ${palette.border}`}>
         <h2
           className={`font-bold ${palette.title}`}
           style={{ fontSize: `${typography.title}em`, lineHeight: 1.1 }}
@@ -193,7 +193,7 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.experiences.length > 0 ? (
-        <section className={`cv-section ${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -243,7 +243,7 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.educations.length > 0 ? (
-        <section className={`cv-section ${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -293,7 +293,7 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.projects.length > 0 ? (
-        <section className={`cv-section ${sectionSpacing}`}>
+        <section className={sectionSpacing}>
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}

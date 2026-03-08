@@ -26,32 +26,38 @@ export default function PaginatedResumePreview({
   settings,
   mode = 'editor',
 }: PaginatedResumePreviewProps) {
-  const pages = paginateResumeContent(content, settings);
   const isPreviewMode = mode === 'preview';
 
+  if (isPreviewMode) {
+    return (
+      <div className='mx-auto w-full max-w-[210mm] print:w-[210mm] print:max-w-none'>
+        <ResumePreviewDocument
+          title={title}
+          content={content}
+          settings={settings}
+          className='h-full print:rounded-none print:shadow-none print:border-stone-200'
+        />
+      </div>
+    );
+  }
+
+  const pages = paginateResumeContent(content, settings);
+
   return (
-    <div className={isPreviewMode ? 'space-y-5 print:space-y-0' : 'space-y-3'}>
+    <div className='space-y-3'>
       {pages.map((pageContent, index) => (
         <div
           key={`resume-page-${index + 1}`}
-          className={
-            isPreviewMode
-              ? 'mx-auto w-full max-w-[210mm] print:w-[210mm] print:max-w-none print:break-after-page last:print:break-after-auto'
-              : 'w-full'
-          }
+          className='w-full'
           style={{
-            minHeight: isPreviewMode ? '297mm' : `${PREVIEW_PAGE_BASE_HEIGHT}px`,
+            minHeight: `${PREVIEW_PAGE_BASE_HEIGHT}px`,
           }}
         >
           <ResumePreviewDocument
             title={title}
             content={pageContent}
             settings={settings}
-            className={
-              isPreviewMode
-                ? 'h-full print:rounded-none print:shadow-none print:border-stone-200'
-                : 'h-full'
-            }
+            className='h-full'
           />
         </div>
       ))}

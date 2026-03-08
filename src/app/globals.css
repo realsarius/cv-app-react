@@ -194,16 +194,21 @@ a {
     line-height: 1.4;
   }
 
-  .cv-section {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
   .cv-experience-item,
   .cv-education-item,
   .cv-project-item {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  #cv-print-area header,
+  .cv-header {
+    position: static !important;
+  }
+
+  .cv-header {
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   h2,
