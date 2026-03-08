@@ -25,6 +25,7 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 - ATS score ve autosave endpointleri icin API seviye test senaryolari eklendi.
 - Resume settings ve export endpointleri icin API seviye test senaryolari eklendi.
 - Login ve register server action akislari icin auth/rate-limit test senaryolari eklendi.
+- Playwright CLI ile e2e smoke turu calistirildi ve temel yonlendirme akislari dogrulandi.
 
 ## Kurulum
 
