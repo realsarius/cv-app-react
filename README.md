@@ -1,34 +1,53 @@
-# CV Application
+# Resume Builder (Next.js + Supabase)
 
-This is a web application that allows users to create and preview their resumes in a user-friendly manner. It is built with React, TypeScript and Tailwind, and it was created as a project for The Odin Project curriculum.
+Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya modernizasyonunu icerir.
 
-![CV Application Screenshot](ss2.gif)
+## Mevcut Durum
 
-## Features
+- Next.js App Router iskeleti eklendi.
+- Public auth sayfalari eklendi: `/login`, `/register`.
+- Korumali alan iskeleti eklendi: `/dashboard`.
+- Supabase session middleware akisi eklendi.
 
-- Users can fill in their personal information, such as name, job title, contact details, and address.
-- Users can also provide a summary of their work experience, education, and skills.
-- The application has a preview feature that allows users to see how their resumes would look like when printed or shared.
-- The application is responsive and mobile-friendly.
+## Kurulum
 
-## How to Run the Application
+1. Bagimliliklari yukleyin:
 
-To run this application on your local machine, follow these steps:
+```bash
+npm install
+```
 
-1. Clone this repository to your local machine.
-2. Install the dependencies by running `npm install`.
-3. Run the application by running `npm start`.
-4. Access the application in your web browser at <http://localhost:3000>.
+2. Ortam degiskenlerini hazirlayin:
 
-## Dependencies
+```bash
+cp .env.example .env.local
+```
 
-This project was built with the following dependencies:
+3. `.env.local` dosyasinda Supabase degerlerini doldurun:
 
-- [React](https://reactjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Vite](https://vitejs.dev/)
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-## Acknowledgments
+4. Gelistirme sunucusunu baslatin:
 
-This project was created as part of [The Odin Project](https://www.theodinproject.com/) curriculum. Special thanks to [FlowCV](https://flowcv.com/) for providing design inspiration for this project.
+```bash
+npm run dev
+```
+
+Uygulama varsayilan olarak `http://localhost:3000` adresinde calisir.
+
+## Komutlar
+
+```bash
+npm run dev
+npm run lint
+npm run build
+npm run start
+```
+
+## Sonraki Isler
+
+- Drizzle ORM kurulumu ve migration dosyalari
+- `profiles/resumes/resume_versions` tablolari
+- Editor + autosave ozellikleri
+- ATS skor endpoint iskeleti

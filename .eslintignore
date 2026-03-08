@@ -1,0 +1,6 @@
+dist
+src/App.tsx
+src/main.tsx
+src/pages/**
+src/components/**
+src/types.ts
