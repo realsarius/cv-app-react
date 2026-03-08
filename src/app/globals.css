@@ -206,9 +206,19 @@ a {
     position: static !important;
   }
 
+  #cv-print-area * {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
   .cv-header {
     break-after: avoid;
     page-break-after: avoid;
+  }
+
+  .cv-divider {
+    border-bottom: 1px solid #000 !important;
   }
 
   h2,
