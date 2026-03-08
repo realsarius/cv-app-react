@@ -15,6 +15,13 @@ export default function ResumePrintActions({ resumeId }: ResumePrintActionsProps
       >
         Editore don
       </Link>
+      <Link
+        href={`/api/resumes/${resumeId}/export`}
+        target='_blank'
+        className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+      >
+        PDF indir
+      </Link>
       <button
         type='button'
         onClick={() => window.print()}
