@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { loginAction } from './actions';
 
 type LoginPageProps = {
@@ -8,11 +9,13 @@ type LoginPageProps = {
 };
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
+  const t = useTranslations('auth.login');
+
   return (
     <section>
-      <h1 className='text-2xl font-bold tracking-tight text-stone-900'>Giriş yap</h1>
+      <h1 className='text-2xl font-bold tracking-tight text-stone-900'>{t('title')}</h1>
       <p className='mt-2 text-sm text-stone-700'>
-        Hesabınıza giriş yaparak CV taslaklarınıza kaldığınız yerden devam edin.
+        {t('description')}
       </p>
 
       {searchParams?.error ? (
@@ -23,7 +26,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
 
       <form action={loginAction} className='mt-6 space-y-4'>
         <label className='block'>
-          <span className='form-label'>E-posta</span>
+          <span className='form-label'>{t('email')}</span>
           <input
             type='email'
             name='email'
@@ -34,7 +37,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
         </label>
 
         <label className='block'>
-          <span className='form-label'>Şifre</span>
+          <span className='form-label'>{t('password')}</span>
           <input
             type='password'
             name='password'
@@ -46,14 +49,14 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
         </label>
 
         <button type='submit' className='btn-primary w-full'>
-          Giriş yap
+          {t('submit')}
         </button>
       </form>
 
       <p className='mt-5 text-sm text-stone-700'>
-        Hesabın yok mu?{' '}
+        {t('noAccount')}{' '}
         <Link href='/register' className='font-semibold text-stone-900 underline'>
-          Kayıt ol
+          {t('register')}
         </Link>
       </p>
     </section>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { verifyEmailCodeAction } from './actions';
 
 type CheckEmailPageProps = {
@@ -10,18 +11,18 @@ type CheckEmailPageProps = {
 
 export default function CheckEmailPage({ searchParams }: CheckEmailPageProps) {
   const email = searchParams?.email ?? '';
+  const t = useTranslations('auth.checkEmail');
 
   return (
     <section>
       <h1 className='text-2xl font-bold tracking-tight text-stone-900'>
-        E-postanı doğrula
+        {t('title')}
       </h1>
       <p className='mt-2 text-sm text-stone-700'>
-        Kayıt tamamlandı. Hesabını aktifleştirmek için e-postana gelen
-        doğrulama bağlantısına tıkla.
+        {t('description')}
       </p>
       <p className='mt-2 text-sm text-stone-700'>
-        Bağlantı açılmazsa maildeki kodu aşağıdan girerek devam edebilirsin.
+        {t('descriptionFallback')}
       </p>
 
       {searchParams?.error ? (
@@ -32,7 +33,7 @@ export default function CheckEmailPage({ searchParams }: CheckEmailPageProps) {
 
       <form action={verifyEmailCodeAction} className='mt-6 space-y-4'>
         <label className='block'>
-          <span className='form-label'>E-posta</span>
+          <span className='form-label'>{t('email')}</span>
           <input
             type='email'
             name='email'
@@ -44,7 +45,7 @@ export default function CheckEmailPage({ searchParams }: CheckEmailPageProps) {
         </label>
 
         <label className='block'>
-          <span className='form-label'>Doğrulama kodu</span>
+          <span className='form-label'>{t('code')}</span>
           <input
             type='text'
             name='code'
@@ -56,22 +57,21 @@ export default function CheckEmailPage({ searchParams }: CheckEmailPageProps) {
             placeholder='94843772'
           />
           <span className='mt-1 block text-xs text-stone-600'>
-            Maildeki kodu aynen gir. Kod uzunluğu projeye göre 6-12 haneli
-            olabilir.
+            {t('codeHint')}
           </span>
         </label>
 
         <button type='submit' className='btn-primary w-full'>
-          Kodu doğrula
+          {t('submit')}
         </button>
       </form>
 
       <p className='mt-5 text-sm text-stone-700'>
-        Dilersen önce{' '}
+        {t('backToLoginPrefix')}{' '}
         <Link href='/login' className='font-semibold text-stone-900 underline'>
-          giriş ekranına
+          {t('backToLoginLink')}
         </Link>{' '}
-        dönebilirsin.
+        {t('backToLoginSuffix')}
       </p>
     </section>
   );

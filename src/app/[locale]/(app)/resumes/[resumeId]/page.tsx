@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { messages } from '@/constants/messages';
@@ -22,6 +23,8 @@ type ResumeEditorPageProps = {
 export const dynamic = 'force-dynamic';
 
 export default async function ResumeEditorPage({ params }: ResumeEditorPageProps) {
+  const t = await getTranslations('resume.editor');
+
   if (!isSupabaseConfigured()) {
     redirect(
       `/login?${new URLSearchParams({
@@ -76,7 +79,7 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
       <header className='app-card'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <div>
-            <p className='text-sm text-stone-600'>Özgeçmiş düzenleyici</p>
+            <p className='text-sm text-stone-600'>{t('title')}</p>
             <h1 className='text-2xl font-bold tracking-tight text-stone-900'>
               {editorState.resume.title}
             </h1>
@@ -86,13 +89,13 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
               href='/dashboard'
               className='btn-secondary'
             >
-              Panele dön
+              {t('backToDashboard')}
             </Link>
             <Link
               href={`/resumes/${editorState.resume.id}/preview`}
               className='btn-secondary'
             >
-              Önizle / Yazdır
+              {t('preview')}
             </Link>
           </div>
         </div>

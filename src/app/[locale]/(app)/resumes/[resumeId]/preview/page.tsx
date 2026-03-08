@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { messages } from '@/constants/messages';
@@ -21,6 +22,8 @@ type ResumePreviewPageProps = {
 export const dynamic = 'force-dynamic';
 
 export default async function ResumePreviewPage({ params }: ResumePreviewPageProps) {
+  const t = await getTranslations('resume.preview');
+
   if (!isSupabaseConfigured()) {
     redirect(
       `/login?${new URLSearchParams({
@@ -69,7 +72,7 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
       <header className='app-card print:hidden'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <div>
-            <p className='text-sm text-stone-600'>ATS önizleme</p>
+            <p className='text-sm text-stone-600'>{t('title')}</p>
             <h1 className='text-xl font-bold text-stone-900'>
               {editorState.resume.title}
             </h1>

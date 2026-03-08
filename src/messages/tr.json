@@ -105,6 +105,7 @@
     "editor": {
       "title": "Özgeçmiş düzenleyici",
       "backToDashboard": "Panele dön",
+      "backToEditor": "Editöre dön",
       "preview": "Önizle / Yazdır",
       "downloadPdf": "PDF indir",
       "print": "Yazdır / PDF al"

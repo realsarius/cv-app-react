@@ -105,6 +105,7 @@
     "editor": {
       "title": "Resume editor",
       "backToDashboard": "Back to dashboard",
+      "backToEditor": "Back to editor",
       "preview": "Preview / Print",
       "downloadPdf": "Download PDF",
       "print": "Print / Save PDF"
@@ -140,4 +141,3 @@
     }
   }
 }
-

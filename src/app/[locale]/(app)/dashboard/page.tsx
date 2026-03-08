@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { messages } from '@/constants/messages';
 import { ensureUserProfile } from '@/lib/db/profiles';
@@ -17,6 +18,12 @@ type DashboardPageProps = {
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const [t, locale] = await Promise.all([
+    getTranslations('dashboard'),
+    getLocale(),
+  ]);
+  const dateLocale = locale === 'tr' ? 'tr-TR' : 'en-US';
+
   if (!isSupabaseConfigured()) {
     redirect(
       `/login?${new URLSearchParams({
@@ -44,17 +51,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       profileName = profile?.fullName ?? null;
       userResumes = await listUserResumes(user.id);
     } catch {
-      dbError =
-        'Veritabanı bağlantısı kurulamadı. DATABASE_URL değerini kontrol edin.';
+      dbError = t('dbConnectionError');
     }
   }
 
   return (
     <section className='space-y-7'>
       <header>
-        <h1 className='text-3xl font-bold tracking-tight text-stone-900'>Panel</h1>
+        <h1 className='text-3xl font-bold tracking-tight text-stone-900'>{t('title')}</h1>
         <p className='mt-2 text-stone-700'>
-          Hoş geldin{' '}
+          {t('welcome')}{' '}
           <span className='font-semibold'>{profileName || user.email}</span>
         </p>
       </header>
@@ -67,7 +73,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
       {!isDatabaseConfigured() ? (
         <p className='message-warning'>
-          `DATABASE_URL` eksik olduğu için özgeçmiş listesi yüklenemiyor.
+          {t('dbMissing')}
         </p>
       ) : null}
 
@@ -78,27 +84,27 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       <div className='app-card'>
-        <h2 className='text-lg font-semibold text-stone-900'>Yeni taslak oluştur</h2>
+        <h2 className='text-lg font-semibold text-stone-900'>{t('newDraftTitle')}</h2>
         <form action={createDraftResumeAction} className='mt-4 flex flex-col gap-3 sm:flex-row'>
           <input
             type='text'
             name='title'
             maxLength={120}
-            placeholder='Örnek: Frontend Developer CV'
+            placeholder={t('newDraftPlaceholder')}
             className='form-input'
           />
           <button type='submit' className='btn-primary' disabled={!isDatabaseConfigured()}>
-            Taslak oluştur
+            {t('newDraftSubmit')}
           </button>
         </form>
       </div>
 
       <div className='app-card'>
-        <h2 className='text-lg font-semibold text-stone-900'>Özgeçmiş listesi</h2>
+        <h2 className='text-lg font-semibold text-stone-900'>{t('resumeListTitle')}</h2>
 
         {isDatabaseConfigured() && userResumes.length === 0 ? (
           <p className='mt-3 text-sm text-stone-700'>
-            Henüz özgeçmiş yok. İlk taslağını oluşturarak başlayabilirsin.
+            {t('emptyResumes')}
           </p>
         ) : null}
 
@@ -115,13 +121,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 </span>
               </div>
               <p className='mt-1 text-xs text-stone-600'>
-                Son güncelleme: {new Date(resume.updatedAt).toLocaleString('tr-TR')}
+                {t('lastUpdated')}: {new Date(resume.updatedAt).toLocaleString(dateLocale)}
               </p>
               <Link
                 href={`/resumes/${resume.id}`}
                 className='mt-2 inline-flex rounded-md border border-stone-300 px-2.5 py-1 text-xs font-semibold text-stone-700 transition hover:border-stone-500'
               >
-                Editörü aç
+                {t('openEditor')}
               </Link>
             </li>
           ))}
