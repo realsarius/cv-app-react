@@ -5,6 +5,9 @@ const mockCreateResumePdf = vi.fn();
 const mockCreateServerSupabaseClient = vi.fn();
 const mockIsSupabaseConfigured = vi.fn();
 const mockIsDatabaseConfigured = vi.fn();
+const mockCheckRateLimit = vi.fn();
+const mockBuildRateLimitHeaders = vi.fn();
+const mockExtractClientIp = vi.fn();
 
 async function loadRouteModule() {
   vi.resetModules();
@@ -24,6 +27,11 @@ async function loadRouteModule() {
   vi.doMock('@/lib/db/env', () => ({
     isDatabaseConfigured: mockIsDatabaseConfigured,
   }));
+  vi.doMock('@/lib/security/rate-limit', () => ({
+    checkRateLimit: mockCheckRateLimit,
+    buildRateLimitHeaders: mockBuildRateLimitHeaders,
+    extractClientIp: mockExtractClientIp,
+  }));
 
   return import('./route');
 }
@@ -34,6 +42,23 @@ describe('GET /api/resumes/[resumeId]/export', () => {
 
     mockIsSupabaseConfigured.mockReturnValue(true);
     mockIsDatabaseConfigured.mockReturnValue(true);
+    mockExtractClientIp.mockReturnValue('203.0.113.70');
+    mockCheckRateLimit.mockReturnValue({
+      allowed: true,
+      limit: 12,
+      remaining: 11,
+      resetAt: 1_700_000_000_000,
+      retryAfterSec: 60,
+    });
+    mockBuildRateLimitHeaders.mockImplementation(
+      (result, includeRetryAfter = true) => ({
+        'x-ratelimit-limit': String(result.limit),
+        'x-ratelimit-remaining': String(result.remaining),
+        ...(includeRetryAfter
+          ? { 'retry-after': String(result.retryAfterSec) }
+          : {}),
+      })
+    );
   });
 
   it('yetkisiz istekte 401 dondurur', async () => {
@@ -49,13 +74,46 @@ describe('GET /api/resumes/[resumeId]/export', () => {
       },
     });
 
-    const response = await GET(new Request('http://localhost') , {
+    const response = await GET(new Request('http://localhost'), {
       params: {
         resumeId: '550e8400-e29b-41d4-a716-446655440000',
       },
     });
 
     expect(response.status).toBe(401);
+    expect(mockGetResumeEditorState).not.toHaveBeenCalled();
+  });
+
+  it('rate limit asiminda 429 dondurur', async () => {
+    const { GET } = await loadRouteModule();
+
+    mockCreateServerSupabaseClient.mockResolvedValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: {
+            user: {
+              id: 'user-1',
+            },
+          },
+        }),
+      },
+    });
+
+    mockCheckRateLimit.mockReturnValue({
+      allowed: false,
+      limit: 12,
+      remaining: 0,
+      resetAt: 1_700_000_000_000,
+      retryAfterSec: 25,
+    });
+
+    const response = await GET(new Request('http://localhost'), {
+      params: {
+        resumeId: '550e8400-e29b-41d4-a716-446655440000',
+      },
+    });
+
+    expect(response.status).toBe(429);
     expect(mockGetResumeEditorState).not.toHaveBeenCalled();
   });
 
@@ -117,6 +175,7 @@ describe('GET /api/resumes/[resumeId]/export', () => {
     expect(response.headers.get('content-disposition')).toBe(
       'attachment; filename="senior-frontend-cv-2026-ats.pdf"'
     );
+    expect(response.headers.get('x-ratelimit-limit')).toBe('12');
     expect(bytes.toString('utf-8')).toBe('%PDF-1.7');
   });
 });

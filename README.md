@@ -20,6 +20,7 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 - Yazdirilabilir ATS-uyumlu onizleme sayfasi eklendi: `/resumes/[resumeId]/preview`.
 - Server tarafinda PDF export endpointi eklendi: `/api/resumes/[resumeId]/export`.
 - Login/register islemleri ve ATS skor endpointi icin temel rate limit korumasi eklendi.
+- Resume autosave, settings ve export endpointleri icin rate limit korumasi eklendi.
 - Resume editor autosave akisina oturumlar arasi yazma cakismasi korumasi eklendi.
 - ATS score ve autosave endpointleri icin API seviye test senaryolari eklendi.
 - Resume settings ve export endpointleri icin API seviye test senaryolari eklendi.

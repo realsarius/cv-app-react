@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { upsertResumeSettings } from '@/lib/db/resume-settings';
+import {
+  buildRateLimitHeaders,
+  checkRateLimit,
+  extractClientIp,
+} from '@/lib/security/rate-limit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -65,6 +70,27 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
+  const clientIp = extractClientIp((name) => request.headers.get(name));
+  const rateLimitResult = checkRateLimit({
+    bucket: 'resume-settings',
+    identifier: `${user.id}:${parsedParams.data.resumeId}:${clientIp || 'na'}`,
+    limit: 20,
+    windowMs: 60_000,
+  });
+
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          'Cok fazla ayar kaydetme istegi gonderildi. Lutfen kisa bir sure sonra tekrar deneyin.',
+      },
+      {
+        status: 429,
+        headers: buildRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsedBody = settingsSchema.safeParse(body);
 
@@ -92,11 +118,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
-  return NextResponse.json({
-    ok: true,
-    settings: {
-      ...savedSettings,
-      updatedAt: savedSettings.updatedAt.toISOString(),
+  return NextResponse.json(
+    {
+      ok: true,
+      settings: {
+        ...savedSettings,
+        updatedAt: savedSettings.updatedAt.toISOString(),
+      },
     },
-  });
+    {
+      headers: buildRateLimitHeaders(rateLimitResult, false),
+    }
+  );
 }

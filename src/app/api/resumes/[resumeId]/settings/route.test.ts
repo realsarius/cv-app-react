@@ -5,6 +5,9 @@ const mockUpsertResumeSettings = vi.fn();
 const mockCreateServerSupabaseClient = vi.fn();
 const mockIsSupabaseConfigured = vi.fn();
 const mockIsDatabaseConfigured = vi.fn();
+const mockCheckRateLimit = vi.fn();
+const mockBuildRateLimitHeaders = vi.fn();
+const mockExtractClientIp = vi.fn();
 
 function validBody() {
   return {
@@ -30,6 +33,11 @@ async function loadRouteModule() {
   vi.doMock('@/lib/db/env', () => ({
     isDatabaseConfigured: mockIsDatabaseConfigured,
   }));
+  vi.doMock('@/lib/security/rate-limit', () => ({
+    checkRateLimit: mockCheckRateLimit,
+    buildRateLimitHeaders: mockBuildRateLimitHeaders,
+    extractClientIp: mockExtractClientIp,
+  }));
 
   return import('./route');
 }
@@ -40,6 +48,23 @@ describe('POST /api/resumes/[resumeId]/settings', () => {
 
     mockIsSupabaseConfigured.mockReturnValue(true);
     mockIsDatabaseConfigured.mockReturnValue(true);
+    mockExtractClientIp.mockReturnValue('203.0.113.60');
+    mockCheckRateLimit.mockReturnValue({
+      allowed: true,
+      limit: 20,
+      remaining: 19,
+      resetAt: 1_700_000_000_000,
+      retryAfterSec: 60,
+    });
+    mockBuildRateLimitHeaders.mockImplementation(
+      (result, includeRetryAfter = true) => ({
+        'x-ratelimit-limit': String(result.limit),
+        'x-ratelimit-remaining': String(result.remaining),
+        ...(includeRetryAfter
+          ? { 'retry-after': String(result.retryAfterSec) }
+          : {}),
+      })
+    );
 
     mockCreateServerSupabaseClient.mockResolvedValue({
       auth: {
@@ -76,6 +101,36 @@ describe('POST /api/resumes/[resumeId]/settings', () => {
     );
 
     expect(response.status).toBe(400);
+    expect(mockUpsertResumeSettings).not.toHaveBeenCalled();
+  });
+
+  it('rate limit asiminda 429 dondurur', async () => {
+    const { POST } = await loadRouteModule();
+
+    mockCheckRateLimit.mockReturnValue({
+      allowed: false,
+      limit: 20,
+      remaining: 0,
+      resetAt: 1_700_000_000_000,
+      retryAfterSec: 15,
+    });
+
+    const response = await POST(
+      new Request('http://localhost/api/resumes/1/settings', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(validBody()),
+      }) as NextRequest,
+      {
+        params: {
+          resumeId: '550e8400-e29b-41d4-a716-446655440000',
+        },
+      }
+    );
+
+    expect(response.status).toBe(429);
     expect(mockUpsertResumeSettings).not.toHaveBeenCalled();
   });
 
@@ -132,5 +187,6 @@ describe('POST /api/resumes/[resumeId]/settings', () => {
         colorScheme: 'slate',
       }
     );
+    expect(response.headers.get('x-ratelimit-limit')).toBe('20');
   });
 });

@@ -3,6 +3,11 @@ import { z } from 'zod';
 import { getResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { createResumePdf } from '@/lib/pdf/resume-export';
+import {
+  buildRateLimitHeaders,
+  checkRateLimit,
+  extractClientIp,
+} from '@/lib/security/rate-limit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -27,7 +32,7 @@ function buildExportFileName(title: string) {
 
 export const runtime = 'nodejs';
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
@@ -70,6 +75,27 @@ export async function GET(_: Request, context: RouteContext) {
     );
   }
 
+  const clientIp = extractClientIp((name) => request.headers.get(name));
+  const rateLimitResult = checkRateLimit({
+    bucket: 'resume-export',
+    identifier: `${user.id}:${parsedParams.data.resumeId}:${clientIp || 'na'}`,
+    limit: 12,
+    windowMs: 60_000,
+  });
+
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          'Cok fazla PDF export istegi gonderildi. Lutfen kisa bir sure sonra tekrar deneyin.',
+      },
+      {
+        status: 429,
+        headers: buildRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   const editorState = await getResumeEditorState(user.id, parsedParams.data.resumeId);
   if (!editorState) {
     return NextResponse.json(
@@ -92,6 +118,7 @@ export async function GET(_: Request, context: RouteContext) {
       'content-type': 'application/pdf',
       'cache-control': 'no-store',
       'content-disposition': `attachment; filename="${buildExportFileName(editorState.resume.title)}.pdf"`,
+      ...buildRateLimitHeaders(rateLimitResult, false),
     },
   });
 }

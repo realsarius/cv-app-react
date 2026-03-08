@@ -3,6 +3,11 @@ import { z } from 'zod';
 import { saveResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { resumeContentSchema } from '@/features/resume-editor/content';
+import {
+  buildRateLimitHeaders,
+  checkRateLimit,
+  extractClientIp,
+} from '@/lib/security/rate-limit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -65,6 +70,27 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
+  const clientIp = extractClientIp((name) => request.headers.get(name));
+  const rateLimitResult = checkRateLimit({
+    bucket: 'resume-autosave',
+    identifier: `${user.id}:${parsedParams.data.resumeId}:${clientIp || 'na'}`,
+    limit: 45,
+    windowMs: 60_000,
+  });
+
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          'Cok fazla otomatik kaydetme istegi gonderildi. Lutfen kisa bir sure bekleyip tekrar deneyin.',
+      },
+      {
+        status: 429,
+        headers: buildRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsedBody = autosaveBodySchema.safeParse(body);
   if (!parsedBody.success) {
@@ -106,15 +132,23 @@ export async function POST(request: NextRequest, context: RouteContext) {
         currentVersionNo: savedResume.currentVersionNo,
         currentUpdatedAt: savedResume.currentUpdatedAt.toISOString(),
       },
-      { status: 409 }
+      {
+        status: 409,
+        headers: buildRateLimitHeaders(rateLimitResult, false),
+      }
     );
   }
 
-  return NextResponse.json({
-    ok: true,
-    resumeId: savedResume.resume.id,
-    title: savedResume.resume.title,
-    currentVersionNo: savedResume.resume.currentVersionNo,
-    updatedAt: savedResume.resume.updatedAt.toISOString(),
-  });
+  return NextResponse.json(
+    {
+      ok: true,
+      resumeId: savedResume.resume.id,
+      title: savedResume.resume.title,
+      currentVersionNo: savedResume.resume.currentVersionNo,
+      updatedAt: savedResume.resume.updatedAt.toISOString(),
+    },
+    {
+      headers: buildRateLimitHeaders(rateLimitResult, false),
+    }
+  );
 }
