@@ -3,6 +3,11 @@
 import { Link } from '@/i18n/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import {
+  RESUME_TEMPLATES,
+  normalizeResumeTemplateKey,
+} from '@/templates/resume/registry';
+import type { ResumeTemplateKey } from '@/templates/resume/types';
 import PaginatedResumePreview from './preview/PaginatedResumePreview';
 import {
   PREVIEW_PAGE_BASE_HEIGHT,
@@ -67,7 +72,7 @@ type AtsHistoryItem = {
 };
 
 type ResumeVisualSettings = {
-  templateKey: 'ats-classic' | 'ats-compact';
+  templateKey: ResumeTemplateKey;
   fontScale: number;
   spacingScale: number;
   colorScheme: 'neutral' | 'slate' | 'mono';
@@ -896,16 +901,19 @@ export default function ResumeEditorClient({
               onChange={(event) =>
                 setSettings((prev) => ({
                   ...prev,
-                  templateKey:
-                    event.target.value === 'ats-compact'
-                      ? 'ats-compact'
-                      : 'ats-classic',
+                  templateKey: normalizeResumeTemplateKey(event.target.value),
                 }))
               }
               className='w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             >
-              <option value='ats-classic'>{t('templateClassic')}</option>
-              <option value='ats-compact'>{t('templateCompact')}</option>
+              {RESUME_TEMPLATES.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {t(template.labelKey)} ·{' '}
+                  {template.plan === 'pro'
+                    ? t('templatePlanPro')
+                    : t('templatePlanFree')}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -1808,7 +1816,7 @@ export default function ResumeEditorClient({
       </div>
       </div>
 
-      <aside className='h-fit lg:col-span-5 lg:sticky lg:top-6'>
+      <aside className='no-print h-fit lg:col-span-5 lg:sticky lg:top-6'>
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>{t('livePreview')}</h2>
@@ -1854,7 +1862,7 @@ export default function ResumeEditorClient({
 
       {isAddContentDialogOpen ? (
         <div
-          className='fixed inset-0 z-40 flex items-center justify-center bg-stone-900/40 p-4'
+          className='no-print fixed inset-0 z-40 flex items-center justify-center bg-stone-900/40 p-4'
           onClick={() => setIsAddContentDialogOpen(false)}
         >
           <div

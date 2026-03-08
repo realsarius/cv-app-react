@@ -167,10 +167,67 @@ a {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0;
+    margin: 15mm 15mm 15mm 15mm;
   }
 
+  html,
   body {
-    background: #ffffff;
+    background: #ffffff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #cv-print-area,
+  #cv-print-area * {
+    visibility: visible !important;
+  }
+
+  #cv-print-area {
+    position: absolute;
+    inset: 0;
+    width: 210mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .cv-experience-item,
+  .cv-education-item,
+  .cv-project-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #cv-print-area header,
+  .cv-header {
+    position: static !important;
+  }
+
+  #cv-print-area * {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .cv-header {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .cv-divider {
+    border-bottom: 1px solid #000 !important;
+  }
+
+  h2,
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .no-print {
+    display: none !important;
   }
 }

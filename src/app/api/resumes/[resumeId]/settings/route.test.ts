@@ -104,6 +104,50 @@ describe('POST /api/resumes/[resumeId]/settings', () => {
     expect(mockUpsertResumeSettings).not.toHaveBeenCalled();
   });
 
+  it('yeni template anahtari gonderildiginde kaydi kabul eder', async () => {
+    const { POST } = await loadRouteModule();
+
+    mockUpsertResumeSettings.mockResolvedValue({
+      templateKey: 'atlantic-blue',
+      fontScale: 1,
+      spacingScale: 1,
+      colorScheme: 'neutral',
+      updatedAt: new Date('2026-03-08T11:05:00.000Z'),
+    });
+
+    const response = await POST(
+      new Request('http://localhost/api/resumes/1/settings', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          templateKey: 'atlantic-blue',
+          fontScale: 1,
+          spacingScale: 1,
+          colorScheme: 'neutral',
+        }),
+      }) as NextRequest,
+      {
+        params: {
+          resumeId: '550e8400-e29b-41d4-a716-446655440000',
+        },
+      }
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockUpsertResumeSettings).toHaveBeenCalledWith(
+      'user-1',
+      '550e8400-e29b-41d4-a716-446655440000',
+      {
+        templateKey: 'atlantic-blue',
+        fontScale: 1,
+        spacingScale: 1,
+        colorScheme: 'neutral',
+      }
+    );
+  });
+
   it('rate limit asiminda 429 dondurur', async () => {
     const { POST } = await loadRouteModule();
 

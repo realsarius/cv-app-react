@@ -4,9 +4,10 @@ import type {
   ResumeExperienceItem,
   ResumeProjectItem,
 } from '@/features/resume-editor/content';
+import type { ResumeTemplateKey } from '@/templates/resume/types';
 
 type PreviewVisualSettings = {
-  templateKey: 'ats-classic' | 'ats-compact';
+  templateKey: ResumeTemplateKey;
   fontScale: number;
   spacingScale: number;
   colorScheme: 'neutral' | 'slate' | 'mono';
@@ -95,9 +96,16 @@ function createPageSkeleton(personalDetails: ResumeContent['personalDetails']) {
 }
 
 function createPageCapacity(settings: PreviewVisualSettings) {
-  const compactBonus = settings.templateKey === 'ats-compact' ? 6 : 0;
+  const templateBonus =
+    settings.templateKey === 'ats-compact'
+      ? 6
+      : settings.templateKey === 'two-column'
+        ? -7
+        : settings.templateKey === 'atlantic-blue'
+          ? -2
+          : 0;
   const density = (settings.fontScale + settings.spacingScale) / 2;
-  const base = 72 + compactBonus;
+  const base = 72 + templateBonus;
   return Math.max(34, Math.floor(base / density));
 }
 
@@ -179,4 +187,3 @@ export function paginateResumeContent(
 
   return pages;
 }
-

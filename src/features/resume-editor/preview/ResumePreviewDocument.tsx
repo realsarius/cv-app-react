@@ -1,8 +1,11 @@
 import type { ResumeContent } from '@/features/resume-editor/content';
+import type { ResumeTemplateKey } from '@/templates/resume/types';
 import { useTranslations } from 'next-intl';
+import AtlanticBlueTemplate from './templates/AtlanticBlueTemplate';
+import TwoColumnTemplate from './templates/TwoColumnTemplate';
 
 type PreviewVisualSettings = {
-  templateKey: 'ats-classic' | 'ats-compact';
+  templateKey: ResumeTemplateKey;
   fontScale: number;
   spacingScale: number;
   colorScheme: 'neutral' | 'slate' | 'mono';
@@ -76,6 +79,31 @@ export default function ResumePreviewDocument({
   className,
 }: ResumePreviewDocumentProps) {
   const t = useTranslations('resume.previewDocument');
+
+  if (settings.templateKey === 'atlantic-blue') {
+    return (
+      <AtlanticBlueTemplate
+        title={title}
+        content={content}
+        settings={settings}
+        printFriendly={printFriendly}
+        className={className}
+      />
+    );
+  }
+
+  if (settings.templateKey === 'two-column') {
+    return (
+      <TwoColumnTemplate
+        title={title}
+        content={content}
+        settings={settings}
+        printFriendly={printFriendly}
+        className={className}
+      />
+    );
+  }
+
   const isCompactTemplate = settings.templateKey === 'ats-compact';
   const palette = buildPalette(settings.colorScheme);
   const sectionSpacing = isCompactTemplate ? 'mt-4' : 'mt-6';
@@ -120,7 +148,7 @@ export default function ResumePreviewDocument({
       }}
       className={articleClassName}
     >
-      <header className={`border-b pb-4 ${palette.border}`}>
+      <header className={`cv-header border-b pb-4 ${palette.border}`}>
         <h2
           className={`font-bold ${palette.title}`}
           style={{ fontSize: `${typography.title}em`, lineHeight: 1.1 }}
@@ -174,7 +202,7 @@ export default function ResumePreviewDocument({
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.experiences.map((item) => (
-              <div key={item.id}>
+              <div key={item.id} className='cv-experience-item'>
                 <div className='flex flex-wrap items-center justify-between gap-2'>
                   <p
                     className={`font-semibold ${palette.title}`}
@@ -224,7 +252,7 @@ export default function ResumePreviewDocument({
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.educations.map((item) => (
-              <div key={item.id}>
+              <div key={item.id} className='cv-education-item'>
                 <div className='flex flex-wrap items-center justify-between gap-2'>
                   <p
                     className={`font-semibold ${palette.title}`}
@@ -274,7 +302,7 @@ export default function ResumePreviewDocument({
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.projects.map((item) => (
-              <div key={item.id}>
+              <div key={item.id} className='cv-project-item'>
                 <p
                   className={`font-semibold ${palette.title}`}
                   style={{ fontSize: `${typography.body}em` }}

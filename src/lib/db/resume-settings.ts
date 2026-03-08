@@ -1,9 +1,11 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { resumeSettings, resumes } from '@/db/schema';
+import { normalizeResumeTemplateKey } from '@/templates/resume/registry';
+import type { ResumeTemplateKey } from '@/templates/resume/types';
 import { withUserRls } from './rls';
 
 export type ResumeVisualSettings = {
-  templateKey: 'ats-classic' | 'ats-compact';
+  templateKey: ResumeTemplateKey;
   fontScale: number;
   spacingScale: number;
   colorScheme: 'neutral' | 'slate' | 'mono';
@@ -17,10 +19,6 @@ export const DEFAULT_RESUME_SETTINGS: ResumeVisualSettings = {
   colorScheme: 'neutral',
   updatedAt: new Date(0),
 };
-
-function normalizeTemplateKey(value: string | null | undefined): ResumeVisualSettings['templateKey'] {
-  return value === 'ats-compact' ? 'ats-compact' : 'ats-classic';
-}
 
 function normalizeColorScheme(value: string | null | undefined): ResumeVisualSettings['colorScheme'] {
   if (value === 'slate' || value === 'mono') {
@@ -57,7 +55,7 @@ function toVisualSettings(
   }
 
   return {
-    templateKey: normalizeTemplateKey(row.templateKey),
+    templateKey: normalizeResumeTemplateKey(row.templateKey),
     fontScale: toNumber(row.fontScale, 1),
     spacingScale: toNumber(row.spacingScale, 1),
     colorScheme: normalizeColorScheme(row.colorScheme),
