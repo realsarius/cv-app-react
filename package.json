@@ -6,12 +6,17 @@
     "dev": "next dev",
     "build": "next build --no-lint",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
+    "drizzle-orm": "^0.44.5",
     "next": "^14.2.26",
+    "pg": "^8.16.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.56.0",
@@ -19,9 +24,12 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
+    "@types/pg": "^8.15.6",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^17.3.1",
+    "drizzle-kit": "^0.31.6",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.26",
     "postcss": "^8.5.3",
