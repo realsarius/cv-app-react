@@ -84,8 +84,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
       DATABASE_URL: postgresql://${DATABASE_DEV_USER:-cv_dev_user}:${DATABASE_DEV_PASSWORD:-dev_password}@postgres-dev:5432/${DATABASE_DEV_NAME:-cv_app_dev}
       DATABASE_DEV_URL: postgresql://${DATABASE_DEV_USER:-cv_dev_user}:${DATABASE_DEV_PASSWORD:-dev_password}@postgres-dev:5432/${DATABASE_DEV_NAME:-cv_app_dev}
     ports:
@@ -117,8 +117,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
       DATABASE_URL: postgresql://${DATABASE_PROD_USER:-cv_prod_user}:${DATABASE_PROD_PASSWORD:-prod_password}@postgres-prod:5432/${DATABASE_PROD_NAME:-cv_app_prod}
       DATABASE_PROD_URL: postgresql://${DATABASE_PROD_USER:-cv_prod_user}:${DATABASE_PROD_PASSWORD:-prod_password}@postgres-prod:5432/${DATABASE_PROD_NAME:-cv_app_prod}
     ports:

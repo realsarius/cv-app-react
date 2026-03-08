@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createDraftResume } from '@/lib/db/resumes';
@@ -34,6 +33,6 @@ export async function createDraftResumeAction(formData: FormData) {
     redirect('/dashboard?error=Baslik+120+karakterden+uzun+olamaz');
   }
 
-  await createDraftResume(user.id, parsed.data.title);
-  revalidatePath('/dashboard');
+  const createdResume = await createDraftResume(user.id, parsed.data.title);
+  redirect(`/resumes/${createdResume.id}`);
 }

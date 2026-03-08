@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { listUserResumes } from '@/lib/db/resumes';
 import { isDatabaseConfigured } from '@/lib/db/env';
@@ -110,6 +111,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <p className='mt-1 text-xs text-slate-500'>
                 Son guncelleme: {new Date(resume.updatedAt).toLocaleString('tr-TR')}
               </p>
+              <Link
+                href={`/resumes/${resume.id}`}
+                className='mt-2 inline-flex rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:border-slate-500'
+              >
+                Editoru ac
+              </Link>
             </li>
           ))}
         </ul>
