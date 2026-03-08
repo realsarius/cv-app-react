@@ -22,6 +22,7 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 - Login/register islemleri ve ATS skor endpointi icin temel rate limit korumasi eklendi.
 - Resume editor autosave akisina oturumlar arasi yazma cakismasi korumasi eklendi.
 - ATS score ve autosave endpointleri icin API seviye test senaryolari eklendi.
+- Resume settings ve export endpointleri icin API seviye test senaryolari eklendi.
 
 ## Kurulum
 
