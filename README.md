@@ -85,6 +85,14 @@ npm run db:migrate:test
 npm run db:migrate:prod
 ```
 
+## Test Komutlari
+
+```bash
+npm run test
+npm run test:watch
+npm run test:coverage
+```
+
 ## Notlar
 
 - Varsayilan lokal PostgreSQL portu `5440` olarak ayarlandi.
