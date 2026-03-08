@@ -9,9 +9,9 @@ type NavbarProps = {
 };
 
 const sectionAnchors = [
-  { id: 'features', key: 'features' },
-  { id: 'templates', key: 'templates' },
-  { id: 'pricing', key: 'pricing' },
+  { id: 'features', href: '/#features', key: 'features' },
+  { id: 'templates', href: '/#templates', key: 'templates' },
+  { id: 'pricing', href: '/#pricing', key: 'pricing' },
 ] as const;
 
 export default function Navbar({ isLoggedIn }: NavbarProps) {
@@ -59,13 +59,13 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
 
           <nav className='hidden items-center gap-1 md:flex'>
             {sectionAnchors.map((item) => (
-              <a
+              <Link
                 key={item.id}
-                href={`#${item.id}`}
+                href={item.href}
                 className='rounded-md px-3 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100 hover:text-stone-900'
               >
                 {t(item.key)}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
@@ -119,14 +119,14 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
           <div className='app-container space-y-3 py-4'>
             <nav className='flex flex-col gap-1'>
               {sectionAnchors.map((item) => (
-                <a
+                <Link
                   key={item.id}
-                  href={`#${item.id}`}
+                  href={item.href}
                   className='rounded-md px-2 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {t(item.key)}
-                </a>
+                </Link>
               ))}
             </nav>
 

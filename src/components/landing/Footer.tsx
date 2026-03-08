@@ -20,15 +20,15 @@ export default function Footer({ isLoggedIn }: FooterProps) {
         <div className='space-y-2'>
           <p className='text-sm font-semibold text-stone-900'>{t('product')}</p>
           <div className='flex flex-col gap-1 text-sm text-stone-700'>
-            <a href='#features' className='hover:text-stone-900'>
+            <Link href='/#features' className='hover:text-stone-900'>
               {t('features')}
-            </a>
-            <a href='#templates' className='hover:text-stone-900'>
+            </Link>
+            <Link href='/#templates' className='hover:text-stone-900'>
               {t('templates')}
-            </a>
-            <a href='#pricing' className='hover:text-stone-900'>
+            </Link>
+            <Link href='/#pricing' className='hover:text-stone-900'>
               {t('pricing')}
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -49,16 +49,19 @@ export default function Footer({ isLoggedIn }: FooterProps) {
                 </Link>
               </>
             )}
+            <Link href='/faq' className='hover:text-stone-900'>
+              {t('faq')}
+            </Link>
           </div>
         </div>
 
         <div className='space-y-2'>
           <p className='text-sm font-semibold text-stone-900'>{t('legal')}</p>
           <div className='flex flex-col gap-1 text-sm text-stone-700'>
-            <Link href='/register' className='hover:text-stone-900'>
+            <Link href='/privacy' className='hover:text-stone-900'>
               {t('privacy')}
             </Link>
-            <Link href='/register' className='hover:text-stone-900'>
+            <Link href='/terms' className='hover:text-stone-900'>
               {t('terms')}
             </Link>
           </div>
