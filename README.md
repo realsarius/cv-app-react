@@ -1,4 +1,4 @@
-# Resume Builder (Next.js + Supabase)
+# Resume Builder (Next.js + Supabase + Drizzle)
 
 Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya modernizasyonunu icerir.
 
@@ -8,6 +8,8 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 - Public auth sayfalari eklendi: `/login`, `/register`.
 - Korumali alan iskeleti eklendi: `/dashboard`.
 - Supabase session middleware akisi eklendi.
+- Drizzle ORM ile `profiles`, `resumes`, `resume_versions` tablolari eklendi.
+- RLS policy kurallari migration dosyasina eklendi.
 
 ## Kurulum
 
@@ -17,46 +19,66 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 npm install
 ```
 
-2. Ortam degiskenlerini hazirlayin:
+2. Ortam dosyalarini olusturun:
 
 ```bash
+cp .env.example .env
 cp .env.example .env.local
 ```
 
-3. `.env.local` dosyasinda gerekli degerleri doldurun:
+3. `.env.local` icinde en az su degerleri doldurun:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `DATABASE_URL`
+- `DATABASE_URL` veya `DATABASE_DEV_URL`
 
-4. Gelistirme sunucusunu baslatin:
+4. Uygulamayi baslatin:
 
 ```bash
 npm run dev
 ```
 
-Uygulama varsayilan olarak `http://localhost:3000` adresinde calisir.
+## Docker Profilleri
 
-## Komutlar
+`docker-compose.yml` dosyasi dev/test/prod ayri profile mantigi ile calisir.
+
+- `dev`
+  - `postgres-dev` -> host port: `5440`
+  - `app-dev` -> host port: `3000`
+  - `pgadmin` -> host port: `5050`
+- `test`
+  - `postgres-test` -> host port: `5441`
+- `prod`
+  - `postgres-prod` -> host port: `5442`
+  - `app-prod` -> host port: `3001`
+
+Komutlar:
 
 ```bash
-npm run dev
-npm run lint
-npm run build
-npm run start
+npm run docker:dev:up
+npm run docker:dev:down
+
+npm run docker:test:up
+npm run docker:test:down
+
+npm run docker:prod:up
+npm run docker:prod:down
+```
+
+## Veritabani Komutlari
+
+```bash
 npm run db:generate
 npm run db:migrate
 npm run db:studio
+
+npm run db:migrate:dev
+npm run db:migrate:test
+npm run db:migrate:prod
 ```
 
-## Veritabani
+## Notlar
 
-- Drizzle schema dosyasi: `src/db/schema.ts`
-- Ilk tablolar: `profiles`, `resumes`, `resume_versions`
-- Migration klasoru: `drizzle/`
-
-## Sonraki Isler
-
-- Resume editor ve autosave akisi
-- RLS policy migrationlari
-- ATS skor endpoint iskeleti
+- Varsayilan lokal PostgreSQL portu `5440` olarak ayarlandi.
+- Test veritabani portu `5441`, prod veritabani portu `5442` olarak ayrildi.
+- `docker/postgres/init/001_extensions_auth.sql` dosyasi, lokal Postgres icin `auth` semasi ve `auth.uid()` fonksiyonu uyumlulugunu saglar.

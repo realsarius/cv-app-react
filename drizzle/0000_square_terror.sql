@@ -1,3 +1,19 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+--> statement-breakpoint
+CREATE SCHEMA IF NOT EXISTS auth;
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS auth.users (
+	"id" uuid PRIMARY KEY
+);
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION auth.uid()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
+	SELECT nullif(current_setting('request.jwt.claim.sub', true), '')::uuid;
+$$;
+--> statement-breakpoint
 CREATE TYPE "public"."resume_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
 CREATE TABLE "profiles" (
 	"id" uuid PRIMARY KEY NOT NULL,
