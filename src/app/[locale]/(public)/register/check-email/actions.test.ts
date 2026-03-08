@@ -137,6 +137,21 @@ describe('verifyEmailCodeAction', () => {
     });
   });
 
+  it('en locale ile dogrulama basariliysa locale korunarak dashboarda yonlendirir', async () => {
+    const { verifyEmailCodeAction } = await loadActionModule();
+
+    mockGetLocale.mockResolvedValue('en');
+
+    await expect(
+      verifyEmailCodeAction(buildFormData('ali@example.com', '469740'))
+    ).rejects.toThrow('REDIRECT:/dashboard');
+
+    expect(mockRedirect).toHaveBeenLastCalledWith({
+      href: '/dashboard',
+      locale: 'en',
+    });
+  });
+
   it('signup tipi hataliysa email tipi ile fallback dogrulamasi yapar', async () => {
     const { verifyEmailCodeAction } = await loadActionModule();
 

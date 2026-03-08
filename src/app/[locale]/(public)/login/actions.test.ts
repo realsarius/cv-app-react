@@ -144,6 +144,21 @@ describe('loginAction', () => {
     );
   });
 
+  it('en locale ile basarili giriste locale korunarak dashboarda yonlendirir', async () => {
+    const { loginAction } = await loadActionModule();
+
+    mockGetLocale.mockResolvedValue('en');
+
+    await expect(
+      loginAction(buildFormData('ali@example.com', 'password123'))
+    ).rejects.toThrow('REDIRECT:/dashboard');
+
+    expect(mockRedirect).toHaveBeenLastCalledWith({
+      href: '/dashboard',
+      locale: 'en',
+    });
+  });
+
   it('supabase auth hatasinda login sayfasina hata mesajiyla doner', async () => {
     const { loginAction } = await loadActionModule();
 

@@ -163,6 +163,33 @@ describe('registerAction', () => {
     });
   });
 
+  it('en locale kaydinda callback next yolu locale-aware olusturur', async () => {
+    const { registerAction } = await loadActionModule();
+
+    mockGetLocale.mockResolvedValue('en');
+    mockGetPathname.mockReturnValue('/en/dashboard');
+
+    await expect(
+      registerAction(buildFormData('ali@example.com', 'password123'))
+    ).rejects.toThrow('REDIRECT:/register/check-email?email=ali%40example.com');
+
+    expect(mockGetPathname).toHaveBeenCalledWith({
+      href: '/dashboard',
+      locale: 'en',
+    });
+    expect(mockSignUp).toHaveBeenCalledWith({
+      email: 'ali@example.com',
+      password: 'password123',
+      options: {
+        emailRedirectTo: 'http://localhost:3010/auth/callback?next=%2Fen%2Fdashboard',
+      },
+    });
+    expect(mockRedirect).toHaveBeenLastCalledWith({
+      href: '/register/check-email?email=ali%40example.com',
+      locale: 'en',
+    });
+  });
+
   it('supabase signUp hatasinda register sayfasina hata mesajiyla doner', async () => {
     const { registerAction } = await loadActionModule();
 

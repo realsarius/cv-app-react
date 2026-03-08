@@ -19,8 +19,10 @@ async function loadRouteModule() {
   return import('./route');
 }
 
-function buildRequest(pathnameAndQuery: string) {
-  return new Request(`http://localhost${pathnameAndQuery}`) as NextRequest;
+function buildRequest(pathnameAndQuery: string, headers?: HeadersInit) {
+  return new Request(`http://localhost${pathnameAndQuery}`, {
+    headers,
+  }) as NextRequest;
 }
 
 function getRedirectUrl(response: Response) {
@@ -106,5 +108,19 @@ describe('GET /auth/callback', () => {
 
     expect(redirectUrl.pathname).toBe('/login');
     expect(redirectUrl.searchParams.get('error')).toBe('Invalid grant');
+  });
+
+  it('accept-language en oldugunda gecersiz link hatasini ingilizce dondurur', async () => {
+    const { GET } = await loadRouteModule();
+
+    const response = await GET(
+      buildRequest('/auth/callback', {
+        'accept-language': 'en-US,en;q=0.9',
+      })
+    );
+    const redirectUrl = getRedirectUrl(response);
+
+    expect(redirectUrl.pathname).toBe('/login');
+    expect(redirectUrl.searchParams.get('error')).toBe('Verification link is invalid or expired.');
   });
 });

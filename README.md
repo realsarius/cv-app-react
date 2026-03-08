@@ -257,7 +257,7 @@ npm run test:coverage
 2026-03-08 tarihinde local çalıştırma sonucu:
 
 - **12 test dosyası geçti**
-- **37 test geçti**
+- **41 test geçti**
 
 ## 7. Kurulum ve Çalıştırma
 
