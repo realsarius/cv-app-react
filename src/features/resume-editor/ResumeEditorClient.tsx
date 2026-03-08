@@ -1,7 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ResumeContent } from './content';
+import type {
+  ResumeContent,
+  ResumeEducationItem,
+  ResumeExperienceItem,
+  ResumeProjectItem,
+} from './content';
 
 type ResumeEditorClientProps = {
   resumeId: string;
@@ -31,6 +36,52 @@ type AtsScoreResponse = {
     roleAlignment: number;
   };
 };
+
+function createItemId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `item-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function createEmptyExperienceItem(): ResumeExperienceItem {
+  return {
+    id: createItemId(),
+    title: '',
+    company: '',
+    city: '',
+    country: '',
+    startDate: '',
+    endDate: '',
+    description: '',
+  };
+}
+
+function createEmptyEducationItem(): ResumeEducationItem {
+  return {
+    id: createItemId(),
+    school: '',
+    degree: '',
+    city: '',
+    country: '',
+    startDate: '',
+    endDate: '',
+    description: '',
+  };
+}
+
+function createEmptyProjectItem(): ResumeProjectItem {
+  return {
+    id: createItemId(),
+    title: '',
+    subtitle: '',
+    city: '',
+    country: '',
+    stack: '',
+    description: '',
+  };
+}
 
 export default function ResumeEditorClient({
   resumeId,
@@ -144,6 +195,48 @@ export default function ResumeEditorClient({
       setAtsLoading(false);
     }
   }, [content, jobDescription]);
+
+  const addExperience = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      experiences: [...prev.experiences, createEmptyExperienceItem()],
+    }));
+  }, []);
+
+  const removeExperience = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      experiences: prev.experiences.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const addEducation = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      educations: [...prev.educations, createEmptyEducationItem()],
+    }));
+  }, []);
+
+  const removeEducation = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      educations: prev.educations.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const addProject = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      projects: [...prev.projects, createEmptyProjectItem()],
+    }));
+  }, []);
+
+  const removeProject = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((item) => item.id !== id),
+    }));
+  }, []);
 
   useEffect(() => {
     if (payloadString === lastSavedPayloadRef.current) {
@@ -286,6 +379,447 @@ export default function ResumeEditorClient({
           className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
           placeholder='Kisa kariyer ozeti...'
         />
+      </div>
+
+      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <h2 className='text-lg font-semibold text-slate-900'>Deneyimler</h2>
+          <button
+            type='button'
+            onClick={addExperience}
+            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+          >
+            Deneyim ekle
+          </button>
+        </div>
+
+        {content.experiences.length === 0 ? (
+          <p className='mt-3 text-sm text-slate-500'>Henuz deneyim eklenmedi.</p>
+        ) : (
+          <div className='mt-4 space-y-4'>
+            {content.experiences.map((item) => (
+              <div key={item.id} className='rounded-lg border border-slate-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-slate-800'>Deneyim kaydi</p>
+                  <button
+                    type='button'
+                    onClick={() => removeExperience(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    Sil
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        experiences: prev.experiences.map((exp) =>
+                          exp.id === item.id ? { ...exp, title: event.target.value } : exp
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Pozisyon'
+                  />
+                  <input
+                    type='text'
+                    value={item.company}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        experiences: prev.experiences.map((exp) =>
+                          exp.id === item.id
+                            ? { ...exp, company: event.target.value }
+                            : exp
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Sirket'
+                  />
+                  <input
+                    type='text'
+                    value={item.city}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        experiences: prev.experiences.map((exp) =>
+                          exp.id === item.id ? { ...exp, city: event.target.value } : exp
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Sehir'
+                  />
+                  <input
+                    type='text'
+                    value={item.country}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        experiences: prev.experiences.map((exp) =>
+                          exp.id === item.id
+                            ? { ...exp, country: event.target.value }
+                            : exp
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Ulke'
+                  />
+                  <input
+                    type='text'
+                    value={item.startDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        experiences: prev.experiences.map((exp) =>
+                          exp.id === item.id
+                            ? { ...exp, startDate: event.target.value }
+                            : exp
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Baslangic'
+                  />
+                  <input
+                    type='text'
+                    value={item.endDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        experiences: prev.experiences.map((exp) =>
+                          exp.id === item.id ? { ...exp, endDate: event.target.value } : exp
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Bitis'
+                  />
+                </div>
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      experiences: prev.experiences.map((exp) =>
+                        exp.id === item.id
+                          ? { ...exp, description: event.target.value }
+                          : exp
+                      ),
+                    }))
+                  }
+                  rows={4}
+                  maxLength={3000}
+                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                  placeholder='Sorumluluklar ve etkiler...'
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <h2 className='text-lg font-semibold text-slate-900'>Egitim</h2>
+          <button
+            type='button'
+            onClick={addEducation}
+            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+          >
+            Egitim ekle
+          </button>
+        </div>
+
+        {content.educations.length === 0 ? (
+          <p className='mt-3 text-sm text-slate-500'>Henuz egitim eklenmedi.</p>
+        ) : (
+          <div className='mt-4 space-y-4'>
+            {content.educations.map((item) => (
+              <div key={item.id} className='rounded-lg border border-slate-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-slate-800'>Egitim kaydi</p>
+                  <button
+                    type='button'
+                    onClick={() => removeEducation(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    Sil
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.school}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        educations: prev.educations.map((edu) =>
+                          edu.id === item.id
+                            ? { ...edu, school: event.target.value }
+                            : edu
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Okul'
+                  />
+                  <input
+                    type='text'
+                    value={item.degree}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        educations: prev.educations.map((edu) =>
+                          edu.id === item.id
+                            ? { ...edu, degree: event.target.value }
+                            : edu
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Bolum / Derece'
+                  />
+                  <input
+                    type='text'
+                    value={item.city}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        educations: prev.educations.map((edu) =>
+                          edu.id === item.id ? { ...edu, city: event.target.value } : edu
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Sehir'
+                  />
+                  <input
+                    type='text'
+                    value={item.country}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        educations: prev.educations.map((edu) =>
+                          edu.id === item.id
+                            ? { ...edu, country: event.target.value }
+                            : edu
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Ulke'
+                  />
+                  <input
+                    type='text'
+                    value={item.startDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        educations: prev.educations.map((edu) =>
+                          edu.id === item.id
+                            ? { ...edu, startDate: event.target.value }
+                            : edu
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Baslangic'
+                  />
+                  <input
+                    type='text'
+                    value={item.endDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        educations: prev.educations.map((edu) =>
+                          edu.id === item.id ? { ...edu, endDate: event.target.value } : edu
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Bitis'
+                  />
+                </div>
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      educations: prev.educations.map((edu) =>
+                        edu.id === item.id
+                          ? { ...edu, description: event.target.value }
+                          : edu
+                      ),
+                    }))
+                  }
+                  rows={3}
+                  maxLength={3000}
+                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                  placeholder='Egitim ozet notu...'
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <h2 className='text-lg font-semibold text-slate-900'>Projeler</h2>
+          <button
+            type='button'
+            onClick={addProject}
+            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+          >
+            Proje ekle
+          </button>
+        </div>
+
+        {content.projects.length === 0 ? (
+          <p className='mt-3 text-sm text-slate-500'>Henuz proje eklenmedi.</p>
+        ) : (
+          <div className='mt-4 space-y-4'>
+            {content.projects.map((item) => (
+              <div key={item.id} className='rounded-lg border border-slate-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-slate-800'>Proje kaydi</p>
+                  <button
+                    type='button'
+                    onClick={() => removeProject(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    Sil
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        projects: prev.projects.map((project) =>
+                          project.id === item.id
+                            ? { ...project, title: event.target.value }
+                            : project
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Proje adi'
+                  />
+                  <input
+                    type='text'
+                    value={item.subtitle}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        projects: prev.projects.map((project) =>
+                          project.id === item.id
+                            ? { ...project, subtitle: event.target.value }
+                            : project
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Alt baslik'
+                  />
+                  <input
+                    type='text'
+                    value={item.city}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        projects: prev.projects.map((project) =>
+                          project.id === item.id
+                            ? { ...project, city: event.target.value }
+                            : project
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Sehir'
+                  />
+                  <input
+                    type='text'
+                    value={item.country}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        projects: prev.projects.map((project) =>
+                          project.id === item.id
+                            ? { ...project, country: event.target.value }
+                            : project
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    placeholder='Ulke'
+                  />
+                </div>
+                <input
+                  type='text'
+                  value={item.stack}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      projects: prev.projects.map((project) =>
+                        project.id === item.id
+                          ? { ...project, stack: event.target.value }
+                          : project
+                      ),
+                    }))
+                  }
+                  maxLength={500}
+                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                  placeholder='Kullanilan teknolojiler (React, Next.js, PostgreSQL...)'
+                />
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      projects: prev.projects.map((project) =>
+                        project.id === item.id
+                          ? { ...project, description: event.target.value }
+                          : project
+                      ),
+                    }))
+                  }
+                  rows={4}
+                  maxLength={3000}
+                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                  placeholder='Proje aciklamasi...'
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className='rounded-xl border border-slate-200 bg-white p-5'>

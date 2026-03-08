@@ -106,6 +106,47 @@ function buildKeywordSet(jobDescription: string) {
 }
 
 function buildResumeText(content: ResumeContent) {
+  const experiencesText = content.experiences
+    .map((item) =>
+      [
+        item.title,
+        item.company,
+        item.city,
+        item.country,
+        item.startDate,
+        item.endDate,
+        item.description,
+      ].join(' ')
+    )
+    .join(' ');
+
+  const educationsText = content.educations
+    .map((item) =>
+      [
+        item.school,
+        item.degree,
+        item.city,
+        item.country,
+        item.startDate,
+        item.endDate,
+        item.description,
+      ].join(' ')
+    )
+    .join(' ');
+
+  const projectsText = content.projects
+    .map((item) =>
+      [
+        item.title,
+        item.subtitle,
+        item.city,
+        item.country,
+        item.stack,
+        item.description,
+      ].join(' ')
+    )
+    .join(' ');
+
   return normalizeText(
     [
       content.personalDetails.fullName,
@@ -114,6 +155,9 @@ function buildResumeText(content: ResumeContent) {
       content.personalDetails.phone,
       content.personalDetails.address,
       content.profile,
+      experiencesText,
+      educationsText,
+      projectsText,
     ].join(' ')
   );
 }
@@ -159,6 +203,9 @@ export function calculateAtsScore(
     content.personalDetails.phone.replace(/\D/g, '').length >= 7,
     content.personalDetails.address.trim().length >= 4,
     content.profile.trim().length >= 60,
+    content.experiences.length > 0,
+    content.educations.length > 0,
+    content.projects.length > 0,
   ];
   const sectionCompletenessRatio =
     sectionChecks.filter(Boolean).length / sectionChecks.length;

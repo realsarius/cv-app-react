@@ -15,6 +15,7 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 - Profil ayarlari sayfasi eklendi: `/settings`.
 - Auth kullanicisi icin `profiles` tablosunda otomatik profil bootstrap akisi eklendi.
 - Rule-based ATS skor endpointi eklendi: `/api/ats/score`.
+- Editor kapsaminda `experience`, `education` ve `projects` bolumleri dinamik olarak eklendi.
 
 ## Kurulum
 
