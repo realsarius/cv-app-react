@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { messages } from '@/constants/messages';
 import { ensureUserProfile, updateOwnProfile } from '@/lib/db/profiles';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -29,11 +30,19 @@ export async function updateProfileAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect('/settings?error=Ad+soyad+120+karakterden+uzun+olamaz');
+    redirect(
+      `/settings?${new URLSearchParams({
+        error: messages.profile.fullNameTooLong,
+      }).toString()}`
+    );
   }
 
   await ensureUserProfile(user.id, user.email);
   await updateOwnProfile(user.id, parsed.data.fullName);
 
-  redirect('/settings?success=Profil+guncellendi');
+  redirect(
+    `/settings?${new URLSearchParams({
+      success: messages.profile.profileUpdated,
+    }).toString()}`
+  );
 }

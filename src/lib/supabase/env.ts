@@ -8,7 +8,7 @@ export function isSupabaseConfigured() {
 export function getSupabaseEnv() {
   if (!isSupabaseConfigured()) {
     throw new Error(
-      'Supabase environment degiskenleri eksik. NEXT_PUBLIC_SUPABASE_URL ve NEXT_PUBLIC_SUPABASE_ANON_KEY tanimlanmalidir.'
+      'Supabase environment değişkenleri eksik. NEXT_PUBLIC_SUPABASE_URL ve NEXT_PUBLIC_SUPABASE_ANON_KEY tanımlanmalıdır.'
     );
   }
 

@@ -57,14 +57,14 @@ export function getDatabaseUrl() {
 
   if (!url) {
     if (target === 'test') {
-      throw new Error('DATABASE_URL veya DATABASE_TEST_URL tanimlanmalidir.');
+      throw new Error('DATABASE_URL veya DATABASE_TEST_URL tanımlanmalıdır.');
     }
 
     if (target === 'prod') {
-      throw new Error('DATABASE_URL veya DATABASE_PROD_URL tanimlanmalidir.');
+      throw new Error('DATABASE_URL veya DATABASE_PROD_URL tanımlanmalıdır.');
     }
 
-    throw new Error('DATABASE_URL veya DATABASE_DEV_URL tanimlanmalidir.');
+    throw new Error('DATABASE_URL veya DATABASE_DEV_URL tanımlanmalıdır.');
   }
 
   return url;

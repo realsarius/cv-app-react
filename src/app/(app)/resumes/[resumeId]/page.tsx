@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { messages } from '@/constants/messages';
 import ResumeEditorClient from '@/features/resume-editor/ResumeEditorClient';
 import { listJobTargetHistory } from '@/lib/db/job-targets';
 import { getResumeEditorState } from '@/lib/db/resume-editor';
@@ -22,16 +23,28 @@ export const dynamic = 'force-dynamic';
 
 export default async function ResumeEditorPage({ params }: ResumeEditorPageProps) {
   if (!isSupabaseConfigured()) {
-    redirect('/login?error=Supabase+ortam+degiskenleri+eksik');
+    redirect(
+      `/login?${new URLSearchParams({
+        error: messages.common.supabaseEnvMissing,
+      }).toString()}`
+    );
   }
 
   if (!isDatabaseConfigured()) {
-    redirect('/dashboard?error=DATABASE_URL+veya+DATABASE_DEV_URL+eksik');
+    redirect(
+      `/dashboard?${new URLSearchParams({
+        error: messages.common.databaseUrlMissing,
+      }).toString()}`
+    );
   }
 
   const parsedParams = paramsSchema.safeParse(params);
   if (!parsedParams.success) {
-    redirect('/dashboard?error=Resume+kimligi+gecersiz');
+    redirect(
+      `/dashboard?${new URLSearchParams({
+        error: messages.resume.idInvalid,
+      }).toString()}`
+    );
   }
 
   const supabase = await createServerSupabaseClient();
@@ -45,7 +58,11 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
 
   const editorState = await getResumeEditorState(user.id, parsedParams.data.resumeId);
   if (!editorState) {
-    redirect('/dashboard?error=Resume+bulunamadi');
+    redirect(
+      `/dashboard?${new URLSearchParams({
+        error: messages.resume.notFound,
+      }).toString()}`
+    );
   }
 
   const jobTargetHistory = await listJobTargetHistory(
@@ -55,27 +72,27 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
   );
 
   return (
-    <section className='space-y-5'>
-      <header className='rounded-xl border border-slate-200 bg-white p-5'>
+    <section className='space-y-7'>
+      <header className='app-card'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <div>
-            <p className='text-sm text-slate-500'>Resume Editor</p>
-            <h1 className='text-2xl font-bold text-slate-900'>
+            <p className='text-sm text-stone-600'>Özgeçmiş düzenleyici</p>
+            <h1 className='text-2xl font-bold tracking-tight text-stone-900'>
               {editorState.resume.title}
             </h1>
           </div>
           <div className='flex flex-wrap items-center gap-2'>
             <Link
               href='/dashboard'
-              className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+              className='btn-secondary'
             >
-              Dashboarda don
+              Panele dön
             </Link>
             <Link
               href={`/resumes/${editorState.resume.id}/preview`}
-              className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+              className='btn-secondary'
             >
-              Onizle / Yazdir
+              Önizle / Yazdır
             </Link>
           </div>
         </div>

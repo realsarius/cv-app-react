@@ -125,7 +125,7 @@ describe('POST /api/ats/score', () => {
     const payload = (await blockedResponse.json()) as { error?: string };
 
     expect(blockedResponse.status).toBe(429);
-    expect(payload.error).toContain('Cok fazla ATS analizi');
+    expect(payload.error).toContain('Çok fazla ATS analizi');
     expect(blockedResponse.headers.get('retry-after')).not.toBeNull();
     expect(blockedResponse.headers.get('x-ratelimit-remaining')).toBe('0');
   });

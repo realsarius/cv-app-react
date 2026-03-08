@@ -11,23 +11,23 @@ export default function ResumePrintActions({ resumeId }: ResumePrintActionsProps
     <div className='flex flex-wrap items-center gap-2 print:hidden'>
       <Link
         href={`/resumes/${resumeId}`}
-        className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+        className='btn-secondary'
       >
-        Editore don
+        Editöre dön
       </Link>
       <Link
         href={`/api/resumes/${resumeId}/export`}
         target='_blank'
-        className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+        className='btn-secondary'
       >
         PDF indir
       </Link>
       <button
         type='button'
         onClick={() => window.print()}
-        className='rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-slate-700'
+        className='btn-primary'
       >
-        Yazdir / PDF al
+        Yazdır / PDF al
       </button>
     </div>
   );

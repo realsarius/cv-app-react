@@ -33,7 +33,7 @@ function resolveDatabaseUrl() {
       process.env.DATABASE_TEST_URL ??
       buildUrl(
         process.env.DATABASE_TEST_HOST ?? 'localhost',
-        process.env.DATABASE_TEST_PORT ?? '5441',
+        process.env.DATABASE_TEST_PORT ?? '5451',
         process.env.DATABASE_TEST_NAME ?? 'cv_app_test',
         process.env.DATABASE_TEST_USER ?? 'cv_test_user',
         process.env.DATABASE_TEST_PASSWORD ?? 'test_password'
@@ -46,7 +46,7 @@ function resolveDatabaseUrl() {
       process.env.DATABASE_PROD_URL ??
       buildUrl(
         process.env.DATABASE_PROD_HOST ?? 'localhost',
-        process.env.DATABASE_PROD_PORT ?? '5442',
+        process.env.DATABASE_PROD_PORT ?? '5452',
         process.env.DATABASE_PROD_NAME ?? 'cv_app_prod',
         process.env.DATABASE_PROD_USER ?? 'cv_prod_user',
         process.env.DATABASE_PROD_PASSWORD ?? 'prod_password'
@@ -58,7 +58,7 @@ function resolveDatabaseUrl() {
     process.env.DATABASE_DEV_URL ??
     buildUrl(
       process.env.DATABASE_DEV_HOST ?? 'localhost',
-      process.env.DATABASE_DEV_PORT ?? '5440',
+      process.env.DATABASE_DEV_PORT ?? '5450',
       process.env.DATABASE_DEV_NAME ?? 'cv_app_dev',
       process.env.DATABASE_DEV_USER ?? 'cv_dev_user',
       process.env.DATABASE_DEV_PASSWORD ?? 'dev_password'

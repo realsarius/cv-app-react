@@ -104,7 +104,7 @@ export async function getResumeEditorState(
           settings?.colorScheme === 'slate' || settings?.colorScheme === 'mono'
             ? settings.colorScheme
             : 'neutral',
-        updatedAt: settings?.updatedAt ?? DEFAULT_RESUME_SETTINGS.updatedAt,
+        updatedAt: settings?.updatedAt ?? resume.updatedAt,
       },
     };
   });

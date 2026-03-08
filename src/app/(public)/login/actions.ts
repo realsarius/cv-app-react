@@ -2,20 +2,35 @@
 
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { messages } from '@/constants/messages';
 import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 
+function redirectWithError(pathname: string, message: string): never {
+  const query = new URLSearchParams({ error: message }).toString();
+  redirect(`${pathname}?${query}`);
+}
+
+function mapAuthErrorMessage(message: string) {
+  const normalizedMessage = message.toLowerCase();
+  if (normalizedMessage.includes('email not confirmed')) {
+    return messages.auth.emailNotConfirmed;
+  }
+
+  return message;
+}
+
 export async function loginAction(formData: FormData) {
   if (!isSupabaseConfigured()) {
-    redirect('/login?error=Supabase+ortam+degiskenleri+eksik');
+    redirectWithError('/login', messages.common.supabaseEnvMissing);
   }
 
   const email = formData.get('email');
   const password = formData.get('password');
 
   if (typeof email !== 'string' || typeof password !== 'string') {
-    redirect('/login?error=Giris+bilgileri+gecersiz');
+    redirectWithError('/login', messages.auth.invalidLoginCredentials);
   }
 
   const requestHeaders = await headers();
@@ -28,9 +43,7 @@ export async function loginAction(formData: FormData) {
   });
 
   if (!rateLimitResult.allowed) {
-    redirect(
-      '/login?error=Cok+fazla+giris+denemesi+algilandi.+Lutfen+biraz+sonra+tekrar+deneyin'
-    );
+    redirectWithError('/login', messages.auth.loginRateLimited);
   }
 
   const supabase = await createServerSupabaseClient();
@@ -41,7 +54,8 @@ export async function loginAction(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    const mappedMessage = mapAuthErrorMessage(error.message);
+    redirectWithError('/login', mappedMessage);
   }
 
   redirect('/dashboard');

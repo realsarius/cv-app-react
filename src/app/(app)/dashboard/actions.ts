@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { messages } from '@/constants/messages';
 import { createDraftResume } from '@/lib/db/resumes';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -30,7 +31,11 @@ export async function createDraftResumeAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect('/dashboard?error=Baslik+120+karakterden+uzun+olamaz');
+    redirect(
+      `/dashboard?${new URLSearchParams({
+        error: messages.resume.titleTooLong,
+      }).toString()}`
+    );
   }
 
   const createdResume = await createDraftResume(user.id, parsed.data.title);

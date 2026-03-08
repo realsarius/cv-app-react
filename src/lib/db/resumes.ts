@@ -1,4 +1,5 @@
 import { desc, eq } from 'drizzle-orm';
+import { messages } from '@/constants/messages';
 import { resumeVersions, resumes } from '@/db/schema';
 import { createEmptyResumeContent } from '@/features/resume-editor/content';
 import { withUserRls } from './rls';
@@ -24,7 +25,7 @@ export async function createDraftResume(userId: string, title?: string) {
       .insert(resumes)
       .values({
         userId,
-        title: title?.trim() || 'Untitled Resume',
+        title: title?.trim() || 'Adsız Özgeçmiş',
         status: 'draft',
         currentVersionNo: 1,
       })
@@ -36,7 +37,7 @@ export async function createDraftResume(userId: string, title?: string) {
       });
 
     if (!insertedResume) {
-      throw new Error('Resume olusturulamadi.');
+      throw new Error(messages.resume.createFailed);
     }
 
     await tx.insert(resumeVersions).values({

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { messages } from '@/constants/messages';
 import { ensureUserProfile } from '@/lib/db/profiles';
 import { listUserResumes } from '@/lib/db/resumes';
 import { isDatabaseConfigured } from '@/lib/db/env';
@@ -17,7 +18,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   if (!isSupabaseConfigured()) {
-    redirect('/login?error=Supabase+ortam+degiskenleri+eksik');
+    redirect(
+      `/login?${new URLSearchParams({
+        error: messages.common.supabaseEnvMissing,
+      }).toString()}`
+    );
   }
 
   const supabase = await createServerSupabaseClient();
@@ -40,64 +45,60 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       userResumes = await listUserResumes(user.id);
     } catch {
       dbError =
-        'Veritabani baglantisi kurulamadi. DATABASE_URL degerini kontrol edin.';
+        'Veritabanı bağlantısı kurulamadı. DATABASE_URL değerini kontrol edin.';
     }
   }
 
   return (
-    <section className='space-y-5'>
+    <section className='space-y-7'>
       <header>
-        <h1 className='text-3xl font-bold text-slate-900'>Dashboard</h1>
-        <p className='mt-1 text-slate-700'>
-          Hos geldin{' '}
+        <h1 className='text-3xl font-bold tracking-tight text-stone-900'>Panel</h1>
+        <p className='mt-2 text-stone-700'>
+          Hoş geldin{' '}
           <span className='font-semibold'>{profileName || user.email}</span>
         </p>
       </header>
 
       {searchParams?.error ? (
-        <p className='rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700'>
+        <p className='message-error'>
           {searchParams.error}
         </p>
       ) : null}
 
       {!isDatabaseConfigured() ? (
-        <p className='rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700'>
-          `DATABASE_URL` eksik oldugu icin resume listesi yuklenemiyor.
+        <p className='message-warning'>
+          `DATABASE_URL` eksik olduğu için özgeçmiş listesi yüklenemiyor.
         </p>
       ) : null}
 
       {dbError ? (
-        <p className='rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700'>
+        <p className='message-error'>
           {dbError}
         </p>
       ) : null}
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
-        <h2 className='text-lg font-semibold text-slate-900'>Yeni taslak olustur</h2>
+      <div className='app-card'>
+        <h2 className='text-lg font-semibold text-stone-900'>Yeni taslak oluştur</h2>
         <form action={createDraftResumeAction} className='mt-4 flex flex-col gap-3 sm:flex-row'>
           <input
             type='text'
             name='title'
             maxLength={120}
-            placeholder='Ornek: Frontend Developer CV'
-            className='w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            placeholder='Örnek: Frontend Developer CV'
+            className='form-input'
           />
-          <button
-            type='submit'
-            className='rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400'
-            disabled={!isDatabaseConfigured()}
-          >
-            Taslak olustur
+          <button type='submit' className='btn-primary' disabled={!isDatabaseConfigured()}>
+            Taslak oluştur
           </button>
         </form>
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
-        <h2 className='text-lg font-semibold text-slate-900'>Resume listesi</h2>
+      <div className='app-card'>
+        <h2 className='text-lg font-semibold text-stone-900'>Özgeçmiş listesi</h2>
 
         {isDatabaseConfigured() && userResumes.length === 0 ? (
-          <p className='mt-3 text-sm text-slate-600'>
-            Henuz resume yok. Ilk taslagini olusturarak baslayabilirsin.
+          <p className='mt-3 text-sm text-stone-700'>
+            Henüz özgeçmiş yok. İlk taslağını oluşturarak başlayabilirsin.
           </p>
         ) : null}
 
@@ -105,22 +106,22 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           {userResumes.map((resume) => (
             <li
               key={resume.id}
-              className='rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700'
+              className='rounded-md border border-stone-200 px-4 py-3 text-sm text-stone-800'
             >
               <div className='flex flex-wrap items-center justify-between gap-2'>
-                <span className='font-semibold text-slate-900'>{resume.title}</span>
-                <span className='rounded bg-slate-100 px-2 py-0.5 text-xs uppercase'>
+                <span className='font-semibold text-stone-900'>{resume.title}</span>
+                <span className='rounded-md bg-stone-100 px-2 py-0.5 text-xs uppercase text-stone-700'>
                   {resume.status}
                 </span>
               </div>
-              <p className='mt-1 text-xs text-slate-500'>
-                Son guncelleme: {new Date(resume.updatedAt).toLocaleString('tr-TR')}
+              <p className='mt-1 text-xs text-stone-600'>
+                Son güncelleme: {new Date(resume.updatedAt).toLocaleString('tr-TR')}
               </p>
               <Link
                 href={`/resumes/${resume.id}`}
-                className='mt-2 inline-flex rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:border-slate-500'
+                className='mt-2 inline-flex rounded-md border border-stone-300 px-2.5 py-1 text-xs font-semibold text-stone-700 transition hover:border-stone-500'
               >
-                Editoru ac
+                Editörü aç
               </Link>
             </li>
           ))}

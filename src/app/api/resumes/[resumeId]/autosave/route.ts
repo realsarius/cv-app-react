@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { messages } from '@/constants/messages';
 import { saveResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { resumeContentSchema } from '@/features/resume-editor/content';
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'Supabase ortam degiskenleri eksik.',
+        error: `${messages.common.supabaseEnvMissing}.`,
       },
       { status: 503 }
     );
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'DATABASE_URL veya DATABASE_DEV_URL tanimli degil.',
+        error: 'DATABASE_URL veya DATABASE_DEV_URL tanımlı değil.',
       },
       { status: 503 }
     );
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsedParams.success) {
     return NextResponse.json(
       {
-        error: 'resumeId formati gecersiz.',
+        error: messages.resume.exportIdInvalid,
       },
       { status: 400 }
     );
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!user) {
     return NextResponse.json(
       {
-        error: 'Yetkisiz istek.',
+        error: messages.common.unauthorizedRequest,
       },
       { status: 401 }
     );
@@ -81,8 +82,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       {
-        error:
-          'Cok fazla otomatik kaydetme istegi gonderildi. Lutfen kisa bir sure bekleyip tekrar deneyin.',
+        error: messages.resume.autosaveRateLimited,
       },
       {
         status: 429,
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsedBody.success) {
     return NextResponse.json(
       {
-        error: 'Gonderilen veri formati gecersiz.',
+        error: messages.common.invalidPayload,
       },
       { status: 400 }
     );
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!savedResume) {
     return NextResponse.json(
       {
-        error: 'Resume bulunamadi.',
+        error: `${messages.resume.notFound}.`,
       },
       { status: 404 }
     );
@@ -126,8 +126,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (savedResume.status === 'conflict') {
     return NextResponse.json(
       {
-        error:
-          'Resume baska bir oturumda guncellendi. Lutfen sayfayi yenileyip degisiklikleri tekrar uygulayin.',
+        error: messages.resume.updatedInAnotherSessionDetailed,
         code: 'write_conflict',
         currentVersionNo: savedResume.currentVersionNo,
         currentUpdatedAt: savedResume.currentUpdatedAt.toISOString(),

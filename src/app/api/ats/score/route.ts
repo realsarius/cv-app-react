@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { messages } from '@/constants/messages';
 import { calculateAtsScore } from '@/lib/ats/scoring';
 import {
   buildRateLimitHeaders,
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'Supabase ortam degiskenleri eksik.',
+        error: `${messages.common.supabaseEnvMissing}.`,
       },
       { status: 503 }
     );
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json(
       {
-        error: 'Yetkisiz istek.',
+        error: messages.common.unauthorizedRequest,
       },
       { status: 401 }
     );
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       {
-        error: 'Cok fazla ATS analizi istegi gonderildi. Lutfen biraz sonra tekrar deneyin.',
+        error: messages.ats.rateLimited,
       },
       {
         status: 429,
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json(
       {
-        error: 'Gonderilen veri formati gecersiz.',
+        error: messages.common.invalidPayload,
       },
       { status: 400 }
     );

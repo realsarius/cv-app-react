@@ -7,23 +7,23 @@ type AppLayoutProps = {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className='min-h-screen'>
-      <header className='border-b border-slate-200 bg-white/90 backdrop-blur'>
-        <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4'>
-          <div className='flex items-center gap-5'>
-            <Link href='/dashboard' className='text-lg font-bold text-slate-900'>
-              Resume Builder
+    <div className='app-shell'>
+      <header className='app-header'>
+        <div className='app-container flex h-16 items-center justify-between'>
+          <div className='flex items-center gap-6'>
+            <Link href='/dashboard' className='text-lg font-bold tracking-tight'>
+              Özgeçmiş Oluşturucu
             </Link>
-            <nav className='flex items-center gap-2'>
+            <nav className='flex items-center gap-1'>
               <Link
                 href='/dashboard'
-                className='rounded-md px-2 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-100'
+                className='rounded-md px-2 py-1 text-sm font-medium text-stone-700 transition hover:bg-stone-100'
               >
-                Dashboard
+                Panel
               </Link>
               <Link
                 href='/settings'
-                className='rounded-md px-2 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-100'
+                className='rounded-md px-2 py-1 text-sm font-medium text-stone-700 transition hover:bg-stone-100'
               >
                 Profil
               </Link>
@@ -31,17 +31,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
           </div>
 
           <form action={signOutAction}>
-            <button
-              type='submit'
-              className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
-            >
-              Cikis yap
+            <button type='submit' className='btn-secondary'>
+              Çıkış yap
             </button>
           </form>
         </div>
       </header>
 
-      <main className='mx-auto w-full max-w-5xl p-6'>{children}</main>
+      <main className='app-container app-main'>{children}</main>
     </div>
   );
 }

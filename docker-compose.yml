@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_DEV_PASSWORD:-dev_password}
       POSTGRES_INITDB_ARGS: "-E UTF8"
     ports:
-      - "${DATABASE_DEV_PORT:-5440}:5432"
+      - "${DATABASE_DEV_PORT:-5450}:5432"
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
@@ -35,7 +35,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_TEST_PASSWORD:-test_password}
       POSTGRES_INITDB_ARGS: "-E UTF8"
     ports:
-      - "${DATABASE_TEST_PORT:-5441}:5432"
+      - "${DATABASE_TEST_PORT:-5451}:5432"
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
@@ -60,7 +60,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PROD_PASSWORD:-prod_password}
       POSTGRES_INITDB_ARGS: "-E UTF8"
     ports:
-      - "127.0.0.1:${DATABASE_PROD_PORT:-5442}:5432"
+      - "127.0.0.1:${DATABASE_PROD_PORT:-5452}:5432"
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
@@ -89,7 +89,7 @@ services:
       DATABASE_URL: postgresql://${DATABASE_DEV_USER:-cv_dev_user}:${DATABASE_DEV_PASSWORD:-dev_password}@postgres-dev:5432/${DATABASE_DEV_NAME:-cv_app_dev}
       DATABASE_DEV_URL: postgresql://${DATABASE_DEV_USER:-cv_dev_user}:${DATABASE_DEV_PASSWORD:-dev_password}@postgres-dev:5432/${DATABASE_DEV_NAME:-cv_app_dev}
     ports:
-      - "${APP_DEV_PORT:-3000}:3000"
+      - "${APP_DEV_PORT:-3010}:3000"
     volumes:
       - .:/app
       - app_dev_node_modules:/app/node_modules
@@ -122,7 +122,7 @@ services:
       DATABASE_URL: postgresql://${DATABASE_PROD_USER:-cv_prod_user}:${DATABASE_PROD_PASSWORD:-prod_password}@postgres-prod:5432/${DATABASE_PROD_NAME:-cv_app_prod}
       DATABASE_PROD_URL: postgresql://${DATABASE_PROD_USER:-cv_prod_user}:${DATABASE_PROD_PASSWORD:-prod_password}@postgres-prod:5432/${DATABASE_PROD_NAME:-cv_app_prod}
     ports:
-      - "127.0.0.1:${APP_PROD_PORT:-3001}:3000"
+      - "127.0.0.1:${APP_PROD_PORT:-3011}:3000"
     depends_on:
       postgres-prod:
         condition: service_healthy
@@ -142,12 +142,12 @@ services:
     profiles:
       - dev
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@cvapp.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
-      - "5050:80"
+      - "${PGADMIN_PORT:-5060}:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:

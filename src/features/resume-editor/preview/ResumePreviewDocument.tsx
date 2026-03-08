@@ -1,0 +1,230 @@
+import type { ResumeContent } from '@/features/resume-editor/content';
+
+type PreviewVisualSettings = {
+  templateKey: 'ats-classic' | 'ats-compact';
+  fontScale: number;
+  spacingScale: number;
+  colorScheme: 'neutral' | 'slate' | 'mono';
+};
+
+type ResumePreviewDocumentProps = {
+  title: string;
+  content: ResumeContent;
+  settings: PreviewVisualSettings;
+  printFriendly?: boolean;
+  className?: string;
+};
+
+function formatRange(startDate: string, endDate: string) {
+  const start = startDate.trim();
+  const end = endDate.trim();
+
+  if (start && end) {
+    return `${start} - ${end}`;
+  }
+
+  if (start) {
+    return `${start} - Devam ediyor`;
+  }
+
+  if (end) {
+    return end;
+  }
+
+  return '';
+}
+
+function buildPalette(colorScheme: PreviewVisualSettings['colorScheme']) {
+  if (colorScheme === 'mono') {
+    return {
+      border: 'border-zinc-300',
+      title: 'text-zinc-900',
+      body: 'text-zinc-800',
+      muted: 'text-zinc-600',
+      sectionLabel: 'text-zinc-700',
+      sectionDivider: 'border-zinc-200',
+    };
+  }
+
+  if (colorScheme === 'slate') {
+    return {
+      border: 'border-slate-300',
+      title: 'text-slate-950',
+      body: 'text-slate-800',
+      muted: 'text-slate-600',
+      sectionLabel: 'text-slate-700',
+      sectionDivider: 'border-slate-200',
+    };
+  }
+
+  return {
+    border: 'border-stone-300',
+    title: 'text-stone-900',
+    body: 'text-stone-800',
+    muted: 'text-stone-600',
+    sectionLabel: 'text-stone-700',
+    sectionDivider: 'border-stone-200',
+  };
+}
+
+export default function ResumePreviewDocument({
+  title,
+  content,
+  settings,
+  printFriendly = false,
+  className,
+}: ResumePreviewDocumentProps) {
+  const isCompactTemplate = settings.templateKey === 'ats-compact';
+  const palette = buildPalette(settings.colorScheme);
+  const sectionSpacing = isCompactTemplate ? 'mt-4' : 'mt-6';
+  const contentSpacing = isCompactTemplate ? 'space-y-3' : 'space-y-4';
+  const paragraphSpacing = isCompactTemplate ? 'leading-5' : 'leading-6';
+  const articleLineHeight = Math.max(
+    1.3,
+    Math.min(2, Number((1.55 * settings.spacingScale).toFixed(2)))
+  );
+
+  const articleClassName = [
+    'w-full border bg-white shadow-sm',
+    printFriendly
+      ? 'mx-auto max-w-[210mm] rounded-lg print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none'
+      : 'rounded-md',
+    palette.border,
+    isCompactTemplate ? 'p-5' : 'p-7',
+    className ?? '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <article
+      style={{
+        fontSize: `${settings.fontScale}rem`,
+        lineHeight: articleLineHeight,
+      }}
+      className={articleClassName}
+    >
+      <header className={`border-b pb-4 ${palette.border}`}>
+        <h2 className={`${isCompactTemplate ? 'text-2xl' : 'text-3xl'} font-bold ${palette.title}`}>
+          {content.personalDetails.fullName || title || 'İsim Soyisim'}
+        </h2>
+        <p className={`mt-1 text-base ${palette.body}`}>
+          {content.personalDetails.jobTitle || 'Pozisyon'}
+        </p>
+        <p className={`mt-2 text-sm ${palette.muted}`}>
+          {[
+            content.personalDetails.email,
+            content.personalDetails.phone,
+            content.personalDetails.address,
+          ]
+            .filter(Boolean)
+            .join(' | ')}
+        </p>
+      </header>
+
+      {content.profile ? (
+        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Profil</h3>
+          <p className={`mt-2 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+            {content.profile}
+          </p>
+        </section>
+      ) : null}
+
+      {content.experiences.length > 0 ? (
+        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Deneyim</h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.experiences.map((item) => (
+              <div key={item.id}>
+                <div className='flex flex-wrap items-center justify-between gap-2'>
+                  <p className={`text-sm font-semibold ${palette.title}`}>
+                    {item.title || 'Pozisyon'}
+                    {item.company ? ` - ${item.company}` : ''}
+                  </p>
+                  {formatRange(item.startDate, item.endDate) ? (
+                    <p className={`text-xs ${palette.sectionLabel}`}>
+                      {formatRange(item.startDate, item.endDate)}
+                    </p>
+                  ) : null}
+                </div>
+                {item.city || item.country ? (
+                  <p className={`text-xs ${palette.sectionLabel}`}>
+                    {[item.city, item.country].filter(Boolean).join(', ')}
+                  </p>
+                ) : null}
+                {item.description ? (
+                  <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.educations.length > 0 ? (
+        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Eğitim</h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.educations.map((item) => (
+              <div key={item.id}>
+                <div className='flex flex-wrap items-center justify-between gap-2'>
+                  <p className={`text-sm font-semibold ${palette.title}`}>
+                    {item.school || 'Okul'}
+                    {item.degree ? ` - ${item.degree}` : ''}
+                  </p>
+                  {formatRange(item.startDate, item.endDate) ? (
+                    <p className={`text-xs ${palette.sectionLabel}`}>
+                      {formatRange(item.startDate, item.endDate)}
+                    </p>
+                  ) : null}
+                </div>
+                {item.city || item.country ? (
+                  <p className={`text-xs ${palette.sectionLabel}`}>
+                    {[item.city, item.country].filter(Boolean).join(', ')}
+                  </p>
+                ) : null}
+                {item.description ? (
+                  <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.projects.length > 0 ? (
+        <section className={sectionSpacing}>
+          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Projeler</h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.projects.map((item) => (
+              <div key={item.id}>
+                <p className={`text-sm font-semibold ${palette.title}`}>
+                  {item.title || 'Proje'}
+                  {item.subtitle ? ` - ${item.subtitle}` : ''}
+                </p>
+                {item.stack ? (
+                  <p className={`text-xs ${palette.sectionLabel}`}>{item.stack}</p>
+                ) : null}
+                {item.city || item.country ? (
+                  <p className={`text-xs ${palette.sectionLabel}`}>
+                    {[item.city, item.country].filter(Boolean).join(', ')}
+                  </p>
+                ) : null}
+                {item.description ? (
+                  <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </article>
+  );
+}

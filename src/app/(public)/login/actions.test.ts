@@ -81,10 +81,14 @@ describe('loginAction', () => {
       retryAfterSec: 30,
     });
 
+    const expectedQuery = new URLSearchParams({
+      error: 'Çok fazla giriş denemesi algılandı. Lütfen biraz sonra tekrar deneyin',
+    }).toString();
+
     await expect(
       loginAction(buildFormData('ali@example.com', 'password123'))
     ).rejects.toThrow(
-      'REDIRECT:/login?error=Cok+fazla+giris+denemesi+algilandi.+Lutfen+biraz+sonra+tekrar+deneyin'
+      `REDIRECT:/login?${expectedQuery}`
     );
   });
 
@@ -119,7 +123,31 @@ describe('loginAction', () => {
     await expect(
       loginAction(buildFormData('ali@example.com', 'wrong-password'))
     ).rejects.toThrow(
-      'REDIRECT:/login?error=Invalid%20login%20credentials'
+      `REDIRECT:/login?${new URLSearchParams({
+        error: 'Invalid login credentials',
+      }).toString()}`
+    );
+  });
+
+  it('email dogrulanmadi hatasinda kullanici dostu mesaja donusturur', async () => {
+    const { loginAction } = await loadActionModule();
+
+    mockCreateServerSupabaseClient.mockResolvedValue({
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          error: {
+            message: 'Email not confirmed',
+          },
+        }),
+      },
+    });
+
+    await expect(
+      loginAction(buildFormData('ali@example.com', 'password123'))
+    ).rejects.toThrow(
+      `REDIRECT:/login?${new URLSearchParams({
+        error: 'E-posta adresi doğrulanmadı. Lütfen e-posta kutunuzu kontrol edin.',
+      }).toString()}`
     );
   });
 });

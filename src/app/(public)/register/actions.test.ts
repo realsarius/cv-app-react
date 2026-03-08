@@ -8,6 +8,7 @@ const mockCreateServerSupabaseClient = vi.fn();
 const mockIsSupabaseConfigured = vi.fn();
 const mockCheckRateLimit = vi.fn();
 const mockExtractClientIp = vi.fn();
+const mockSignUp = vi.fn();
 
 function buildFormData(email?: string, password?: string) {
   const formData = new FormData();
@@ -50,7 +51,15 @@ describe('registerAction', () => {
 
     mockIsSupabaseConfigured.mockReturnValue(true);
     mockHeaders.mockResolvedValue({
-      get: vi.fn().mockReturnValue('203.0.113.20'),
+      get: vi.fn((name: string) => {
+        const headerMap: Record<string, string | null> = {
+          origin: 'http://localhost:3010',
+          host: 'localhost:3010',
+          'x-forwarded-for': '203.0.113.20',
+        };
+
+        return headerMap[name] ?? null;
+      }),
     });
     mockExtractClientIp.mockReturnValue('203.0.113.20');
     mockCheckRateLimit.mockReturnValue({
@@ -61,11 +70,13 @@ describe('registerAction', () => {
       retryAfterSec: 1,
     });
 
+    mockSignUp.mockResolvedValue({
+      error: null,
+    });
+
     mockCreateServerSupabaseClient.mockResolvedValue({
       auth: {
-        signUp: vi.fn().mockResolvedValue({
-          error: null,
-        }),
+        signUp: mockSignUp,
       },
     });
   });
@@ -81,25 +92,36 @@ describe('registerAction', () => {
       retryAfterSec: 60,
     });
 
+    const expectedQuery = new URLSearchParams({
+      error: 'Çok fazla kayıt denemesi algılandı. Lütfen daha sonra tekrar deneyin',
+    }).toString();
+
     await expect(
       registerAction(buildFormData('ali@example.com', 'password123'))
     ).rejects.toThrow(
-      'REDIRECT:/register?error=Cok+fazla+kayit+denemesi+algilandi.+Lutfen+daha+sonra+tekrar+deneyin'
+      `REDIRECT:/register?${expectedQuery}`
     );
   });
 
-  it('basarili kayitta dashboarda yonlendirir', async () => {
+  it('basarili kayitta check-email sayfasina yonlendirir', async () => {
     const { registerAction } = await loadActionModule();
 
     await expect(
       registerAction(buildFormData('ali@example.com', 'password123'))
-    ).rejects.toThrow('REDIRECT:/dashboard');
+    ).rejects.toThrow('REDIRECT:/register/check-email?email=ali%40example.com');
 
     expect(mockCheckRateLimit).toHaveBeenCalledWith(
       expect.objectContaining({
         bucket: 'auth-register',
       })
     );
+    expect(mockSignUp).toHaveBeenCalledWith({
+      email: 'ali@example.com',
+      password: 'password123',
+      options: {
+        emailRedirectTo: 'http://localhost:3010/auth/callback?next=%2Fdashboard',
+      },
+    });
   });
 
   it('supabase signUp hatasinda register sayfasina hata mesajiyla doner', async () => {
@@ -118,7 +140,9 @@ describe('registerAction', () => {
     await expect(
       registerAction(buildFormData('ali@example.com', 'password123'))
     ).rejects.toThrow(
-      'REDIRECT:/register?error=User%20already%20registered'
+      `REDIRECT:/register?${new URLSearchParams({
+        error: 'User already registered',
+      }).toString()}`
     );
   });
 });

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Resume Builder',
-  description: 'Next.js + Supabase tabanli CV olusturma uygulamasi',
+  title: 'Özgeçmiş Oluşturucu',
+  description: 'Next.js + Supabase tabanlı CV oluşturma uygulaması',
 };
 
 type RootLayoutProps = {

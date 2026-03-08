@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { messages } from '@/constants/messages';
 import { getResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { createResumePdf } from '@/lib/pdf/resume-export';
@@ -36,7 +37,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'Supabase ortam degiskenleri eksik.',
+        error: `${messages.common.supabaseEnvMissing}.`,
       },
       { status: 503 }
     );
@@ -45,7 +46,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'DATABASE_URL veya DATABASE_DEV_URL tanimli degil.',
+        error: 'DATABASE_URL veya DATABASE_DEV_URL tanımlı değil.',
       },
       { status: 503 }
     );
@@ -55,7 +56,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!parsedParams.success) {
     return NextResponse.json(
       {
-        error: 'resumeId formati gecersiz.',
+        error: messages.resume.exportIdInvalid,
       },
       { status: 400 }
     );
@@ -69,7 +70,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!user) {
     return NextResponse.json(
       {
-        error: 'Yetkisiz istek.',
+        error: messages.common.unauthorizedRequest,
       },
       { status: 401 }
     );
@@ -86,8 +87,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       {
-        error:
-          'Cok fazla PDF export istegi gonderildi. Lutfen kisa bir sure sonra tekrar deneyin.',
+        error: messages.resume.exportRateLimited,
       },
       {
         status: 429,
@@ -100,7 +100,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!editorState) {
     return NextResponse.json(
       {
-        error: 'Resume bulunamadi.',
+        error: `${messages.resume.notFound}.`,
       },
       { status: 404 }
     );

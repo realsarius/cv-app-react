@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { messages } from '@/constants/messages';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { upsertResumeSettings } from '@/lib/db/resume-settings';
 import {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'Supabase ortam degiskenleri eksik.',
+        error: `${messages.common.supabaseEnvMissing}.`,
       },
       { status: 503 }
     );
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'DATABASE_URL veya DATABASE_DEV_URL tanimli degil.',
+        error: 'DATABASE_URL veya DATABASE_DEV_URL tanımlı değil.',
       },
       { status: 503 }
     );
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsedParams.success) {
     return NextResponse.json(
       {
-        error: 'resumeId formati gecersiz.',
+        error: messages.resume.exportIdInvalid,
       },
       { status: 400 }
     );
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!user) {
     return NextResponse.json(
       {
-        error: 'Yetkisiz istek.',
+        error: messages.common.unauthorizedRequest,
       },
       { status: 401 }
     );
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json(
       {
         error:
-          'Cok fazla ayar kaydetme istegi gonderildi. Lutfen kisa bir sure sonra tekrar deneyin.',
+          'Çok fazla ayar kaydetme isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.',
       },
       {
         status: 429,
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsedBody.success) {
     return NextResponse.json(
       {
-        error: 'Gonderilen ayar formati gecersiz.',
+        error: 'Gönderilen ayar formatı geçersiz.',
       },
       { status: 400 }
     );
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!savedSettings) {
     return NextResponse.json(
       {
-        error: 'Resume bulunamadi.',
+        error: `${messages.resume.notFound}.`,
       },
       { status: 404 }
     );

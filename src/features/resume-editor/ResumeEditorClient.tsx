@@ -1,6 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { messages } from '@/constants/messages';
+import ResumePreviewDocument from './preview/ResumePreviewDocument';
 import type {
   ResumeContent,
   ResumeEducationItem,
@@ -82,6 +85,19 @@ class AutosaveConflictError extends Error {
   }
 }
 
+function formatEditorDateTime(value: string, hydrated: boolean) {
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() <= 0) {
+    return '-';
+  }
+
+  if (!hydrated) {
+    return parsedDate.toISOString().slice(0, 19).replace('T', ' ');
+  }
+
+  return parsedDate.toLocaleString('tr-TR');
+}
+
 function createItemId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -136,6 +152,7 @@ export default function ResumeEditorClient({
   initialSettings,
   initialAtsHistory,
 }: ResumeEditorClientProps) {
+  const [isHydrated, setIsHydrated] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
@@ -157,6 +174,7 @@ export default function ResumeEditorClient({
   const [atsHistory, setAtsHistory] = useState<AtsHistoryItem[]>(initialAtsHistory);
 
   const saveSequenceRef = useRef(0);
+  const isSaveInFlightRef = useRef(false);
   const lastServerUpdatedAtRef = useRef(initialUpdatedAt);
   const lastSavedPayloadRef = useRef(
     JSON.stringify({
@@ -235,12 +253,12 @@ export default function ResumeEditorClient({
         if (response.status === 409 && errorPayload?.code === 'write_conflict') {
           throw new AutosaveConflictError(
             errorPayload.error ||
-              'Resume baska bir oturumda guncellendi. Lutfen sayfayi yenileyin.',
+              messages.resume.updatedInAnotherSession,
             errorPayload.currentUpdatedAt ?? null
           );
         }
 
-        throw new Error(errorPayload?.error || 'Autosave basarisiz oldu.');
+        throw new Error(errorPayload?.error || messages.resume.autosaveFailed);
       }
 
       const responseData = (await response.json()) as AutosaveResponse;
@@ -259,9 +277,11 @@ export default function ResumeEditorClient({
   );
 
   const runSaveNow = useCallback(async () => {
-    if (isAutosaveBlocked) {
+    if (isAutosaveBlocked || isSaveInFlightRef.current) {
       return;
     }
+
+    isSaveInFlightRef.current = true;
 
     try {
       await savePayload(payloadString);
@@ -277,7 +297,11 @@ export default function ResumeEditorClient({
         return;
       }
 
-      setSaveError(error instanceof Error ? error.message : 'Autosave basarisiz oldu.');
+      setSaveError(
+        error instanceof Error ? error.message : messages.resume.autosaveFailed
+      );
+    } finally {
+      isSaveInFlightRef.current = false;
     }
   }, [isAutosaveBlocked, payloadString, savePayload]);
 
@@ -304,7 +328,7 @@ export default function ResumeEditorClient({
         const errorPayload = (await response.json().catch(() => null)) as
           | { error?: string }
           | null;
-        throw new Error(errorPayload?.error || 'ATS analizi basarisiz oldu.');
+        throw new Error(errorPayload?.error || messages.ats.analysisFailed);
       }
 
       const scoreData = (await response.json()) as AtsScoreResponse;
@@ -317,7 +341,7 @@ export default function ResumeEditorClient({
       }
     } catch (error) {
       setAtsError(
-        error instanceof Error ? error.message : 'ATS analizi basarisiz oldu.'
+        error instanceof Error ? error.message : messages.ats.analysisFailed
       );
     } finally {
       setAtsLoading(false);
@@ -424,6 +448,10 @@ export default function ResumeEditorClient({
       return;
     }
 
+    if (saveStatus === 'saving') {
+      return;
+    }
+
     setSaveStatus('saving');
     const timer = window.setTimeout(() => {
       void runSaveNow();
@@ -438,24 +466,29 @@ export default function ResumeEditorClient({
   const isSettingsDirty = settingsPayloadString !== lastSavedSettingsRef.current;
   const canRunAtsAnalysis = jobDescription.trim().length >= 50;
 
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   return (
-    <section className='space-y-6'>
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
-        <h2 className='text-lg font-semibold text-slate-900'>Resume basligi</h2>
+    <section className='grid gap-6 lg:grid-cols-12'>
+      <div className='space-y-6 lg:col-span-7'>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
+        <h2 className='text-lg font-semibold text-stone-900'>Özgeçmiş başlığı</h2>
         <input
           type='text'
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           maxLength={120}
-          className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-          placeholder='Ornek: Frontend Developer CV'
+          className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+          placeholder='Örnek: Frontend Developer CV'
         />
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
-          <h2 className='text-lg font-semibold text-slate-900'>
-            Resume gorunum ayarlari
+          <h2 className='text-lg font-semibold text-stone-900'>
+            Özgeçmiş görünüm ayarları
           </h2>
           <button
             type='button'
@@ -463,19 +496,19 @@ export default function ResumeEditorClient({
               void runSettingsSave();
             }}
             disabled={!isSettingsDirty || settingsSaveStatus === 'saving'}
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400'
+            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400'
           >
-            {settingsSaveStatus === 'saving' ? 'Kaydediliyor' : 'Ayarlari kaydet'}
+            {settingsSaveStatus === 'saving' ? 'Kaydediliyor' : 'Ayarları kaydet'}
           </button>
         </div>
 
-        <p className='mt-2 text-sm text-slate-600'>
-          Onizleme sayfasinda kullanilacak sablon, renk ve bosluk ayarlarini yonet.
+        <p className='mt-2 text-sm text-stone-600'>
+          Önizleme sayfasında kullanılacak şablon, renk ve boşluk ayarlarını yönet.
         </p>
 
         <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
-          <label className='space-y-2 text-sm text-slate-700'>
-            <span className='font-medium text-slate-900'>Sablon</span>
+          <label className='space-y-2 text-sm text-stone-700'>
+            <span className='font-medium text-stone-900'>Şablon</span>
             <select
               value={settings.templateKey}
               onChange={(event) =>
@@ -487,15 +520,15 @@ export default function ResumeEditorClient({
                       : 'ats-classic',
                 }))
               }
-              className='w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+              className='w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             >
               <option value='ats-classic'>ATS Classic</option>
               <option value='ats-compact'>ATS Compact</option>
             </select>
           </label>
 
-          <label className='space-y-2 text-sm text-slate-700'>
-            <span className='font-medium text-slate-900'>Renk duzeni</span>
+          <label className='space-y-2 text-sm text-stone-700'>
+            <span className='font-medium text-stone-900'>Renk düzeni</span>
             <select
               value={settings.colorScheme}
               onChange={(event) =>
@@ -507,7 +540,7 @@ export default function ResumeEditorClient({
                       : 'neutral',
                 }))
               }
-              className='w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+              className='w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             >
               <option value='neutral'>Neutral</option>
               <option value='slate'>Slate</option>
@@ -515,9 +548,9 @@ export default function ResumeEditorClient({
             </select>
           </label>
 
-          <label className='space-y-2 text-sm text-slate-700 sm:col-span-2'>
-            <span className='font-medium text-slate-900'>
-              Font olcegi ({settings.fontScale.toFixed(2)}x)
+          <label className='space-y-2 text-sm text-stone-700 sm:col-span-2'>
+            <span className='font-medium text-stone-900'>
+              Font ölçeği ({settings.fontScale.toFixed(2)}x)
             </span>
             <input
               type='range'
@@ -531,13 +564,13 @@ export default function ResumeEditorClient({
                   fontScale: Number.parseFloat(event.target.value),
                 }))
               }
-              className='w-full accent-slate-700'
+              className='w-full accent-stone-700'
             />
           </label>
 
-          <label className='space-y-2 text-sm text-slate-700 sm:col-span-2'>
-            <span className='font-medium text-slate-900'>
-              Satir ve bolum boslugu ({settings.spacingScale.toFixed(2)}x)
+          <label className='space-y-2 text-sm text-stone-700 sm:col-span-2'>
+            <span className='font-medium text-stone-900'>
+              Satır ve bölüm boşluğu ({settings.spacingScale.toFixed(2)}x)
             </span>
             <input
               type='range'
@@ -551,22 +584,22 @@ export default function ResumeEditorClient({
                   spacingScale: Number.parseFloat(event.target.value),
                 }))
               }
-              className='w-full accent-slate-700'
+              className='w-full accent-stone-700'
             />
           </label>
         </div>
 
         <div className='mt-3 flex flex-wrap items-center gap-2 text-sm'>
-          <span className='font-medium text-slate-900'>Durum:</span>
-          <span className='rounded bg-slate-100 px-2 py-0.5 text-slate-700'>
+          <span className='font-medium text-stone-900'>Durum:</span>
+          <span className='rounded bg-stone-100 px-2 py-0.5 text-stone-700'>
             {settingsSaveStatus === 'saving' && 'Kaydediliyor'}
             {settingsSaveStatus === 'saved' && 'Kaydedildi'}
             {settingsSaveStatus === 'error' && 'Hata'}
             {settingsSaveStatus === 'idle' &&
-              (isSettingsDirty ? 'Degisiklik var' : 'Hazir')}
+              (isSettingsDirty ? 'Değişiklik var' : 'Hazır')}
           </span>
-          <span className='text-slate-500'>
-            Son kayit: {new Date(settingsLastSavedAt).toLocaleString('tr-TR')}
+          <span className='text-stone-500'>
+            Son kayıt: {formatEditorDateTime(settingsLastSavedAt, isHydrated)}
           </span>
         </div>
 
@@ -577,8 +610,8 @@ export default function ResumeEditorClient({
         ) : null}
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
-        <h2 className='text-lg font-semibold text-slate-900'>Kisisel bilgiler</h2>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
+        <h2 className='text-lg font-semibold text-stone-900'>Kişisel bilgiler</h2>
 
         <div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2'>
           <input
@@ -594,7 +627,7 @@ export default function ResumeEditorClient({
               }))
             }
             maxLength={120}
-            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             placeholder='Ad soyad'
           />
 
@@ -611,7 +644,7 @@ export default function ResumeEditorClient({
               }))
             }
             maxLength={120}
-            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             placeholder='Pozisyon'
           />
 
@@ -628,7 +661,7 @@ export default function ResumeEditorClient({
               }))
             }
             maxLength={160}
-            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             placeholder='E-posta'
           />
 
@@ -645,7 +678,7 @@ export default function ResumeEditorClient({
               }))
             }
             maxLength={64}
-            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             placeholder='Telefon'
           />
 
@@ -662,14 +695,14 @@ export default function ResumeEditorClient({
               }))
             }
             maxLength={200}
-            className='sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+            className='sm:col-span-2 rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             placeholder='Adres'
           />
         </div>
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
-        <h2 className='text-lg font-semibold text-slate-900'>Profil ozeti</h2>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
+        <h2 className='text-lg font-semibold text-stone-900'>Profil özeti</h2>
         <textarea
           value={content.profile}
           onChange={(event) =>
@@ -680,31 +713,31 @@ export default function ResumeEditorClient({
           }
           maxLength={5000}
           rows={8}
-          className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-          placeholder='Kisa kariyer ozeti...'
+          className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+          placeholder='Kısa kariyer özeti...'
         />
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
-          <h2 className='text-lg font-semibold text-slate-900'>Deneyimler</h2>
+          <h2 className='text-lg font-semibold text-stone-900'>Deneyimler</h2>
           <button
             type='button'
             onClick={addExperience}
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
           >
             Deneyim ekle
           </button>
         </div>
 
         {content.experiences.length === 0 ? (
-          <p className='mt-3 text-sm text-slate-500'>Henuz deneyim eklenmedi.</p>
+          <p className='mt-3 text-sm text-stone-500'>Henüz deneyim eklenmedi.</p>
         ) : (
           <div className='mt-4 space-y-4'>
             {content.experiences.map((item) => (
-              <div key={item.id} className='rounded-lg border border-slate-200 p-4'>
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
                 <div className='flex items-center justify-between gap-2'>
-                  <p className='text-sm font-semibold text-slate-800'>Deneyim kaydi</p>
+                  <p className='text-sm font-semibold text-stone-800'>Deneyim kaydı</p>
                   <button
                     type='button'
                     onClick={() => removeExperience(item.id)}
@@ -727,7 +760,7 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
                     placeholder='Pozisyon'
                   />
                   <input
@@ -744,8 +777,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Sirket'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Şirket'
                   />
                   <input
                     type='text'
@@ -759,8 +792,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Sehir'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Şehir'
                   />
                   <input
                     type='text'
@@ -776,8 +809,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Ulke'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Ülke'
                   />
                   <input
                     type='text'
@@ -793,8 +826,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={20}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Baslangic'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Başlangıç'
                   />
                   <input
                     type='text'
@@ -808,8 +841,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={20}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Bitis'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Bitiş'
                   />
                 </div>
                 <textarea
@@ -826,7 +859,7 @@ export default function ResumeEditorClient({
                   }
                   rows={4}
                   maxLength={3000}
-                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
                   placeholder='Sorumluluklar ve etkiler...'
                 />
               </div>
@@ -835,26 +868,26 @@ export default function ResumeEditorClient({
         )}
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
-          <h2 className='text-lg font-semibold text-slate-900'>Egitim</h2>
+          <h2 className='text-lg font-semibold text-stone-900'>Eğitim</h2>
           <button
             type='button'
             onClick={addEducation}
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
           >
-            Egitim ekle
+            Eğitim ekle
           </button>
         </div>
 
         {content.educations.length === 0 ? (
-          <p className='mt-3 text-sm text-slate-500'>Henuz egitim eklenmedi.</p>
+          <p className='mt-3 text-sm text-stone-500'>Henüz eğitim eklenmedi.</p>
         ) : (
           <div className='mt-4 space-y-4'>
             {content.educations.map((item) => (
-              <div key={item.id} className='rounded-lg border border-slate-200 p-4'>
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
                 <div className='flex items-center justify-between gap-2'>
-                  <p className='text-sm font-semibold text-slate-800'>Egitim kaydi</p>
+                  <p className='text-sm font-semibold text-stone-800'>Eğitim kaydı</p>
                   <button
                     type='button'
                     onClick={() => removeEducation(item.id)}
@@ -879,7 +912,7 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
                     placeholder='Okul'
                   />
                   <input
@@ -896,8 +929,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={160}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Bolum / Derece'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Bölüm / Derece'
                   />
                   <input
                     type='text'
@@ -911,8 +944,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Sehir'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Şehir'
                   />
                   <input
                     type='text'
@@ -928,8 +961,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Ulke'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Ülke'
                   />
                   <input
                     type='text'
@@ -945,8 +978,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={20}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Baslangic'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Başlangıç'
                   />
                   <input
                     type='text'
@@ -960,8 +993,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={20}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Bitis'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Bitiş'
                   />
                 </div>
                 <textarea
@@ -978,8 +1011,8 @@ export default function ResumeEditorClient({
                   }
                   rows={3}
                   maxLength={3000}
-                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                  placeholder='Egitim ozet notu...'
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder='Eğitim özet notu...'
                 />
               </div>
             ))}
@@ -987,26 +1020,26 @@ export default function ResumeEditorClient({
         )}
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
-          <h2 className='text-lg font-semibold text-slate-900'>Projeler</h2>
+          <h2 className='text-lg font-semibold text-stone-900'>Projeler</h2>
           <button
             type='button'
             onClick={addProject}
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
           >
             Proje ekle
           </button>
         </div>
 
         {content.projects.length === 0 ? (
-          <p className='mt-3 text-sm text-slate-500'>Henuz proje eklenmedi.</p>
+          <p className='mt-3 text-sm text-stone-500'>Henüz proje eklenmedi.</p>
         ) : (
           <div className='mt-4 space-y-4'>
             {content.projects.map((item) => (
-              <div key={item.id} className='rounded-lg border border-slate-200 p-4'>
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
                 <div className='flex items-center justify-between gap-2'>
-                  <p className='text-sm font-semibold text-slate-800'>Proje kaydi</p>
+                  <p className='text-sm font-semibold text-stone-800'>Proje kaydı</p>
                   <button
                     type='button'
                     onClick={() => removeProject(item.id)}
@@ -1031,8 +1064,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Proje adi'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Proje adı'
                   />
                   <input
                     type='text'
@@ -1048,8 +1081,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Alt baslik'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Alt başlık'
                   />
                   <input
                     type='text'
@@ -1065,8 +1098,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Sehir'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Şehir'
                   />
                   <input
                     type='text'
@@ -1082,8 +1115,8 @@ export default function ResumeEditorClient({
                       }))
                     }
                     maxLength={120}
-                    className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                    placeholder='Ulke'
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder='Ülke'
                   />
                 </div>
                 <input
@@ -1100,8 +1133,8 @@ export default function ResumeEditorClient({
                     }))
                   }
                   maxLength={500}
-                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                  placeholder='Kullanilan teknolojiler (React, Next.js, PostgreSQL...)'
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder='Kullanılan teknolojiler (React, Next.js, PostgreSQL...)'
                 />
                 <textarea
                   value={item.description}
@@ -1117,8 +1150,8 @@ export default function ResumeEditorClient({
                   }
                   rows={4}
                   maxLength={3000}
-                  className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-                  placeholder='Proje aciklamasi...'
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder='Proje açıklaması...'
                 />
               </div>
             ))}
@@ -1126,23 +1159,23 @@ export default function ResumeEditorClient({
         )}
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
-          <h2 className='text-lg font-semibold text-slate-900'>ATS analizi</h2>
+          <h2 className='text-lg font-semibold text-stone-900'>ATS analizi</h2>
           <button
             type='button'
             onClick={() => {
               void runAtsAnalysis();
             }}
             disabled={!canRunAtsAnalysis || atsLoading}
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400'
+            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400'
           >
             {atsLoading ? 'Analiz ediliyor' : 'ATS analiz et'}
           </button>
         </div>
 
-        <p className='mt-2 text-sm text-slate-600'>
-          Is ilani metnini ekleyerek anahtar kelime kapsami ve temel ATS sinyallerini
+        <p className='mt-2 text-sm text-stone-600'>
+          İş ilanı metnini ekleyerek anahtar kelime kapsamı ve temel ATS sinyallerini
           hesapla.
         </p>
 
@@ -1152,16 +1185,16 @@ export default function ResumeEditorClient({
             value={jobTitle}
             onChange={(event) => setJobTitle(event.target.value)}
             maxLength={120}
-            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-            placeholder='Is unvani (opsiyonel)'
+            className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+            placeholder='İş unvanı (opsiyonel)'
           />
           <input
             type='text'
             value={company}
             onChange={(event) => setCompany(event.target.value)}
             maxLength={120}
-            className='rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-            placeholder='Sirket (opsiyonel)'
+            className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+            placeholder='Şirket (opsiyonel)'
           />
         </div>
 
@@ -1169,13 +1202,13 @@ export default function ResumeEditorClient({
           value={jobDescription}
           onChange={(event) => setJobDescription(event.target.value)}
           rows={8}
-          className='mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500'
-          placeholder='Is ilanini buraya yapistir...'
+          className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+          placeholder='İş ilanını buraya yapıştır...'
         />
 
         {!canRunAtsAnalysis ? (
-          <p className='mt-2 text-xs text-slate-500'>
-            ATS analizi icin en az 50 karakterlik is ilani metni gerekli.
+          <p className='mt-2 text-xs text-stone-500'>
+            ATS analizi için en az 50 karakterlik iş ilanı metni gerekli.
           </p>
         ) : null}
 
@@ -1186,59 +1219,59 @@ export default function ResumeEditorClient({
         ) : null}
 
         {atsResult ? (
-          <div className='mt-4 space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4'>
+          <div className='mt-4 space-y-4 rounded-lg border border-stone-200 bg-stone-50 p-4'>
             <div className='flex flex-wrap items-center gap-3'>
-              <span className='text-sm font-medium text-slate-700'>Toplam skor:</span>
-              <span className='rounded bg-slate-900 px-2 py-0.5 text-sm font-semibold text-white'>
+              <span className='text-sm font-medium text-stone-700'>Toplam skor:</span>
+              <span className='rounded bg-stone-900 px-2 py-0.5 text-sm font-semibold text-white'>
                 {atsResult.overallScore}/100
               </span>
-              <span className='text-xs text-slate-500'>
+              <span className='text-xs text-stone-500'>
                 Algoritma: {atsResult.algorithmVersion}
               </span>
             </div>
 
             <div className='grid grid-cols-1 gap-2 text-sm sm:grid-cols-2'>
-              <p className='rounded bg-white px-2 py-1 text-slate-700'>
-                Keyword coverage: {atsResult.breakdown.keywordCoverage}/50
+              <p className='rounded bg-white px-2 py-1 text-stone-700'>
+                Anahtar kelime kapsamı: {atsResult.breakdown.keywordCoverage}/50
               </p>
-              <p className='rounded bg-white px-2 py-1 text-slate-700'>
-                Section completeness: {atsResult.breakdown.sectionCompleteness}/25
+              <p className='rounded bg-white px-2 py-1 text-stone-700'>
+                Bölüm bütünlüğü: {atsResult.breakdown.sectionCompleteness}/25
               </p>
-              <p className='rounded bg-white px-2 py-1 text-slate-700'>
-                Readability: {atsResult.breakdown.readability}/15
+              <p className='rounded bg-white px-2 py-1 text-stone-700'>
+                Okunabilirlik: {atsResult.breakdown.readability}/15
               </p>
-              <p className='rounded bg-white px-2 py-1 text-slate-700'>
-                Role alignment: {atsResult.breakdown.roleAlignment}/10
+              <p className='rounded bg-white px-2 py-1 text-stone-700'>
+                Pozisyon uyumu: {atsResult.breakdown.roleAlignment}/10
               </p>
             </div>
 
             <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
               <div>
-                <h3 className='text-sm font-semibold text-slate-800'>
-                  Eslesen anahtar kelimeler
+                <h3 className='text-sm font-semibold text-stone-800'>
+                  Eşleşen anahtar kelimeler
                 </h3>
-                <p className='mt-1 text-sm text-slate-600'>
+                <p className='mt-1 text-sm text-stone-600'>
                   {atsResult.matchedKeywords.length > 0
                     ? atsResult.matchedKeywords.join(', ')
-                    : 'Eslesen kelime bulunamadi.'}
+                    : 'Eşleşen kelime bulunamadı.'}
                 </p>
               </div>
               <div>
-                <h3 className='text-sm font-semibold text-slate-800'>
+                <h3 className='text-sm font-semibold text-stone-800'>
                   Eksik anahtar kelimeler
                 </h3>
-                <p className='mt-1 text-sm text-slate-600'>
+                <p className='mt-1 text-sm text-stone-600'>
                   {atsResult.missingKeywords.length > 0
                     ? atsResult.missingKeywords.join(', ')
-                    : 'Eksik anahtar kelime bulunmadi.'}
+                    : 'Eksik anahtar kelime bulunmadı.'}
                 </p>
               </div>
             </div>
 
             {atsResult.suggestions.length > 0 ? (
               <div>
-                <h3 className='text-sm font-semibold text-slate-800'>Oneriler</h3>
-                <ul className='mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700'>
+                <h3 className='text-sm font-semibold text-stone-800'>Öneriler</h3>
+                <ul className='mt-2 list-disc space-y-1 pl-5 text-sm text-stone-700'>
                   {atsResult.suggestions.map((suggestion) => (
                     <li key={suggestion}>{suggestion}</li>
                   ))}
@@ -1248,34 +1281,34 @@ export default function ResumeEditorClient({
           </div>
         ) : null}
 
-        <div className='mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4'>
-          <h3 className='text-sm font-semibold text-slate-800'>ATS gecmisi</h3>
+        <div className='mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4'>
+          <h3 className='text-sm font-semibold text-stone-800'>ATS geçmişi</h3>
           {atsHistory.length === 0 ? (
-            <p className='mt-2 text-sm text-slate-600'>
-              Henuz kayitli ATS analizi bulunmuyor.
+            <p className='mt-2 text-sm text-stone-600'>
+              Henüz kayıtlı ATS analizi bulunmuyor.
             </p>
           ) : (
             <ul className='mt-3 space-y-2'>
               {atsHistory.map((item) => (
                 <li
                   key={item.id}
-                  className='rounded border border-slate-200 bg-white px-3 py-2'
+                  className='rounded border border-stone-200 bg-white px-3 py-2'
                 >
                   <div className='flex flex-wrap items-center justify-between gap-2'>
                     <div>
-                      <p className='text-sm font-semibold text-slate-900'>
-                        {item.jobTitle || 'Is unvani belirtilmedi'}
+                      <p className='text-sm font-semibold text-stone-900'>
+                        {item.jobTitle || 'İş unvanı belirtilmedi'}
                       </p>
-                      <p className='text-xs text-slate-500'>
-                        {item.company || 'Sirket belirtilmedi'}
+                      <p className='text-xs text-stone-500'>
+                        {item.company || 'Şirket belirtilmedi'}
                       </p>
                     </div>
-                    <span className='rounded bg-slate-900 px-2 py-0.5 text-xs font-semibold text-white'>
+                    <span className='rounded bg-stone-900 px-2 py-0.5 text-xs font-semibold text-white'>
                       {item.lastScore ?? 0}/100
                     </span>
                   </div>
-                  <p className='mt-1 text-xs text-slate-500'>
-                    {new Date(item.updatedAt).toLocaleString('tr-TR')}
+                  <p className='mt-1 text-xs text-stone-500'>
+                    {formatEditorDateTime(item.updatedAt, isHydrated)}
                   </p>
                 </li>
               ))}
@@ -1284,33 +1317,33 @@ export default function ResumeEditorClient({
         </div>
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white p-5'>
+      <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
-          <p className='text-sm text-slate-600'>
-            Otomatik kaydetme 1.5 sn gecikme ile calisir.
+          <p className='text-sm text-stone-600'>
+            Otomatik kaydetme 1.5 sn gecikme ile çalışır.
           </p>
           <button
             type='button'
             onClick={() => {
               void runSaveNow();
             }}
-            disabled={isAutosaveBlocked}
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400'
+            disabled={isAutosaveBlocked || saveStatus === 'saving'}
+            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400'
           >
-            Simdi kaydet
+            Şimdi kaydet
           </button>
         </div>
 
         <div className='mt-3 flex flex-wrap items-center gap-2 text-sm'>
-          <span className='font-medium text-slate-900'>Durum:</span>
-          <span className='rounded bg-slate-100 px-2 py-0.5 text-slate-700'>
+          <span className='font-medium text-stone-900'>Durum:</span>
+          <span className='rounded bg-stone-100 px-2 py-0.5 text-stone-700'>
             {saveStatus === 'saving' && 'Kaydediliyor'}
             {saveStatus === 'saved' && 'Kaydedildi'}
             {saveStatus === 'error' && 'Hata'}
-            {saveStatus === 'idle' && (isDirty ? 'Degisiklik var' : 'Hazir')}
+            {saveStatus === 'idle' && (isDirty ? 'Değişiklik var' : 'Hazır')}
           </span>
-          <span className='text-slate-500'>
-            Son kayit: {new Date(lastSavedAt).toLocaleString('tr-TR')}
+          <span className='text-stone-500'>
+            Son kayıt: {formatEditorDateTime(lastSavedAt, isHydrated)}
           </span>
         </div>
 
@@ -1324,12 +1357,31 @@ export default function ResumeEditorClient({
           <button
             type='button'
             onClick={() => window.location.reload()}
-            className='mt-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+            className='mt-2 rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
           >
-            Sayfayi yenile
+            Sayfayı yenile
           </button>
         ) : null}
       </div>
+      </div>
+
+      <aside className='h-fit lg:col-span-5 lg:sticky lg:top-6'>
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>Canlı önizleme</h2>
+            <Link
+              href={`/resumes/${resumeId}/preview`}
+              className='rounded-md border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Ayrı sayfada aç
+            </Link>
+          </div>
+
+          <div className='max-h-[72vh] overflow-auto rounded-md border border-stone-200 bg-stone-50 p-3'>
+            <ResumePreviewDocument title={title} content={content} settings={settings} />
+          </div>
+        </div>
+      </aside>
     </section>
   );
 }
