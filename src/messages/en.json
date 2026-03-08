@@ -152,7 +152,8 @@
       "dashboard": "Dashboard",
       "privacy": "Privacy",
       "terms": "Terms",
-      "rights": "All rights reserved."
+      "rights": "All rights reserved.",
+      "faq": "FAQ"
     }
   },
   "auth": {
@@ -399,6 +400,90 @@
     "errors": {
       "analysisFailed": "ATS analysis failed.",
       "rateLimited": "Too many ATS analysis requests sent. Please try again later."
+    }
+  },
+  "legal": {
+    "privacy": {
+      "meta": {
+        "title": "CV App Privacy Policy",
+        "description": "Privacy policy and data handling principles for CV App."
+      },
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: March 2026",
+      "sections": {
+        "dataCollect": {
+          "title": "Data We Collect",
+          "body": "We collect your email address and resume content solely to provide CV App features. We do not sell your data to third parties."
+        },
+        "dataUse": {
+          "title": "How We Use Data",
+          "body": "Your data is used for resume creation, storage and export. ATS analysis data is stored only when you explicitly save it."
+        },
+        "dataStorage": {
+          "title": "Data Storage",
+          "body": "Data is stored securely on Supabase and PostgreSQL with row-level security. Only you can access your own data."
+        },
+        "contact": {
+          "title": "Contact",
+          "body": "For privacy-related requests, contact us at privacy@cvapp.com."
+        }
+      }
+    },
+    "terms": {
+      "meta": {
+        "title": "CV App Terms of Service",
+        "description": "Terms of service and usage conditions for CV App."
+      },
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: March 2026",
+      "sections": {
+        "acceptance": {
+          "title": "Acceptance of Terms",
+          "body": "By using CV App, you agree to these terms. If you do not agree, please do not use the service."
+        },
+        "serviceUse": {
+          "title": "Use of Service",
+          "body": "CV App is provided for personal resume creation. You may not use the service to create misleading or fraudulent resumes."
+        },
+        "account": {
+          "title": "Account Responsibility",
+          "body": "You are responsible for maintaining the confidentiality of your account credentials and all activity under your account."
+        },
+        "liability": {
+          "title": "Limitation of Liability",
+          "body": "CV App is provided \"as is\" without warranties of any kind. We are not liable for job application outcomes."
+        },
+        "changes": {
+          "title": "Changes to Terms",
+          "body": "We may update these terms at any time. Continued use of the service means you accept the updated terms."
+        }
+      }
+    },
+    "faq": {
+      "meta": {
+        "title": "CV App Frequently Asked Questions",
+        "description": "Frequently asked questions and answers about CV App."
+      },
+      "title": "Frequently Asked Questions",
+      "lastUpdated": "Last updated: March 2026",
+      "items": {
+        "free": {
+          "question": "Is CV App free to use?",
+          "answer": "Yes. The free plan allows up to 3 resumes and 10 PDF exports per month."
+        },
+        "ats": {
+          "question": "What is ATS?",
+          "answer": "ATS is an Applicant Tracking System used by companies to filter resumes before human review."
+        },
+        "share": {
+          "question": "Can I share my resume publicly?",
+          "answer": "Yes. You can generate a public resume link and share it easily."
+        },
+        "pro": {
+          "question": "When will Pro be available?",
+          "answer": "Pro is coming soon. You can start free now and upgrade when it becomes available."
+        }
+      }
     }
   }
 }

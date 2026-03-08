@@ -152,7 +152,8 @@
       "dashboard": "Panele Git",
       "privacy": "Gizlilik",
       "terms": "Kullanım Koşulları",
-      "rights": "Tüm hakları saklıdır."
+      "rights": "Tüm hakları saklıdır.",
+      "faq": "Sık Sorulan Sorular"
     }
   },
   "auth": {
@@ -399,6 +400,90 @@
     "errors": {
       "analysisFailed": "ATS analizi başarısız oldu.",
       "rateLimited": "Çok fazla ATS analizi isteği gönderildi. Lütfen biraz sonra tekrar deneyin."
+    }
+  },
+  "legal": {
+    "privacy": {
+      "meta": {
+        "title": "CV App Gizlilik Politikası",
+        "description": "CV App gizlilik politikası ve veri işleme ilkeleri."
+      },
+      "title": "Gizlilik Politikası",
+      "lastUpdated": "Son güncelleme: Mart 2026",
+      "sections": {
+        "dataCollect": {
+          "title": "Toplanan Veriler",
+          "body": "Hizmeti sunmak için e-posta adresinizi ve özgeçmiş içeriklerinizi toplarız. Verilerinizi üçüncü taraflara satmayız."
+        },
+        "dataUse": {
+          "title": "Verileri Nasıl Kullanıyoruz",
+          "body": "Verileriniz özgeçmiş oluşturma, saklama ve export işlemleri için kullanılır. ATS analiz verileri sadece kaydetmeyi seçtiğinizde saklanır."
+        },
+        "dataStorage": {
+          "title": "Veri Saklama",
+          "body": "Verileriniz Supabase ve PostgreSQL üzerinde satır seviyesinde güvenlik politikaları ile korunur. Sadece kendi verilerinize erişebilirsiniz."
+        },
+        "contact": {
+          "title": "İletişim",
+          "body": "Gizlilik ile ilgili talepleriniz için privacy@cvapp.com adresinden bize ulaşabilirsiniz."
+        }
+      }
+    },
+    "terms": {
+      "meta": {
+        "title": "CV App Kullanım Koşulları",
+        "description": "CV App kullanım koşulları ve hizmet şartları."
+      },
+      "title": "Kullanım Koşulları",
+      "lastUpdated": "Son güncelleme: Mart 2026",
+      "sections": {
+        "acceptance": {
+          "title": "Koşulların Kabulü",
+          "body": "CV App hizmetini kullanarak bu koşulları kabul etmiş olursunuz. Koşulları kabul etmiyorsanız lütfen hizmeti kullanmayın."
+        },
+        "serviceUse": {
+          "title": "Hizmetin Kullanımı",
+          "body": "CV App kişisel özgeçmiş oluşturma amacıyla sunulur. Yanıltıcı veya sahte özgeçmiş üretimi için kullanılamaz."
+        },
+        "account": {
+          "title": "Hesap Sorumluluğu",
+          "body": "Hesap bilgilerinizin gizliliğini korumaktan ve hesabınız altında gerçekleşen işlemlerden siz sorumlusunuz."
+        },
+        "liability": {
+          "title": "Sorumluluğun Sınırlandırılması",
+          "body": "CV App \"olduğu gibi\" sunulur. İş başvurusu sonuçları ile ilgili herhangi bir garanti verilmez."
+        },
+        "changes": {
+          "title": "Koşullarda Değişiklik",
+          "body": "Bu koşullar zaman içinde güncellenebilir. Hizmeti kullanmaya devam etmeniz yeni koşulları kabul ettiğiniz anlamına gelir."
+        }
+      }
+    },
+    "faq": {
+      "meta": {
+        "title": "CV App Sık Sorulan Sorular",
+        "description": "CV App hakkında en sık sorulan sorular ve yanıtlar."
+      },
+      "title": "Sık Sorulan Sorular",
+      "lastUpdated": "Son güncelleme: Mart 2026",
+      "items": {
+        "free": {
+          "question": "CV App ücretsiz mi?",
+          "answer": "Evet. Ücretsiz plan ile 3 özgeçmiş oluşturabilir ve ayda 10 PDF export alabilirsiniz."
+        },
+        "ats": {
+          "question": "ATS nedir?",
+          "answer": "ATS, şirketlerin özgeçmişleri insan incelemesinden önce filtrelemek için kullandığı Aday Takip Sistemi yazılımıdır."
+        },
+        "share": {
+          "question": "Özgeçmişimi public olarak paylaşabilir miyim?",
+          "answer": "Evet. Özgeçmişiniz için public link üretebilir ve paylaşım akışını hızlandırabilirsiniz."
+        },
+        "pro": {
+          "question": "Pro plan ne zaman aktif olacak?",
+          "answer": "Pro plan yakında aktif olacak. Şimdilik ücretsiz başlayabilir ve yayınlandığında yükseltebilirsiniz."
+        }
+      }
     }
   }
 }
