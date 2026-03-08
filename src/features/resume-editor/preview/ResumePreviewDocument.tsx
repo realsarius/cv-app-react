@@ -193,7 +193,7 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.experiences.length > 0 ? (
-        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+        <section className={`cv-section ${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -202,7 +202,7 @@ export default function ResumePreviewDocument({
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.experiences.map((item) => (
-              <div key={item.id}>
+              <div key={item.id} className='cv-experience-item'>
                 <div className='flex flex-wrap items-center justify-between gap-2'>
                   <p
                     className={`font-semibold ${palette.title}`}
@@ -243,7 +243,7 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.educations.length > 0 ? (
-        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+        <section className={`cv-section ${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -252,7 +252,7 @@ export default function ResumePreviewDocument({
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.educations.map((item) => (
-              <div key={item.id}>
+              <div key={item.id} className='cv-education-item'>
                 <div className='flex flex-wrap items-center justify-between gap-2'>
                   <p
                     className={`font-semibold ${palette.title}`}
@@ -293,7 +293,7 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.projects.length > 0 ? (
-        <section className={sectionSpacing}>
+        <section className={`cv-section ${sectionSpacing}`}>
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -302,7 +302,7 @@ export default function ResumePreviewDocument({
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.projects.map((item) => (
-              <div key={item.id}>
+              <div key={item.id} className='cv-project-item'>
                 <p
                   className={`font-semibold ${palette.title}`}
                   style={{ fontSize: `${typography.body}em` }}

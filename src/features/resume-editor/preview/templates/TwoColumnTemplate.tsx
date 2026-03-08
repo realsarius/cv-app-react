@@ -133,13 +133,13 @@ export default function TwoColumnTemplate({
 
         <main className='space-y-5 p-6'>
           {content.experiences.length > 0 ? (
-            <section className={`border-b pb-4 ${theme.sectionDivider}`}>
+            <section className={`cv-section border-b pb-4 ${theme.sectionDivider}`}>
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.experience')}
               </h3>
               <div className='mt-3 space-y-4'>
                 {content.experiences.map((item) => (
-                  <div key={item.id}>
+                  <div key={item.id} className='cv-experience-item'>
                     <div className='flex flex-wrap items-center justify-between gap-2'>
                       <p className={`text-[0.94em] font-semibold ${theme.body}`}>
                         {item.title || t('positionFallback')}
@@ -168,13 +168,13 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.educations.length > 0 ? (
-            <section className={`border-b pb-4 ${theme.sectionDivider}`}>
+            <section className={`cv-section border-b pb-4 ${theme.sectionDivider}`}>
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.education')}
               </h3>
               <div className='mt-3 space-y-4'>
                 {content.educations.map((item) => (
-                  <div key={item.id}>
+                  <div key={item.id} className='cv-education-item'>
                     <div className='flex flex-wrap items-center justify-between gap-2'>
                       <p className={`text-[0.94em] font-semibold ${theme.body}`}>
                         {item.school || t('schoolFallback')}
@@ -203,13 +203,13 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.projects.length > 0 ? (
-            <section>
+            <section className='cv-section'>
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.projects')}
               </h3>
               <div className='mt-3 space-y-4'>
                 {content.projects.map((item) => (
-                  <div key={item.id}>
+                  <div key={item.id} className='cv-project-item'>
                     <p className={`text-[0.94em] font-semibold ${theme.body}`}>
                       {item.title || t('projectFallback')}
                       {item.subtitle ? ` - ${item.subtitle}` : ''}
