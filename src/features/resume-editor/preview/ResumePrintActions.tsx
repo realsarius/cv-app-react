@@ -11,7 +11,7 @@ export default function ResumePrintActions({ resumeId }: ResumePrintActionsProps
   const t = useTranslations('resume.editor');
 
   return (
-    <div className='flex flex-wrap items-center gap-2 print:hidden'>
+    <div className='no-print flex flex-wrap items-center gap-2 print:hidden'>
       <Link
         href={`/resumes/${resumeId}`}
         className='btn-secondary'

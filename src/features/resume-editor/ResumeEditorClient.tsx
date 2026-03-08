@@ -1816,7 +1816,7 @@ export default function ResumeEditorClient({
       </div>
       </div>
 
-      <aside className='h-fit lg:col-span-5 lg:sticky lg:top-6'>
+      <aside className='no-print h-fit lg:col-span-5 lg:sticky lg:top-6'>
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>{t('livePreview')}</h2>
@@ -1862,7 +1862,7 @@ export default function ResumeEditorClient({
 
       {isAddContentDialogOpen ? (
         <div
-          className='fixed inset-0 z-40 flex items-center justify-center bg-stone-900/40 p-4'
+          className='no-print fixed inset-0 z-40 flex items-center justify-center bg-stone-900/40 p-4'
           onClick={() => setIsAddContentDialogOpen(false)}
         >
           <div

@@ -170,7 +170,29 @@ a {
     margin: 0;
   }
 
+  html,
   body {
-    background: #ffffff;
+    background: #ffffff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #cv-print-area,
+  #cv-print-area * {
+    visibility: visible !important;
+  }
+
+  #cv-print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print {
+    display: none !important;
   }
 }

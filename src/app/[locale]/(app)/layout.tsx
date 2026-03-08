@@ -11,7 +11,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className='app-shell'>
-      <header className='app-header'>
+      <header className='app-header no-print'>
         <div className='app-container flex h-16 items-center justify-between'>
           <div className='flex items-center gap-6'>
             <Link href='/dashboard' className='text-lg font-bold tracking-tight'>

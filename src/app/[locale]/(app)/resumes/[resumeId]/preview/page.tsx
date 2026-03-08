@@ -94,7 +94,7 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
 
   return (
     <section className='space-y-4 print:space-y-0'>
-      <header className='app-card print:hidden'>
+      <header className='app-card no-print print:hidden'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <div>
             <p className='text-sm text-stone-600'>{t('title')}</p>
@@ -106,12 +106,14 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
         </div>
       </header>
 
-      <PaginatedResumePreview
-        title={editorState.resume.title}
-        content={editorState.content}
-        settings={editorState.settings}
-        mode='preview'
-      />
+      <div id='cv-print-area'>
+        <PaginatedResumePreview
+          title={editorState.resume.title}
+          content={editorState.content}
+          settings={editorState.settings}
+          mode='preview'
+        />
+      </div>
     </section>
   );
 }
