@@ -96,9 +96,16 @@ function createPageSkeleton(personalDetails: ResumeContent['personalDetails']) {
 }
 
 function createPageCapacity(settings: PreviewVisualSettings) {
-  const compactBonus = settings.templateKey === 'ats-compact' ? 6 : 0;
+  const templateBonus =
+    settings.templateKey === 'ats-compact'
+      ? 6
+      : settings.templateKey === 'two-column'
+        ? -7
+        : settings.templateKey === 'atlantic-blue'
+          ? -2
+          : 0;
   const density = (settings.fontScale + settings.spacingScale) / 2;
-  const base = 72 + compactBonus;
+  const base = 72 + templateBonus;
   return Math.max(34, Math.floor(base / density));
 }
 

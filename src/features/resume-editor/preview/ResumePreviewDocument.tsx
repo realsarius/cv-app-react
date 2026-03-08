@@ -1,6 +1,8 @@
 import type { ResumeContent } from '@/features/resume-editor/content';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
 import { useTranslations } from 'next-intl';
+import AtlanticBlueTemplate from './templates/AtlanticBlueTemplate';
+import TwoColumnTemplate from './templates/TwoColumnTemplate';
 
 type PreviewVisualSettings = {
   templateKey: ResumeTemplateKey;
@@ -77,6 +79,31 @@ export default function ResumePreviewDocument({
   className,
 }: ResumePreviewDocumentProps) {
   const t = useTranslations('resume.previewDocument');
+
+  if (settings.templateKey === 'atlantic-blue') {
+    return (
+      <AtlanticBlueTemplate
+        title={title}
+        content={content}
+        settings={settings}
+        printFriendly={printFriendly}
+        className={className}
+      />
+    );
+  }
+
+  if (settings.templateKey === 'two-column') {
+    return (
+      <TwoColumnTemplate
+        title={title}
+        content={content}
+        settings={settings}
+        printFriendly={printFriendly}
+        className={className}
+      />
+    );
+  }
+
   const isCompactTemplate = settings.templateKey === 'ats-compact';
   const palette = buildPalette(settings.colorScheme);
   const sectionSpacing = isCompactTemplate ? 'mt-4' : 'mt-6';
