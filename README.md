@@ -217,6 +217,18 @@ Rate limit header’ları:
 - DB işlemleri kullanıcı bağlamında transaction + RLS ile sınırlandırılır.
 - Supabase env veya DB env eksikliğinde kullanıcıya kontrollü hata mesajı döndürülür.
 
+### 5.4 Internationalization (i18n)
+
+- Uygulama `next-intl` ile EN/TR locale desteği kullanır.
+- Desteklenen locale’ler: `tr`, `en`; varsayılan locale: `tr`.
+- URL stratejisi `localePrefix: 'as-needed'` şeklindedir:
+  - TR: prefixsiz (`/dashboard`, `/login`)
+  - EN: prefiksli (`/en/dashboard`, `/en/login`)
+- App Router sayfaları `src/app/[locale]/` altında konumlandırılmıştır.
+- Locale-aware gezinti için `@/i18n/navigation` kullanılmalıdır (`Link`, `redirect`, `useRouter`, `usePathname`).
+- Mesaj katalogları `src/messages/tr.json` ve `src/messages/en.json` dosyalarında tutulur.
+- API ve `auth/callback` tarafında istek başlığındaki `Accept-Language` değerine göre mesaj kataloğu seçilir.
+
 ## 6. Test Stratejisi (Testing)
 
 Vitest ile route-level ve birim test yaklaşımı uygulanır.
