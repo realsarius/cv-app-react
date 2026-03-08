@@ -1,4 +1,5 @@
 import type { ResumeContent } from '@/features/resume-editor/content';
+import type { ResumeTemplateKey } from '@/templates/resume/types';
 import ResumePreviewDocument from './ResumePreviewDocument';
 import {
   paginateResumeContent,
@@ -6,7 +7,7 @@ import {
 } from './paginate';
 
 type PreviewVisualSettings = {
-  templateKey: 'ats-classic' | 'ats-compact';
+  templateKey: ResumeTemplateKey;
   fontScale: number;
   spacingScale: number;
   colorScheme: 'neutral' | 'slate' | 'mono';
@@ -57,4 +58,3 @@ export default function PaginatedResumePreview({
     </div>
   );
 }
-

@@ -4,9 +4,10 @@ import type {
   ResumeExperienceItem,
   ResumeProjectItem,
 } from '@/features/resume-editor/content';
+import type { ResumeTemplateKey } from '@/templates/resume/types';
 
 type PreviewVisualSettings = {
-  templateKey: 'ats-classic' | 'ats-compact';
+  templateKey: ResumeTemplateKey;
   fontScale: number;
   spacingScale: number;
   colorScheme: 'neutral' | 'slate' | 'mono';
@@ -179,4 +180,3 @@ export function paginateResumeContent(
 
   return pages;
 }
-

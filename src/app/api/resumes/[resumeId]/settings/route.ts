@@ -10,13 +10,14 @@ import {
 } from '@/lib/security/rate-limit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { RESUME_TEMPLATE_KEYS } from '@/templates/resume/types';
 
 const paramsSchema = z.object({
   resumeId: z.string().uuid(),
 });
 
 const settingsSchema = z.object({
-  templateKey: z.enum(['ats-classic', 'ats-compact']),
+  templateKey: z.enum(RESUME_TEMPLATE_KEYS),
   fontScale: z.number().min(0.85).max(1.3),
   spacingScale: z.number().min(0.8).max(1.4),
   colorScheme: z.enum(['neutral', 'slate', 'mono']),

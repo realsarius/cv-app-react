@@ -8,6 +8,7 @@ import {
   DEFAULT_RESUME_SETTINGS,
   type ResumeVisualSettings,
 } from './resume-settings';
+import { normalizeResumeTemplateKey } from '@/templates/resume/registry';
 import { withUserRls } from './rls';
 
 export type ResumeEditorState = {
@@ -94,8 +95,7 @@ export async function getResumeEditorState(
       resume,
       content: parseResumeContent(version?.content),
       settings: {
-        templateKey:
-          settings?.templateKey === 'ats-compact' ? 'ats-compact' : 'ats-classic',
+        templateKey: normalizeResumeTemplateKey(settings?.templateKey),
         fontScale: Number(settings?.fontScale ?? DEFAULT_RESUME_SETTINGS.fontScale),
         spacingScale: Number(
           settings?.spacingScale ?? DEFAULT_RESUME_SETTINGS.spacingScale
