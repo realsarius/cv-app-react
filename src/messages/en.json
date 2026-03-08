@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "title": "Resume Builder",
+    "description": "Resume builder app powered by Next.js and Supabase"
+  },
+  "common": {
+    "supabaseEnvMissing": "Supabase environment variables are missing.",
+    "databaseUrlMissing": "DATABASE_URL or DATABASE_DEV_URL is missing.",
+    "unauthorizedRequest": "Unauthorized request.",
+    "invalidPayload": "The submitted payload format is invalid.",
+    "loading": "Loading...",
+    "error": "An error occurred.",
+    "unknown": "Unknown",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back"
+  },
+  "nav": {
+    "brand": "Resume Builder",
+    "dashboard": "Dashboard",
+    "settings": "Profile",
+    "logout": "Sign out"
+  },
+  "landing": {
+    "title": "Resume Builder",
+    "description": "Welcome to the resume builder app. Sign in to manage drafts, edit content and run ATS analysis.",
+    "login": "Sign in",
+    "register": "Sign up"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "description": "Sign in to continue working on your resume drafts.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "Do not have an account?",
+      "register": "Sign up"
+    },
+    "register": {
+      "title": "Sign up",
+      "description": "Create a new account securely with Supabase Auth.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign up",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in"
+    },
+    "checkEmail": {
+      "title": "Verify your email",
+      "description": "Registration is complete. Click the verification link sent to your email to activate your account.",
+      "descriptionFallback": "If the link does not open, enter the code from the email below.",
+      "email": "Email",
+      "code": "Verification code",
+      "codeHint": "Enter the code exactly as shown in your email. Depending on setup, it can be 6-12 digits.",
+      "submit": "Verify code",
+      "backToLoginPrefix": "If you want, you can go back to",
+      "backToLoginLink": "the sign-in page",
+      "backToLoginSuffix": "."
+    },
+    "errors": {
+      "invalidLoginCredentials": "Invalid login credentials.",
+      "loginRateLimited": "Too many sign-in attempts detected. Please try again later.",
+      "registerInvalidInput": "Registration input is invalid.",
+      "registerRateLimited": "Too many registration attempts detected. Please try again later.",
+      "emailNotConfirmed": "Your email address is not confirmed. Please check your inbox.",
+      "verifyLinkInvalidOrExpired": "Verification link is invalid or expired.",
+      "verificationCodeRequired": "Email and verification code are required.",
+      "verificationCodeInvalidOrExpired": "Verification code is invalid or expired."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "dbConnectionError": "Database connection failed. Please check DATABASE_URL.",
+    "dbMissing": "Resume list cannot be loaded because `DATABASE_URL` is missing.",
+    "newDraftTitle": "Create a new draft",
+    "newDraftPlaceholder": "Example: Frontend Developer Resume",
+    "newDraftSubmit": "Create draft",
+    "resumeListTitle": "Resume list",
+    "emptyResumes": "You do not have any resumes yet. Start by creating your first draft.",
+    "lastUpdated": "Last updated",
+    "openEditor": "Open editor"
+  },
+  "settings": {
+    "title": "Profile settings",
+    "description": "You can update account information and review your account status.",
+    "summaryTitle": "Account summary",
+    "profileTitle": "Profile information",
+    "profileDescription": "The full name here is used in the dashboard welcome text and in new resume drafts.",
+    "userId": "User ID",
+    "provider": "Identity provider",
+    "emailVerification": "Email verification",
+    "verified": "Verified",
+    "notVerified": "Not verified",
+    "accountCreated": "Account created",
+    "lastSignIn": "Last sign in",
+    "profileUpdatedAt": "Profile updated",
+    "email": "Email",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "Enter full name",
+    "submit": "Update profile"
+  },
+  "resume": {
+    "editor": {
+      "title": "Resume editor",
+      "backToDashboard": "Back to dashboard",
+      "preview": "Preview / Print",
+      "downloadPdf": "Download PDF",
+      "print": "Print / Save PDF"
+    },
+    "preview": {
+      "title": "ATS preview"
+    },
+    "errors": {
+      "idInvalid": "Resume ID is invalid.",
+      "notFound": "Resume not found.",
+      "createFailed": "Failed to create resume.",
+      "titleTooLong": "Title must be 120 characters or fewer.",
+      "autosaveFailed": "Autosave failed.",
+      "autosaveRateLimited": "Too many autosave requests sent. Please wait a short time and try again.",
+      "updatedInAnotherSession": "Resume was updated in another session. Please refresh the page.",
+      "updatedInAnotherSessionDetailed": "Resume was updated in another session. Please refresh and apply your changes again.",
+      "exportRateLimited": "Too many PDF export requests sent. Please try again shortly.",
+      "exportIdInvalid": "resumeId format is invalid."
+    }
+  },
+  "profile": {
+    "errors": {
+      "fullNameTooLong": "Full name cannot be longer than 120 characters."
+    },
+    "success": {
+      "profileUpdated": "Profile updated."
+    }
+  },
+  "ats": {
+    "errors": {
+      "analysisFailed": "ATS analysis failed.",
+      "rateLimited": "Too many ATS analysis requests sent. Please try again later."
+    }
+  }
+}
+

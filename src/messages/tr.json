@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "Özgeçmiş Oluşturucu",
+    "description": "Next.js ve Supabase tabanlı CV oluşturma uygulaması"
+  },
+  "common": {
+    "supabaseEnvMissing": "Supabase ortam değişkenleri eksik.",
+    "databaseUrlMissing": "DATABASE_URL veya DATABASE_DEV_URL eksik.",
+    "unauthorizedRequest": "Yetkisiz istek.",
+    "invalidPayload": "Gönderilen veri formatı geçersiz.",
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu.",
+    "unknown": "Bilinmiyor",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "back": "Geri"
+  },
+  "nav": {
+    "brand": "Özgeçmiş Oluşturucu",
+    "dashboard": "Panel",
+    "settings": "Profil",
+    "logout": "Çıkış yap"
+  },
+  "landing": {
+    "title": "Özgeçmiş Oluşturucu",
+    "description": "CV oluşturma uygulamasına hoş geldiniz. Hesabınıza giriş yaparak taslaklarınızı yönetebilir, düzenleyebilir ve ATS analizini kullanabilirsiniz.",
+    "login": "Giriş yap",
+    "register": "Kayıt ol"
+  },
+  "auth": {
+    "login": {
+      "title": "Giriş yap",
+      "description": "Hesabınıza giriş yaparak CV taslaklarınıza kaldığınız yerden devam edin.",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş yap",
+      "noAccount": "Hesabın yok mu?",
+      "register": "Kayıt ol"
+    },
+    "register": {
+      "title": "Kayıt ol",
+      "description": "Supabase Auth ile güvenli şekilde yeni hesap oluştur.",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Kayıt ol",
+      "hasAccount": "Zaten hesabın var mı?",
+      "login": "Giriş yap"
+    },
+    "checkEmail": {
+      "title": "E-postanı doğrula",
+      "description": "Kayıt tamamlandı. Hesabını aktifleştirmek için e-postana gelen doğrulama bağlantısına tıkla.",
+      "descriptionFallback": "Bağlantı açılmazsa maildeki kodu aşağıdan girerek devam edebilirsin.",
+      "email": "E-posta",
+      "code": "Doğrulama kodu",
+      "codeHint": "Maildeki kodu aynen gir. Kod uzunluğu projeye göre 6-12 haneli olabilir.",
+      "submit": "Kodu doğrula",
+      "backToLoginPrefix": "Dilersen önce",
+      "backToLoginLink": "giriş ekranına",
+      "backToLoginSuffix": "dönebilirsin."
+    },
+    "errors": {
+      "invalidLoginCredentials": "Giriş bilgileri geçersiz.",
+      "loginRateLimited": "Çok fazla giriş denemesi algılandı. Lütfen biraz sonra tekrar deneyin.",
+      "registerInvalidInput": "Kayıt bilgileri geçersiz.",
+      "registerRateLimited": "Çok fazla kayıt denemesi algılandı. Lütfen daha sonra tekrar deneyin.",
+      "emailNotConfirmed": "E-posta adresi doğrulanmadı. Lütfen e-posta kutunuzu kontrol edin.",
+      "verifyLinkInvalidOrExpired": "Doğrulama bağlantısı geçersiz veya süresi dolmuş.",
+      "verificationCodeRequired": "E-posta ve doğrulama kodu zorunludur.",
+      "verificationCodeInvalidOrExpired": "Doğrulama kodu geçersiz veya süresi dolmuş."
+    }
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "Hoş geldin",
+    "dbConnectionError": "Veritabanı bağlantısı kurulamadı. DATABASE_URL değerini kontrol edin.",
+    "dbMissing": "`DATABASE_URL` eksik olduğu için özgeçmiş listesi yüklenemiyor.",
+    "newDraftTitle": "Yeni taslak oluştur",
+    "newDraftPlaceholder": "Örnek: Frontend Developer CV",
+    "newDraftSubmit": "Taslak oluştur",
+    "resumeListTitle": "Özgeçmiş listesi",
+    "emptyResumes": "Henüz özgeçmiş yok. İlk taslağını oluşturarak başlayabilirsin.",
+    "lastUpdated": "Son güncelleme",
+    "openEditor": "Editörü aç"
+  },
+  "settings": {
+    "title": "Profil ayarları",
+    "description": "Hesap bilgilerini güncelleyebilir, hesap durumunu kontrol edebilirsin.",
+    "summaryTitle": "Hesap özeti",
+    "profileTitle": "Profil bilgileri",
+    "profileDescription": "Buradaki ad soyad bilgisi panelde karşılama metninde ve yeni özgeçmiş taslaklarında kullanılır.",
+    "userId": "Kullanıcı ID",
+    "provider": "Kimlik sağlayıcı",
+    "emailVerification": "E-posta doğrulama",
+    "verified": "Doğrulandı",
+    "notVerified": "Doğrulanmadı",
+    "accountCreated": "Hesap oluşturma",
+    "lastSignIn": "Son giriş",
+    "profileUpdatedAt": "Profil güncelleme",
+    "email": "E-posta",
+    "fullName": "Ad soyad",
+    "fullNamePlaceholder": "Ad soyad girin",
+    "submit": "Profili güncelle"
+  },
+  "resume": {
+    "editor": {
+      "title": "Özgeçmiş düzenleyici",
+      "backToDashboard": "Panele dön",
+      "preview": "Önizle / Yazdır",
+      "downloadPdf": "PDF indir",
+      "print": "Yazdır / PDF al"
+    },
+    "preview": {
+      "title": "ATS önizleme"
+    },
+    "errors": {
+      "idInvalid": "Özgeçmiş kimliği geçersiz.",
+      "notFound": "Özgeçmiş bulunamadı.",
+      "createFailed": "Özgeçmiş oluşturulamadı.",
+      "titleTooLong": "Başlık 120 karakterden uzun olamaz.",
+      "autosaveFailed": "Otomatik kayıt başarısız oldu.",
+      "autosaveRateLimited": "Çok fazla otomatik kaydetme isteği gönderildi. Lütfen kısa bir süre bekleyip tekrar deneyin.",
+      "updatedInAnotherSession": "Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyin.",
+      "updatedInAnotherSessionDetailed": "Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyip değişiklikleri tekrar uygulayın.",
+      "exportRateLimited": "Çok fazla PDF export isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.",
+      "exportIdInvalid": "resumeId formatı geçersiz."
+    }
+  },
+  "profile": {
+    "errors": {
+      "fullNameTooLong": "Ad soyad 120 karakterden uzun olamaz."
+    },
+    "success": {
+      "profileUpdated": "Profil güncellendi."
+    }
+  },
+  "ats": {
+    "errors": {
+      "analysisFailed": "ATS analizi başarısız oldu.",
+      "rateLimited": "Çok fazla ATS analizi isteği gönderildi. Lütfen biraz sonra tekrar deneyin."
+    }
+  }
+}
