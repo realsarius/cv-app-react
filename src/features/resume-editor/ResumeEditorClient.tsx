@@ -3,7 +3,11 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { messages } from '@/constants/messages';
-import ResumePreviewDocument from './preview/ResumePreviewDocument';
+import PaginatedResumePreview from './preview/PaginatedResumePreview';
+import {
+  PREVIEW_PAGE_BASE_HEIGHT,
+  PREVIEW_PAGE_BASE_WIDTH,
+} from './preview/paginate';
 import type {
   ResumeContent,
   ResumeEducationItem,
@@ -75,6 +79,14 @@ type ResumeSettingsResponse = {
   settings: ResumeVisualSettings;
 };
 
+type AddableSection = {
+  key: 'profile' | 'experiences' | 'educations' | 'projects' | 'ats';
+  label: string;
+  description: string;
+  isAdded: boolean;
+  onAdd: () => void;
+};
+
 class AutosaveConflictError extends Error {
   readonly currentUpdatedAt: string | null;
 
@@ -144,6 +156,81 @@ function createEmptyProjectItem(): ResumeProjectItem {
   };
 }
 
+function createBerkansCvSeedContent(): ResumeContent {
+  return {
+    personalDetails: {
+      fullName: 'Berkan Sözer',
+      jobTitle: 'Full-Stack Developer',
+      email: 'berkansozer@outlook.com',
+      phone: '+90 5XX XXX XX XX',
+      address: 'Salihli, Manisa, Türkiye',
+    },
+    profile:
+      'Bilgisayar Mühendisliği mezunuyum. .NET ve Next.js ekosistemlerinde güvenlik, test disiplini ve modüler mimari odağıyla full-stack projeler geliştiriyorum. API tasarımı, veri modeli, kimlik doğrulama, loglama/izlenebilirlik ve CI doğrulama süreçlerini uçtan uca yönetiyorum.',
+    experiences: [
+      {
+        id: createItemId(),
+        title: 'Bilgisayar Teknik Servis',
+        company: 'Sistem Bilgisayar',
+        city: 'Salihli, Manisa',
+        country: 'Türkiye',
+        startDate: '07/2024',
+        endDate: 'Halen',
+        description:
+          'Son kullanıcı destek, arıza analizi, yazılım kurulumları ve sistem danışmanlığı süreçlerini yönettim. Windows Server kurulumu, ağ yapılandırması ve cihaz entegrasyonu ile altyapı sürekliliğini destekledim. Teknik servis süreçlerinde dijital takip yaklaşımını güçlendiren yazılım geliştirme çalışmalarına katkı sağladım.',
+      },
+    ],
+    educations: [
+      {
+        id: createItemId(),
+        school: 'İnönü Üniversitesi',
+        degree: 'Bilgisayar Mühendisliği (GNO: 3.44/4.00)',
+        city: 'Malatya',
+        country: 'Türkiye',
+        startDate: '2018',
+        endDate: '2022',
+        description:
+          'Yazılım mühendisliği, veri yapıları, algoritmalar, veritabanı ve web teknolojileri alanlarında proje temelli eğitim aldım.',
+      },
+    ],
+    projects: [
+      {
+        id: createItemId(),
+        title: 'Fiş Yönetim Sistemi',
+        subtitle: 'Modüler Monolith',
+        city: 'Uzaktan',
+        country: 'Türkiye',
+        stack:
+          'Next.js 15, React 19, TypeScript, Prisma, PostgreSQL, Tailwind CSS',
+        description:
+          '9 modül ve 36 API route ile modüler monolith mimari uyguladım. Auth/RBAC, CSRF, rate limit ve API boundary kontrollerini middleware + doğrulama scriptleri ile yönettim. Typecheck + test + boundary verify pipeline ile release gate yapısı kurdum.',
+      },
+      {
+        id: createItemId(),
+        title: 'Ecommerce Belediye Testcase',
+        subtitle: 'Clean Architecture',
+        city: 'Uzaktan',
+        country: 'Türkiye',
+        stack:
+          '.NET 8, C#, Clean Architecture, React, Redis, RabbitMQ, MassTransit, SignalR, Hangfire, Elasticsearch',
+        description:
+          '.NET 8 ve Clean Architecture ile JWT/refresh token, FluentValidation ve merkezi exception handling içeren backend geliştirdim. Redis distributed lock ile stok tutarlılığı sağladım. Asenkron event akışları, canlı destek ve zamanlanmış görev yapıları kurdum.',
+      },
+      {
+        id: createItemId(),
+        title: 'Fiyat Karşılaştırma ve Scraping Platformu',
+        subtitle: 'Veri Toplama ve Karşılaştırma',
+        city: 'Uzaktan',
+        country: 'Türkiye',
+        stack:
+          'FastAPI, Selenium, BeautifulSoup, Next.js, Firebase Auth, Firestore',
+        description:
+          'Birden fazla e-ticaret kaynağından ürün/fiyat verisi toplama ve normalize etme akışı geliştirdim. FastAPI servis katmanı ve frontend karşılaştırma/filtreleme deneyimi oluşturdum.',
+      },
+    ],
+  };
+}
+
 export default function ResumeEditorClient({
   resumeId,
   initialTitle,
@@ -165,6 +252,13 @@ export default function ResumeEditorClient({
   const [settingsLastSavedAt, setSettingsLastSavedAt] = useState(
     initialSettings.updatedAt
   );
+  const [isAddContentDialogOpen, setIsAddContentDialogOpen] = useState(false);
+  const [isProfileSectionEnabled, setIsProfileSectionEnabled] = useState(
+    initialContent.profile.trim().length > 0
+  );
+  const [isAtsSectionEnabled, setIsAtsSectionEnabled] = useState(
+    initialAtsHistory.length > 0
+  );
   const [jobDescription, setJobDescription] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [company, setCompany] = useState('');
@@ -172,10 +266,17 @@ export default function ResumeEditorClient({
   const [atsError, setAtsError] = useState<string | null>(null);
   const [atsResult, setAtsResult] = useState<AtsScoreResponse | null>(null);
   const [atsHistory, setAtsHistory] = useState<AtsHistoryItem[]>(initialAtsHistory);
+  const [previewScale, setPreviewScale] = useState(1);
+  const [previewPaperHeight, setPreviewPaperHeight] = useState(
+    PREVIEW_PAGE_BASE_HEIGHT
+  );
 
   const saveSequenceRef = useRef(0);
   const isSaveInFlightRef = useRef(false);
+  const cheatCodeBufferRef = useRef('');
   const lastServerUpdatedAtRef = useRef(initialUpdatedAt);
+  const previewViewportRef = useRef<HTMLDivElement | null>(null);
+  const previewPaperRef = useRef<HTMLDivElement | null>(null);
   const lastSavedPayloadRef = useRef(
     JSON.stringify({
       title: initialTitle,
@@ -394,6 +495,38 @@ export default function ResumeEditorClient({
     }
   }, [resumeId, settingsPayloadString]);
 
+  const applyDevSeedContent = useCallback(() => {
+    const seededContent = createBerkansCvSeedContent();
+    setTitle('Berkan Sözer - Full-Stack Developer CV');
+    setContent(seededContent);
+    setIsProfileSectionEnabled(true);
+    setIsAtsSectionEnabled(true);
+    setIsAddContentDialogOpen(false);
+    setJobTitle('Senior Full-Stack Developer');
+    setCompany('Örnek Teknoloji A.Ş.');
+    setJobDescription(
+      'We are looking for a full-stack developer with strong .NET and Next.js experience. The candidate should build secure REST APIs, work with PostgreSQL, Redis and RabbitMQ, manage CI/CD pipelines, write automated tests, and improve observability with structured logging and monitoring.'
+    );
+    setAtsResult(null);
+    setAtsError(null);
+    setIsAutosaveBlocked(false);
+    setSaveStatus('idle');
+    setSaveError(null);
+  }, []);
+
+  const addProfileSection = useCallback(() => {
+    setIsProfileSectionEnabled(true);
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeProfileSection = useCallback(() => {
+    setIsProfileSectionEnabled(false);
+    setContent((prev) => ({
+      ...prev,
+      profile: '',
+    }));
+  }, []);
+
   const addExperience = useCallback(() => {
     setContent((prev) => ({
       ...prev,
@@ -401,10 +534,28 @@ export default function ResumeEditorClient({
     }));
   }, []);
 
+  const addExperienceSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      experiences:
+        prev.experiences.length > 0
+          ? prev.experiences
+          : [createEmptyExperienceItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
   const removeExperience = useCallback((id: string) => {
     setContent((prev) => ({
       ...prev,
       experiences: prev.experiences.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeExperienceSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      experiences: [],
     }));
   }, []);
 
@@ -415,10 +566,26 @@ export default function ResumeEditorClient({
     }));
   }, []);
 
+  const addEducationSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      educations:
+        prev.educations.length > 0 ? prev.educations : [createEmptyEducationItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
   const removeEducation = useCallback((id: string) => {
     setContent((prev) => ({
       ...prev,
       educations: prev.educations.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeEducationSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      educations: [],
     }));
   }, []);
 
@@ -429,11 +596,41 @@ export default function ResumeEditorClient({
     }));
   }, []);
 
+  const addProjectSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      projects:
+        prev.projects.length > 0 ? prev.projects : [createEmptyProjectItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
   const removeProject = useCallback((id: string) => {
     setContent((prev) => ({
       ...prev,
       projects: prev.projects.filter((item) => item.id !== id),
     }));
+  }, []);
+
+  const removeProjectSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      projects: [],
+    }));
+  }, []);
+
+  const addAtsSection = useCallback(() => {
+    setIsAtsSectionEnabled(true);
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeAtsSection = useCallback(() => {
+    setIsAtsSectionEnabled(false);
+    setJobTitle('');
+    setCompany('');
+    setJobDescription('');
+    setAtsError(null);
+    setAtsResult(null);
   }, []);
 
   useEffect(() => {
@@ -452,7 +649,6 @@ export default function ResumeEditorClient({
       return;
     }
 
-    setSaveStatus('saving');
     const timer = window.setTimeout(() => {
       void runSaveNow();
     }, 1500);
@@ -465,10 +661,189 @@ export default function ResumeEditorClient({
   const isDirty = payloadString !== lastSavedPayloadRef.current;
   const isSettingsDirty = settingsPayloadString !== lastSavedSettingsRef.current;
   const canRunAtsAnalysis = jobDescription.trim().length >= 50;
+  const addableSections = useMemo<AddableSection[]>(
+    () => [
+      {
+        key: 'profile',
+        label: 'Profil özeti',
+        description: 'Kısa bir kariyer özeti ekleyin.',
+        isAdded: isProfileSectionEnabled,
+        onAdd: addProfileSection,
+      },
+      {
+        key: 'experiences',
+        label: 'Deneyimler',
+        description: 'Çalıştığınız roller ve etkilerinizi ekleyin.',
+        isAdded: content.experiences.length > 0,
+        onAdd: addExperienceSection,
+      },
+      {
+        key: 'educations',
+        label: 'Eğitim',
+        description: 'Okul, bölüm ve tarih bilgilerinizi ekleyin.',
+        isAdded: content.educations.length > 0,
+        onAdd: addEducationSection,
+      },
+      {
+        key: 'projects',
+        label: 'Projeler',
+        description: 'Öne çıkarmak istediğiniz projeleri ekleyin.',
+        isAdded: content.projects.length > 0,
+        onAdd: addProjectSection,
+      },
+      {
+        key: 'ats',
+        label: 'ATS analizi',
+        description: 'İş ilanına göre anahtar kelime analizini açın.',
+        isAdded: isAtsSectionEnabled,
+        onAdd: addAtsSection,
+      },
+    ],
+    [
+      addAtsSection,
+      addEducationSection,
+      addExperienceSection,
+      addProfileSection,
+      addProjectSection,
+      content.educations.length,
+      content.experiences.length,
+      content.projects.length,
+      isAtsSectionEnabled,
+      isProfileSectionEnabled,
+    ]
+  );
+  const hasHiddenSections = addableSections.some((section) => !section.isAdded);
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!isAddContentDialogOpen) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsAddContentDialogOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isAddContentDialogOpen]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isEditableTarget =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable;
+
+      if (isEditableTarget) {
+        cheatCodeBufferRef.current = '';
+        return;
+      }
+
+      if (event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        cheatCodeBufferRef.current = '';
+        return;
+      }
+
+      if (event.key.length !== 1) {
+        return;
+      }
+
+      const nextBuffer = `${cheatCodeBufferRef.current}${event.key.toUpperCase()}`
+        .replace(/[^A-Z]/g, '')
+        .slice(-7);
+      cheatCodeBufferRef.current = nextBuffer;
+
+      if (nextBuffer === 'BIGBANG') {
+        event.preventDefault();
+        cheatCodeBufferRef.current = '';
+        applyDevSeedContent();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [applyDevSeedContent]);
+
+  useEffect(() => {
+    const viewportNode = previewViewportRef.current;
+    if (!viewportNode) {
+      return;
+    }
+
+    const updateScale = () => {
+      const availableWidth = Math.max(0, viewportNode.clientWidth - 24);
+      const nextScale = Math.min(
+        1,
+        Math.max(0.35, availableWidth / PREVIEW_PAGE_BASE_WIDTH)
+      );
+      setPreviewScale((prev) =>
+        Math.abs(prev - nextScale) < 0.002 ? prev : nextScale
+      );
+    };
+
+    updateScale();
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      updateScale();
+    });
+
+    observer.observe(viewportNode);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const paperNode = previewPaperRef.current;
+    if (!paperNode) {
+      return;
+    }
+
+    const updatePaperHeight = () => {
+      const nextHeight = Math.max(PREVIEW_PAGE_BASE_HEIGHT, paperNode.offsetHeight);
+      setPreviewPaperHeight((prev) =>
+        Math.abs(prev - nextHeight) < 1 ? prev : nextHeight
+      );
+    };
+
+    updatePaperHeight();
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      updatePaperHeight();
+    });
+
+    observer.observe(paperNode);
+    return () => observer.disconnect();
+  }, []);
+
+  const previewFrameWidth = Math.round(PREVIEW_PAGE_BASE_WIDTH * previewScale);
+  const previewFrameHeight = Math.round(previewPaperHeight * previewScale);
 
   return (
     <section className='grid gap-6 lg:grid-cols-12'>
@@ -702,40 +1077,77 @@ export default function ResumeEditorClient({
       </div>
 
       <div className='rounded-lg border border-stone-200 bg-white p-6'>
-        <h2 className='text-lg font-semibold text-stone-900'>Profil özeti</h2>
-        <textarea
-          value={content.profile}
-          onChange={(event) =>
-            setContent((prev) => ({
-              ...prev,
-              profile: event.target.value,
-            }))
-          }
-          maxLength={5000}
-          rows={8}
-          className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
-          placeholder='Kısa kariyer özeti...'
-        />
-      </div>
-
-      <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
-          <h2 className='text-lg font-semibold text-stone-900'>Deneyimler</h2>
+          <div>
+            <h2 className='text-lg font-semibold text-stone-900'>İçerik bölümleri</h2>
+            <p className='mt-1 text-sm text-stone-600'>
+              Sadece ihtiyacınız olan bölümleri ekleyin.
+            </p>
+          </div>
           <button
             type='button'
-            onClick={addExperience}
-            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            onClick={() => setIsAddContentDialogOpen(true)}
+            disabled={!hasHiddenSections}
+            className='rounded-lg border border-stone-900 bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800'
           >
-            Deneyim ekle
+            {hasHiddenSections ? 'İçerik ekle' : 'Tüm bölümler eklendi'}
           </button>
         </div>
+      </div>
 
-        {content.experiences.length === 0 ? (
-          <p className='mt-3 text-sm text-stone-500'>Henüz deneyim eklenmedi.</p>
-        ) : (
-          <div className='mt-4 space-y-4'>
-            {content.experiences.map((item) => (
-              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+      {isProfileSectionEnabled ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>Profil özeti</h2>
+            <button
+              type='button'
+              onClick={removeProfileSection}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Bölümü kaldır
+            </button>
+          </div>
+          <textarea
+            value={content.profile}
+            onChange={(event) =>
+              setContent((prev) => ({
+                ...prev,
+                profile: event.target.value,
+              }))
+            }
+            maxLength={5000}
+            rows={8}
+            className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+            placeholder='Kısa kariyer özeti...'
+          />
+        </div>
+      ) : null}
+
+      {content.experiences.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <h2 className='text-lg font-semibold text-stone-900'>Deneyimler</h2>
+          <div className='flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={addExperience}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Deneyim ekle
+            </button>
+            <button
+              type='button'
+              onClick={removeExperienceSection}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Bölümü kaldır
+            </button>
+          </div>
+        </div>
+
+        <div className='mt-4 space-y-4'>
+          {content.experiences.map((item) => (
+            <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
                 <div className='flex items-center justify-between gap-2'>
                   <p className='text-sm font-semibold text-stone-800'>Deneyim kaydı</p>
                   <button
@@ -863,29 +1275,36 @@ export default function ResumeEditorClient({
                   placeholder='Sorumluluklar ve etkiler...'
                 />
               </div>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
+      ) : null}
 
-      <div className='rounded-lg border border-stone-200 bg-white p-6'>
+      {content.educations.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <h2 className='text-lg font-semibold text-stone-900'>Eğitim</h2>
-          <button
-            type='button'
-            onClick={addEducation}
-            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
-          >
-            Eğitim ekle
-          </button>
+          <div className='flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={addEducation}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Eğitim ekle
+            </button>
+            <button
+              type='button'
+              onClick={removeEducationSection}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Bölümü kaldır
+            </button>
+          </div>
         </div>
 
-        {content.educations.length === 0 ? (
-          <p className='mt-3 text-sm text-stone-500'>Henüz eğitim eklenmedi.</p>
-        ) : (
-          <div className='mt-4 space-y-4'>
-            {content.educations.map((item) => (
-              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+        <div className='mt-4 space-y-4'>
+          {content.educations.map((item) => (
+            <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
                 <div className='flex items-center justify-between gap-2'>
                   <p className='text-sm font-semibold text-stone-800'>Eğitim kaydı</p>
                   <button
@@ -1015,29 +1434,36 @@ export default function ResumeEditorClient({
                   placeholder='Eğitim özet notu...'
                 />
               </div>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
+      ) : null}
 
-      <div className='rounded-lg border border-stone-200 bg-white p-6'>
+      {content.projects.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <h2 className='text-lg font-semibold text-stone-900'>Projeler</h2>
-          <button
-            type='button'
-            onClick={addProject}
-            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
-          >
-            Proje ekle
-          </button>
+          <div className='flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={addProject}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Proje ekle
+            </button>
+            <button
+              type='button'
+              onClick={removeProjectSection}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Bölümü kaldır
+            </button>
+          </div>
         </div>
 
-        {content.projects.length === 0 ? (
-          <p className='mt-3 text-sm text-stone-500'>Henüz proje eklenmedi.</p>
-        ) : (
-          <div className='mt-4 space-y-4'>
-            {content.projects.map((item) => (
-              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+        <div className='mt-4 space-y-4'>
+          {content.projects.map((item) => (
+            <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
                 <div className='flex items-center justify-between gap-2'>
                   <p className='text-sm font-semibold text-stone-800'>Proje kaydı</p>
                   <button
@@ -1154,24 +1580,34 @@ export default function ResumeEditorClient({
                   placeholder='Proje açıklaması...'
                 />
               </div>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
+      ) : null}
 
-      <div className='rounded-lg border border-stone-200 bg-white p-6'>
+      {isAtsSectionEnabled ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <h2 className='text-lg font-semibold text-stone-900'>ATS analizi</h2>
-          <button
-            type='button'
-            onClick={() => {
-              void runAtsAnalysis();
-            }}
-            disabled={!canRunAtsAnalysis || atsLoading}
-            className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400'
-          >
-            {atsLoading ? 'Analiz ediliyor' : 'ATS analiz et'}
-          </button>
+          <div className='flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={() => {
+                void runAtsAnalysis();
+              }}
+              disabled={!canRunAtsAnalysis || atsLoading}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400'
+            >
+              {atsLoading ? 'Analiz ediliyor' : 'ATS analiz et'}
+            </button>
+            <button
+              type='button'
+              onClick={removeAtsSection}
+              className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+            >
+              Bölümü kaldır
+            </button>
+          </div>
         </div>
 
         <p className='mt-2 text-sm text-stone-600'>
@@ -1316,6 +1752,7 @@ export default function ResumeEditorClient({
           )}
         </div>
       </div>
+      ) : null}
 
       <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
@@ -1377,11 +1814,87 @@ export default function ResumeEditorClient({
             </Link>
           </div>
 
-          <div className='max-h-[72vh] overflow-auto rounded-md border border-stone-200 bg-stone-50 p-3'>
-            <ResumePreviewDocument title={title} content={content} settings={settings} />
+          <div
+            ref={previewViewportRef}
+            className='max-h-[72vh] overflow-auto rounded-md border border-stone-200 bg-stone-50 p-3'
+          >
+            <div
+              className='mx-auto'
+              style={{
+                width: `${previewFrameWidth}px`,
+                height: `${previewFrameHeight}px`,
+              }}
+            >
+              <div
+                ref={previewPaperRef}
+                style={{
+                  width: `${PREVIEW_PAGE_BASE_WIDTH}px`,
+                  minHeight: `${PREVIEW_PAGE_BASE_HEIGHT}px`,
+                  transform: `scale(${previewScale})`,
+                  transformOrigin: 'top left',
+                }}
+              >
+                <PaginatedResumePreview
+                  title={title}
+                  content={content}
+                  settings={settings}
+                  mode='editor'
+                />
+              </div>
+            </div>
           </div>
         </div>
       </aside>
+
+      {isAddContentDialogOpen ? (
+        <div
+          className='fixed inset-0 z-40 flex items-center justify-center bg-stone-900/40 p-4'
+          onClick={() => setIsAddContentDialogOpen(false)}
+        >
+          <div
+            role='dialog'
+            aria-modal='true'
+            aria-label='İçerik bölümü ekle'
+            onClick={(event) => event.stopPropagation()}
+            className='w-full max-w-4xl rounded-lg border border-stone-200 bg-white p-6'
+          >
+            <div className='flex flex-wrap items-center justify-between gap-3'>
+              <div>
+                <h2 className='text-2xl font-bold text-stone-900'>İçerik ekle</h2>
+                <p className='mt-1 text-sm text-stone-600'>
+                  İhtiyacınız olan bölümleri seçin, istemediklerinizi gizleyin.
+                </p>
+              </div>
+              <button
+                type='button'
+                onClick={() => setIsAddContentDialogOpen(false)}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                Kapat
+              </button>
+            </div>
+
+            <ul className='mt-5 grid grid-cols-1 gap-3 md:grid-cols-2'>
+              {addableSections.map((section) => (
+                <li key={section.key}>
+                  <button
+                    type='button'
+                    disabled={section.isAdded}
+                    onClick={section.onAdd}
+                    className='w-full rounded-lg border border-stone-200 px-4 py-3 text-left transition hover:border-stone-400 disabled:cursor-not-allowed disabled:border-stone-200 disabled:bg-stone-50'
+                  >
+                    <p className='text-base font-semibold text-stone-900'>{section.label}</p>
+                    <p className='mt-1 text-sm text-stone-600'>{section.description}</p>
+                    <p className='mt-2 text-xs font-medium text-stone-500'>
+                      {section.isAdded ? 'Bu bölüm zaten eklendi' : 'Bölümü ekle'}
+                    </p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { messages } from '@/constants/messages';
-import ResumePreviewDocument from '@/features/resume-editor/preview/ResumePreviewDocument';
+import PaginatedResumePreview from '@/features/resume-editor/preview/PaginatedResumePreview';
 import ResumePrintActions from '@/features/resume-editor/preview/ResumePrintActions';
 import { getResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
@@ -78,11 +78,11 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
         </div>
       </header>
 
-      <ResumePreviewDocument
+      <PaginatedResumePreview
         title={editorState.resume.title}
         content={editorState.content}
         settings={editorState.settings}
-        printFriendly
+        mode='preview'
       />
     </section>
   );

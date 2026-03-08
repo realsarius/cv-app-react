@@ -78,11 +78,25 @@ export default function ResumePreviewDocument({
   const palette = buildPalette(settings.colorScheme);
   const sectionSpacing = isCompactTemplate ? 'mt-4' : 'mt-6';
   const contentSpacing = isCompactTemplate ? 'space-y-3' : 'space-y-4';
-  const paragraphSpacing = isCompactTemplate ? 'leading-5' : 'leading-6';
   const articleLineHeight = Math.max(
     1.3,
     Math.min(2, Number((1.55 * settings.spacingScale).toFixed(2)))
   );
+  const typography = isCompactTemplate
+    ? {
+        title: 2.2,
+        subtitle: 1.06,
+        section: 0.84,
+        body: 0.92,
+        meta: 0.78,
+      }
+    : {
+        title: 2.5,
+        subtitle: 1.1,
+        section: 0.86,
+        body: 0.95,
+        meta: 0.8,
+      };
 
   const articleClassName = [
     'w-full border bg-white shadow-sm',
@@ -105,13 +119,22 @@ export default function ResumePreviewDocument({
       className={articleClassName}
     >
       <header className={`border-b pb-4 ${palette.border}`}>
-        <h2 className={`${isCompactTemplate ? 'text-2xl' : 'text-3xl'} font-bold ${palette.title}`}>
+        <h2
+          className={`font-bold ${palette.title}`}
+          style={{ fontSize: `${typography.title}em`, lineHeight: 1.1 }}
+        >
           {content.personalDetails.fullName || title || 'İsim Soyisim'}
         </h2>
-        <p className={`mt-1 text-base ${palette.body}`}>
+        <p
+          className={`mt-1 ${palette.body}`}
+          style={{ fontSize: `${typography.subtitle}em`, lineHeight: articleLineHeight }}
+        >
           {content.personalDetails.jobTitle || 'Pozisyon'}
         </p>
-        <p className={`mt-2 text-sm ${palette.muted}`}>
+        <p
+          className={`mt-2 ${palette.muted}`}
+          style={{ fontSize: `${typography.meta}em`, lineHeight: articleLineHeight }}
+        >
           {[
             content.personalDetails.email,
             content.personalDetails.phone,
@@ -124,8 +147,16 @@ export default function ResumePreviewDocument({
 
       {content.profile ? (
         <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
-          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Profil</h3>
-          <p className={`mt-2 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            Profil
+          </h3>
+          <p
+            className={`mt-2 whitespace-pre-wrap ${palette.body}`}
+            style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+          >
             {content.profile}
           </p>
         </section>
@@ -133,28 +164,45 @@ export default function ResumePreviewDocument({
 
       {content.experiences.length > 0 ? (
         <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
-          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Deneyim</h3>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            Deneyim
+          </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.experiences.map((item) => (
               <div key={item.id}>
                 <div className='flex flex-wrap items-center justify-between gap-2'>
-                  <p className={`text-sm font-semibold ${palette.title}`}>
+                  <p
+                    className={`font-semibold ${palette.title}`}
+                    style={{ fontSize: `${typography.body}em` }}
+                  >
                     {item.title || 'Pozisyon'}
                     {item.company ? ` - ${item.company}` : ''}
                   </p>
                   {formatRange(item.startDate, item.endDate) ? (
-                    <p className={`text-xs ${palette.sectionLabel}`}>
+                    <p
+                      className={palette.sectionLabel}
+                      style={{ fontSize: `${typography.meta}em` }}
+                    >
                       {formatRange(item.startDate, item.endDate)}
                     </p>
                   ) : null}
                 </div>
                 {item.city || item.country ? (
-                  <p className={`text-xs ${palette.sectionLabel}`}>
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
                     {[item.city, item.country].filter(Boolean).join(', ')}
                   </p>
                 ) : null}
                 {item.description ? (
-                  <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
                     {item.description}
                   </p>
                 ) : null}
@@ -166,28 +214,45 @@ export default function ResumePreviewDocument({
 
       {content.educations.length > 0 ? (
         <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
-          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Eğitim</h3>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            Eğitim
+          </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.educations.map((item) => (
               <div key={item.id}>
                 <div className='flex flex-wrap items-center justify-between gap-2'>
-                  <p className={`text-sm font-semibold ${palette.title}`}>
+                  <p
+                    className={`font-semibold ${palette.title}`}
+                    style={{ fontSize: `${typography.body}em` }}
+                  >
                     {item.school || 'Okul'}
                     {item.degree ? ` - ${item.degree}` : ''}
                   </p>
                   {formatRange(item.startDate, item.endDate) ? (
-                    <p className={`text-xs ${palette.sectionLabel}`}>
+                    <p
+                      className={palette.sectionLabel}
+                      style={{ fontSize: `${typography.meta}em` }}
+                    >
                       {formatRange(item.startDate, item.endDate)}
                     </p>
                   ) : null}
                 </div>
                 {item.city || item.country ? (
-                  <p className={`text-xs ${palette.sectionLabel}`}>
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
                     {[item.city, item.country].filter(Boolean).join(', ')}
                   </p>
                 ) : null}
                 {item.description ? (
-                  <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
                     {item.description}
                   </p>
                 ) : null}
@@ -199,24 +264,43 @@ export default function ResumePreviewDocument({
 
       {content.projects.length > 0 ? (
         <section className={sectionSpacing}>
-          <h3 className={`text-sm font-semibold ${palette.sectionLabel}`}>Projeler</h3>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            Projeler
+          </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.projects.map((item) => (
               <div key={item.id}>
-                <p className={`text-sm font-semibold ${palette.title}`}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
                   {item.title || 'Proje'}
                   {item.subtitle ? ` - ${item.subtitle}` : ''}
                 </p>
                 {item.stack ? (
-                  <p className={`text-xs ${palette.sectionLabel}`}>{item.stack}</p>
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
+                    {item.stack}
+                  </p>
                 ) : null}
                 {item.city || item.country ? (
-                  <p className={`text-xs ${palette.sectionLabel}`}>
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
                     {[item.city, item.country].filter(Boolean).join(', ')}
                   </p>
                 ) : null}
                 {item.description ? (
-                  <p className={`mt-1 whitespace-pre-wrap text-sm ${paragraphSpacing} ${palette.body}`}>
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
                     {item.description}
                   </p>
                 ) : null}
