@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import LegalPageFrame from '@/components/legal/LegalPageFrame';
 import { getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 
@@ -10,7 +11,20 @@ type FaqPageProps = {
   };
 };
 
-const faqKeys = ['free', 'ats', 'share', 'pro'] as const;
+const faqKeys = [
+  'free',
+  'planLimits',
+  'ats',
+  'pdfExport',
+  'templates',
+  'share',
+  'ai',
+  'dataSecurity',
+  'deleteData',
+  'pro',
+  'billing',
+  'support',
+] as const;
 
 function resolveLocale(locale: string): AppLocale {
   return routing.locales.includes(locale as AppLocale)
@@ -37,18 +51,15 @@ export default async function FaqPage() {
   const t = await getTranslations('legal.faq');
 
   return (
-    <main className='app-container max-w-3xl py-14 sm:py-20'>
-      <h1 className='text-3xl font-bold tracking-tight text-stone-900'>{t('title')}</h1>
-      <p className='mt-2 text-sm text-stone-600'>{t('lastUpdated')}</p>
-
-      <section className='mt-8 space-y-6'>
+    <LegalPageFrame activePage='faq' title={t('title')} lead={t('lead')} lastUpdated={t('lastUpdated')}>
+      <section className='space-y-6'>
         {faqKeys.map((key) => (
-          <article key={key} className='border-b border-stone-200 pb-5 last:border-b-0 last:pb-0'>
+          <article key={key} className='rounded-lg border border-stone-200 bg-stone-50 p-5'>
             <h2 className='text-lg font-semibold text-stone-900'>{t(`items.${key}.question`)}</h2>
             <p className='mt-2 text-sm leading-7 text-stone-700'>{t(`items.${key}.answer`)}</p>
           </article>
         ))}
       </section>
-    </main>
+    </LegalPageFrame>
   );
 }

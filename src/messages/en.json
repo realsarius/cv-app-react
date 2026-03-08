@@ -403,29 +403,79 @@
     }
   },
   "legal": {
+    "common": {
+      "legalCenter": "Legal Information Center",
+      "backHome": "Back to home",
+      "quickLinks": "Legal pages",
+      "pages": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "faq": "Frequently Asked Questions"
+      },
+      "goDashboard": "Go to dashboard",
+      "goLogin": "Sign in",
+      "goRegister": "Start free",
+      "help": {
+        "title": "Do you still have questions?",
+        "body": "You can reach our support team for legal text clarifications, data requests, and account process questions.",
+        "faq": "Open FAQ",
+        "contact": "Contact support"
+      }
+    },
     "privacy": {
       "meta": {
         "title": "CV App Privacy Policy",
         "description": "Privacy policy and data handling principles for CV App."
       },
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: March 2026",
+      "lead": "We explain what data we collect, how we process it, and which controls are available to you so you can use CV App with confidence.",
+      "lastUpdated": "Last updated: March 8, 2026",
+      "highlights": {
+        "control": {
+          "title": "You stay in control",
+          "body": "You can update account and content settings at any time and limit how your data is used."
+        },
+        "security": {
+          "title": "Security-first approach",
+          "body": "Your data is protected with secure transport, access boundaries and row-level authorization policies."
+        },
+        "transparency": {
+          "title": "Clear communication",
+          "body": "We clearly state what we collect, why we collect it and how long it is retained."
+        }
+      },
       "sections": {
         "dataCollect": {
           "title": "Data We Collect",
-          "body": "We collect your email address and resume content solely to provide CV App features. We do not sell your data to third parties."
+          "body": "To provide the service, we process account details, resume content, basic session logs and technical error events. Additional data such as payment information is collected only when related features are enabled."
         },
         "dataUse": {
           "title": "How We Use Data",
-          "body": "Your data is used for resume creation, storage and export. ATS analysis data is stored only when you explicitly save it."
+          "body": "Your data is used for resume creation, autosave, PDF export, ATS analysis display and account security operations. Marketing communication is sent only when you opt in."
         },
-        "dataStorage": {
-          "title": "Data Storage",
-          "body": "Data is stored securely on Supabase and PostgreSQL with row-level security. Only you can access your own data."
+        "legalBasis": {
+          "title": "Legal Basis for Processing",
+          "body": "We process data under legal bases such as contract performance, legitimate interest and consent where required. You can withdraw consent in applicable cases."
+        },
+        "retention": {
+          "title": "Retention Period",
+          "body": "Your content remains accessible while your account is active. After account closure requests, personal data is removed or anonymized within a reasonable period except where legal obligations require retention."
+        },
+        "userControls": {
+          "title": "User Rights and Controls",
+          "body": "You can update your profile, delete resumes and request data access or portability when needed. Session management options are provided for account safety."
+        },
+        "security": {
+          "title": "Security Measures",
+          "body": "Your data is protected on Supabase and PostgreSQL infrastructure. Access controls, encrypted transport and strict authorization rules ensure only account owners can access their content."
+        },
+        "internationalTransfer": {
+          "title": "International Data Transfers",
+          "body": "Because of infrastructure providers, data may be processed in different regions. Contractual and technical safeguards are applied whenever transfer scenarios occur."
         },
         "contact": {
           "title": "Contact",
-          "body": "For privacy-related requests, contact us at privacy@cvapp.com."
+          "body": "For privacy requests, data access inquiries or deletion requests, contact us at privacy@cvapp.com and we will respond as quickly as possible."
         }
       }
     },
@@ -435,27 +485,66 @@
         "description": "Terms of service and usage conditions for CV App."
       },
       "title": "Terms of Service",
-      "lastUpdated": "Last updated: March 2026",
+      "lead": "These terms describe your rights and responsibilities while using CV App. Continuing to use the service means you accept the latest version of these terms.",
+      "lastUpdated": "Last updated: March 8, 2026",
+      "highlights": {
+        "clarity": {
+          "title": "Clear rules",
+          "body": "We define acceptable usage and explain when restrictions may be applied."
+        },
+        "safety": {
+          "title": "Safe usage",
+          "body": "Rules are enforced to protect the platform and provide a reliable experience for all users."
+        },
+        "fairAccess": {
+          "title": "Fair access",
+          "body": "Rate limits and technical safeguards are used to maintain service stability."
+        }
+      },
       "sections": {
         "acceptance": {
           "title": "Acceptance of Terms",
           "body": "By using CV App, you agree to these terms. If you do not agree, please do not use the service."
         },
-        "serviceUse": {
-          "title": "Use of Service",
-          "body": "CV App is provided for personal resume creation. You may not use the service to create misleading or fraudulent resumes."
+        "eligibility": {
+          "title": "Eligibility",
+          "body": "To use the service, you must create a valid account and provide accurate information. You are responsible for keeping account details current."
+        },
+        "serviceScope": {
+          "title": "Service Scope",
+          "body": "CV App provides resume creation, editing, analysis and export tools. Features may evolve over time as the product is improved."
+        },
+        "acceptableUse": {
+          "title": "Acceptable Use",
+          "body": "The service cannot be used for illegal activity, misleading content generation or violation of third-party rights. Access may be restricted when automated abuse is detected."
         },
         "account": {
           "title": "Account Responsibility",
           "body": "You are responsible for maintaining the confidentiality of your account credentials and all activity under your account."
         },
+        "payments": {
+          "title": "Plans and Payments",
+          "body": "When paid plans are enabled, pricing, renewal and cancellation details are displayed during checkout. Payment operations may be handled by third-party providers."
+        },
+        "intellectualProperty": {
+          "title": "Intellectual Property",
+          "body": "CV App interface, branding and software components are protected by intellectual property laws. Users remain responsible for the content they upload or create."
+        },
         "liability": {
           "title": "Limitation of Liability",
           "body": "CV App is provided \"as is\" without warranties of any kind. We are not liable for job application outcomes."
         },
+        "termination": {
+          "title": "Suspension and Termination",
+          "body": "Accounts may be suspended or terminated for policy violations, abuse or security risk scenarios."
+        },
         "changes": {
           "title": "Changes to Terms",
           "body": "We may update these terms at any time. Continued use of the service means you accept the updated terms."
+        },
+        "contact": {
+          "title": "Contact",
+          "body": "For questions about these terms, contact us at support@cvapp.com."
         }
       }
     },
@@ -465,23 +554,56 @@
         "description": "Frequently asked questions and answers about CV App."
       },
       "title": "Frequently Asked Questions",
-      "lastUpdated": "Last updated: March 2026",
+      "lead": "We collected the most common questions to help you get started quickly. If you cannot find your answer, reach out to our support team.",
+      "lastUpdated": "Last updated: March 8, 2026",
       "items": {
         "free": {
           "question": "Is CV App free to use?",
-          "answer": "Yes. The free plan allows up to 3 resumes and 10 PDF exports per month."
+          "answer": "Yes. The free plan includes core editing features, allows up to 3 resumes and provides a limited number of PDF exports per month."
+        },
+        "planLimits": {
+          "question": "What limits exist on the free plan?",
+          "answer": "The free plan includes limits such as resume count and monthly export quota. Current limits are always shown inside the product interface."
         },
         "ats": {
           "question": "What is ATS?",
-          "answer": "ATS is an Applicant Tracking System used by companies to filter resumes before human review."
+          "answer": "ATS is software used by companies to filter applications before human review. CV App helps structure your content to improve readability in ATS workflows."
+        },
+        "pdfExport": {
+          "question": "How does PDF export work?",
+          "answer": "PDF output reflects your latest editor content and view settings. If you hit a temporary connection issue, retrying shortly usually resolves it."
+        },
+        "templates": {
+          "question": "Can I switch between templates?",
+          "answer": "Yes. You can switch between templates available in your current plan and quickly compare different visual styles for the same resume."
         },
         "share": {
           "question": "Can I share my resume publicly?",
-          "answer": "Yes. You can generate a public resume link and share it easily."
+          "answer": "Yes. You can share your resume with a public link and disable or regenerate that link later when needed."
+        },
+        "ai": {
+          "question": "What are AI suggestions used for?",
+          "answer": "AI suggestions help improve clarity and impact in experience and project descriptions. Final content decisions always remain with the user."
+        },
+        "dataSecurity": {
+          "question": "How secure is my data?",
+          "answer": "Your data is protected with access controls, secure session handling and infrastructure-level security measures. Other users cannot access your resume content."
+        },
+        "deleteData": {
+          "question": "Can I delete my account and data?",
+          "answer": "Yes. You can submit account closure or data deletion requests through support channels. Data is removed except where legal obligations require retention."
         },
         "pro": {
           "question": "When will Pro be available?",
-          "answer": "Pro is coming soon. You can start free now and upgrade when it becomes available."
+          "answer": "Pro features will be released gradually. Updates are announced inside the app and through official communication channels."
+        },
+        "billing": {
+          "question": "How will billing work when paid plans launch?",
+          "answer": "When paid plans are available, monthly or yearly options, renewal dates and cancellation rules will be clearly shown during checkout."
+        },
+        "support": {
+          "question": "How can I contact support?",
+          "answer": "For account, billing, privacy or technical issues, email support@cvapp.com. The team responds as quickly as possible based on request type."
         }
       }
     }

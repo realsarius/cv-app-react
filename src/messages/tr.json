@@ -403,29 +403,79 @@
     }
   },
   "legal": {
+    "common": {
+      "legalCenter": "Yasal Bilgi Merkezi",
+      "backHome": "Ana sayfaya dön",
+      "quickLinks": "Yasal sayfalar",
+      "pages": {
+        "privacy": "Gizlilik Politikası",
+        "terms": "Kullanım Koşulları",
+        "faq": "Sık Sorulan Sorular"
+      },
+      "goDashboard": "Panele git",
+      "goLogin": "Giriş yap",
+      "goRegister": "Ücretsiz başla",
+      "help": {
+        "title": "Ek sorularınız mı var?",
+        "body": "Hukuki metinler, veri talepleri veya hesap süreçleri hakkında destek ekibine ulaşabilirsiniz.",
+        "faq": "SSS sayfası",
+        "contact": "Destek ile iletişime geç"
+      }
+    },
     "privacy": {
       "meta": {
         "title": "CV App Gizlilik Politikası",
         "description": "CV App gizlilik politikası ve veri işleme ilkeleri."
       },
       "title": "Gizlilik Politikası",
-      "lastUpdated": "Son güncelleme: Mart 2026",
+      "lead": "CV App'i güvenle kullanabilmeniz için hangi verileri topladığımızı, bunları nasıl işlediğimizi ve sizin hangi kontrol haklarına sahip olduğunuzu açık şekilde paylaşıyoruz.",
+      "lastUpdated": "Son güncelleme: 8 Mart 2026",
+      "highlights": {
+        "control": {
+          "title": "Kontrol sizde",
+          "body": "Hesap ve içerik ayarlarınızı dilediğiniz zaman güncelleyebilir, verilerinizin kullanımını sınırlandırabilirsiniz."
+        },
+        "security": {
+          "title": "Güvenlik odaklı",
+          "body": "Verileriniz güvenli bağlantı, erişim sınırları ve satır seviyesinde yetkilendirme politikaları ile korunur."
+        },
+        "transparency": {
+          "title": "Şeffaf iletişim",
+          "body": "Ne topladığımızı, neden topladığımızı ve ne kadar süre sakladığımızı net bir şekilde belirtiriz."
+        }
+      },
       "sections": {
         "dataCollect": {
           "title": "Toplanan Veriler",
-          "body": "Hizmeti sunmak için e-posta adresinizi ve özgeçmiş içeriklerinizi toplarız. Verilerinizi üçüncü taraflara satmayız."
+          "body": "Hizmeti sunmak için hesap bilgileriniz, özgeçmiş içerikleriniz, temel oturum kayıtlarınız ve teknik hata günlükleri işlenir. Ödeme bilgisi gibi ek veriler yalnızca ilgili özellik açıldığında toplanır."
         },
         "dataUse": {
           "title": "Verileri Nasıl Kullanıyoruz",
-          "body": "Verileriniz özgeçmiş oluşturma, saklama ve export işlemleri için kullanılır. ATS analiz verileri sadece kaydetmeyi seçtiğinizde saklanır."
+          "body": "Verileriniz; özgeçmiş oluşturma, otomatik kayıt, PDF export, ATS analiz sonuçlarını görüntüleme ve hesap güvenliği amacıyla kullanılır. Pazarlama iletişimi yalnızca izin verdiğinizde gönderilir."
         },
-        "dataStorage": {
-          "title": "Veri Saklama",
-          "body": "Verileriniz Supabase ve PostgreSQL üzerinde satır seviyesinde güvenlik politikaları ile korunur. Sadece kendi verilerinize erişebilirsiniz."
+        "legalBasis": {
+          "title": "İşleme Dayanakları",
+          "body": "Veri işleme faaliyetleri; sözleşmenin ifası, meşru menfaat ve açık rıza gibi hukuki dayanaklara göre yürütülür. Uygun durumlarda onayınızı geri alma hakkınız bulunur."
+        },
+        "retention": {
+          "title": "Saklama Süresi",
+          "body": "Hesabınız aktif kaldığı sürece içerikleriniz erişilebilir tutulur. Hesap kapatma taleplerinde teknik ve yasal zorunluluklar dışında kalan kişisel veriler makul süre içinde silinir veya anonimleştirilir."
+        },
+        "userControls": {
+          "title": "Kullanıcı Hakları ve Kontroller",
+          "body": "Profilinizi güncelleyebilir, özgeçmişlerinizi silebilir ve gerektiğinde veri erişimi ya da veri taşıma talebinde bulunabilirsiniz. Hesap güvenliği için oturum yönetimi seçenekleri sağlanır."
+        },
+        "security": {
+          "title": "Güvenlik Önlemleri",
+          "body": "Verileriniz Supabase ve PostgreSQL altyapısında korunur. Erişim kontrolleri, şifreli iletişim ve yapılandırılmış yetkilendirme kuralları ile sadece hesabınıza ait içerikler görünür olur."
+        },
+        "internationalTransfer": {
+          "title": "Uluslararası Veri Aktarımları",
+          "body": "Hizmet sağlayıcı altyapısı nedeniyle verileriniz farklı bölgelerde işlenebilir. Bu durumlarda sözleşmesel ve teknik koruma önlemleri uygulanır."
         },
         "contact": {
           "title": "İletişim",
-          "body": "Gizlilik ile ilgili talepleriniz için privacy@cvapp.com adresinden bize ulaşabilirsiniz."
+          "body": "Gizlilik talepleri, veri erişim başvuruları veya silme istekleri için privacy@cvapp.com adresinden bize ulaşabilirsiniz. Talebinize en kısa sürede dönüş yapılır."
         }
       }
     },
@@ -435,27 +485,66 @@
         "description": "CV App kullanım koşulları ve hizmet şartları."
       },
       "title": "Kullanım Koşulları",
-      "lastUpdated": "Son güncelleme: Mart 2026",
+      "lead": "Bu koşullar, CV App hizmetini kullanırken haklarınızı ve sorumluluklarınızı açıklar. Hizmeti kullanmaya devam ederek güncel koşulları kabul etmiş olursunuz.",
+      "lastUpdated": "Son güncelleme: 8 Mart 2026",
+      "highlights": {
+        "clarity": {
+          "title": "Açık kurallar",
+          "body": "Hangi kullanımın uygun olduğunu ve hangi durumlarda kısıtlama uygulanacağını net şekilde tanımlarız."
+        },
+        "safety": {
+          "title": "Güvenli kullanım",
+          "body": "Tüm kullanıcılar için güvenli bir deneyim sağlamak adına kötüye kullanımı engelleyen kurallar uygularız."
+        },
+        "fairAccess": {
+          "title": "Adil erişim",
+          "body": "Hizmet sürekliliğini korumak için oran sınırları ve teknik güvenlik önlemleri kullanılır."
+        }
+      },
       "sections": {
         "acceptance": {
           "title": "Koşulların Kabulü",
           "body": "CV App hizmetini kullanarak bu koşulları kabul etmiş olursunuz. Koşulları kabul etmiyorsanız lütfen hizmeti kullanmayın."
         },
-        "serviceUse": {
-          "title": "Hizmetin Kullanımı",
-          "body": "CV App kişisel özgeçmiş oluşturma amacıyla sunulur. Yanıltıcı veya sahte özgeçmiş üretimi için kullanılamaz."
+        "eligibility": {
+          "title": "Uygunluk",
+          "body": "Hizmeti kullanabilmek için geçerli bir hesap oluşturmanız ve doğru bilgi sağlamanız gerekir. Hesap bilgilerinizin güncelliğinden siz sorumlusunuz."
+        },
+        "serviceScope": {
+          "title": "Hizmet Kapsamı",
+          "body": "CV App; özgeçmiş oluşturma, düzenleme, analiz ve export araçları sunar. Özellikler ürün geliştirme sürecine bağlı olarak zamanla değiştirilebilir."
+        },
+        "acceptableUse": {
+          "title": "Kabul Edilebilir Kullanım",
+          "body": "Hizmet, yasa dışı faaliyetler, yanıltıcı içerik üretimi veya başkalarının haklarını ihlal edecek amaçlarla kullanılamaz. Otomatik kötüye kullanım tespit edildiğinde erişim sınırlandırılabilir."
         },
         "account": {
           "title": "Hesap Sorumluluğu",
           "body": "Hesap bilgilerinizin gizliliğini korumaktan ve hesabınız altında gerçekleşen işlemlerden siz sorumlusunuz."
         },
+        "payments": {
+          "title": "Planlar ve Ödemeler",
+          "body": "Ücretli planlar aktif olduğunda fiyat, yenileme ve iptal koşulları satın alma ekranında ayrıca belirtilir. Ödeme altyapısı üçüncü taraf sağlayıcılar üzerinden yürütülebilir."
+        },
+        "intellectualProperty": {
+          "title": "Fikri Mülkiyet",
+          "body": "CV App arayüzü, marka unsurları ve yazılım bileşenleri ilgili fikri mülkiyet hakları kapsamında korunur. Kullanıcı içeriklerinin sorumluluğu kullanıcıya aittir."
+        },
         "liability": {
           "title": "Sorumluluğun Sınırlandırılması",
           "body": "CV App \"olduğu gibi\" sunulur. İş başvurusu sonuçları ile ilgili herhangi bir garanti verilmez."
         },
+        "termination": {
+          "title": "Hesap Kapatma ve Askıya Alma",
+          "body": "Koşullara aykırı kullanım, güvenlik riski veya kötüye kullanım durumlarında hesabınız geçici olarak askıya alınabilir veya kapatılabilir."
+        },
         "changes": {
           "title": "Koşullarda Değişiklik",
           "body": "Bu koşullar zaman içinde güncellenebilir. Hizmeti kullanmaya devam etmeniz yeni koşulları kabul ettiğiniz anlamına gelir."
+        },
+        "contact": {
+          "title": "İletişim",
+          "body": "Koşullarla ilgili sorularınız için support@cvapp.com adresi üzerinden bize yazabilirsiniz."
         }
       }
     },
@@ -465,23 +554,56 @@
         "description": "CV App hakkında en sık sorulan sorular ve yanıtlar."
       },
       "title": "Sık Sorulan Sorular",
-      "lastUpdated": "Son güncelleme: Mart 2026",
+      "lead": "CV App kullanımına başlamadan önce en sık gelen soruları burada topladık. Aradığınız yanıtı bulamazsanız destek ekibine ulaşabilirsiniz.",
+      "lastUpdated": "Son güncelleme: 8 Mart 2026",
       "items": {
         "free": {
           "question": "CV App ücretsiz mi?",
-          "answer": "Evet. Ücretsiz plan ile 3 özgeçmiş oluşturabilir ve ayda 10 PDF export alabilirsiniz."
+          "answer": "Evet. Ücretsiz plan ile temel düzenleme araçlarını kullanabilir, 3 özgeçmiş oluşturabilir ve aylık belirli sayıda PDF export alabilirsiniz."
+        },
+        "planLimits": {
+          "question": "Ücretsiz planda hangi limitler var?",
+          "answer": "Ücretsiz plan, özgeçmiş adedi ve aylık export sayısı gibi limitler içerir. Bu limitler ürün ekranında güncel değerleriyle gösterilir."
         },
         "ats": {
           "question": "ATS nedir?",
-          "answer": "ATS, şirketlerin özgeçmişleri insan incelemesinden önce filtrelemek için kullandığı Aday Takip Sistemi yazılımıdır."
+          "answer": "ATS, şirketlerin başvuruları ilk aşamada filtrelemek için kullandığı yazılımdır. CV App, içerik yapınızı bu sistemlerde daha okunabilir hale getirmenize yardımcı olur."
+        },
+        "pdfExport": {
+          "question": "PDF export nasıl çalışıyor?",
+          "answer": "Editördeki güncel içerik ve görünüm ayarları PDF çıktısına yansıtılır. İndirme sırasında bağlantı hatası alırsanız kısa süre sonra tekrar deneyebilirsiniz."
+        },
+        "templates": {
+          "question": "Şablonlar arasında geçiş yapabilir miyim?",
+          "answer": "Evet. Kullanabildiğiniz plan kapsamındaki şablonlar arasında geçiş yapabilir, aynı özgeçmiş için farklı görünümleri hızlıca deneyebilirsiniz."
         },
         "share": {
           "question": "Özgeçmişimi public olarak paylaşabilir miyim?",
-          "answer": "Evet. Özgeçmişiniz için public link üretebilir ve paylaşım akışını hızlandırabilirsiniz."
+          "answer": "Evet. Public link özelliği ile özgeçmişinizi bağlantı üzerinden paylaşabilirsiniz. Gerekirse linki sonradan kapatabilir veya yeni link oluşturabilirsiniz."
+        },
+        "ai": {
+          "question": "AI önerileri ne işe yarıyor?",
+          "answer": "AI önerileri, deneyim ve proje açıklamalarını daha net ve etkili hale getirmenize yardımcı olur. Nihai içerik kontrolü her zaman kullanıcıdadır."
+        },
+        "dataSecurity": {
+          "question": "Verilerim ne kadar güvenli?",
+          "answer": "Verileriniz erişim kontrolleri, güvenli oturum yönetimi ve altyapı seviyesinde güvenlik önlemleri ile korunur. Hesabınız dışındaki kullanıcılar içeriklerinize erişemez."
+        },
+        "deleteData": {
+          "question": "Hesabımı ve verilerimi silebilir miyim?",
+          "answer": "Evet. Hesap kapatma veya veri silme talepleriniz için destek kanalları üzerinden başvuru yapabilirsiniz. Yasal yükümlülükler dışında kalan veriler silinir."
         },
         "pro": {
           "question": "Pro plan ne zaman aktif olacak?",
-          "answer": "Pro plan yakında aktif olacak. Şimdilik ücretsiz başlayabilir ve yayınlandığında yükseltebilirsiniz."
+          "answer": "Pro plan özellikleri aşamalı olarak açılacaktır. Duyurular uygulama içinden ve resmi iletişim kanallarından paylaşılır."
+        },
+        "billing": {
+          "question": "Ücretli plan başladığında faturalandırma nasıl olacak?",
+          "answer": "Ücretli plan aktif olduğunda aylık/yıllık seçenekler, yenileme tarihleri ve iptal koşulları ödeme adımında açıkça gösterilir."
+        },
+        "support": {
+          "question": "Destek ekibine nasıl ulaşabilirim?",
+          "answer": "Hesap, ödeme, gizlilik veya teknik sorunlar için support@cvapp.com adresine yazabilirsiniz. Talep türüne göre en hızlı şekilde geri dönüş yapılır."
         }
       }
     }

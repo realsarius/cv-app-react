@@ -6,6 +6,10 @@ vi.mock('next-intl/server', () => ({
   getTranslations: mockGetTranslations,
 }));
 
+vi.mock('@/components/legal/LegalPageFrame', () => ({
+  default: ({ children }: { children: unknown }) => children,
+}));
+
 describe('legal pages metadata', () => {
   beforeEach(() => {
     vi.clearAllMocks();
