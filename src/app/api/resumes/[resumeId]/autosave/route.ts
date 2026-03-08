@@ -13,6 +13,7 @@ const paramsSchema = z.object({
 const autosaveBodySchema = z.object({
   title: z.string().trim().max(120).optional(),
   content: resumeContentSchema,
+  expectedUpdatedAt: z.string().datetime().optional(),
 });
 
 type RouteContext = {
@@ -78,7 +79,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const savedResume = await saveResumeEditorState(
     user.id,
     parsedParams.data.resumeId,
-    parsedBody.data
+    {
+      title: parsedBody.data.title,
+      content: parsedBody.data.content,
+      expectedUpdatedAt: parsedBody.data.expectedUpdatedAt
+        ? new Date(parsedBody.data.expectedUpdatedAt)
+        : undefined,
+    }
   );
 
   if (!savedResume) {
@@ -90,11 +97,24 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
+  if (savedResume.status === 'conflict') {
+    return NextResponse.json(
+      {
+        error:
+          'Resume baska bir oturumda guncellendi. Lutfen sayfayi yenileyip degisiklikleri tekrar uygulayin.',
+        code: 'write_conflict',
+        currentVersionNo: savedResume.currentVersionNo,
+        currentUpdatedAt: savedResume.currentUpdatedAt.toISOString(),
+      },
+      { status: 409 }
+    );
+  }
+
   return NextResponse.json({
     ok: true,
-    resumeId: savedResume.id,
-    title: savedResume.title,
-    currentVersionNo: savedResume.currentVersionNo,
-    updatedAt: savedResume.updatedAt.toISOString(),
+    resumeId: savedResume.resume.id,
+    title: savedResume.resume.title,
+    currentVersionNo: savedResume.resume.currentVersionNo,
+    updatedAt: savedResume.resume.updatedAt.toISOString(),
   });
 }

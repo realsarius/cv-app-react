@@ -25,6 +25,12 @@ type AutosaveResponse = {
   currentVersionNo: number;
 };
 
+type AutosaveErrorResponse = {
+  error?: string;
+  code?: string;
+  currentUpdatedAt?: string;
+};
+
 type AtsScoreResponse = {
   overallScore: number;
   matchedKeywords: string[];
@@ -65,6 +71,16 @@ type ResumeSettingsResponse = {
   ok: boolean;
   settings: ResumeVisualSettings;
 };
+
+class AutosaveConflictError extends Error {
+  readonly currentUpdatedAt: string | null;
+
+  constructor(message: string, currentUpdatedAt: string | null) {
+    super(message);
+    this.name = 'AutosaveConflictError';
+    this.currentUpdatedAt = currentUpdatedAt;
+  }
+}
 
 function createItemId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -125,6 +141,7 @@ export default function ResumeEditorClient({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState(initialUpdatedAt);
+  const [isAutosaveBlocked, setIsAutosaveBlocked] = useState(false);
   const [settings, setSettings] = useState<ResumeVisualSettings>(initialSettings);
   const [settingsSaveStatus, setSettingsSaveStatus] = useState<SaveStatus>('idle');
   const [settingsSaveError, setSettingsSaveError] = useState<string | null>(null);
@@ -140,6 +157,7 @@ export default function ResumeEditorClient({
   const [atsHistory, setAtsHistory] = useState<AtsHistoryItem[]>(initialAtsHistory);
 
   const saveSequenceRef = useRef(0);
+  const lastServerUpdatedAtRef = useRef(initialUpdatedAt);
   const lastSavedPayloadRef = useRef(
     JSON.stringify({
       title: initialTitle,
@@ -189,18 +207,39 @@ export default function ResumeEditorClient({
       setSaveStatus('saving');
       setSaveError(null);
 
+      const requestPayload = JSON.stringify({
+        ...(JSON.parse(nextPayloadString) as {
+          title: string;
+          content: ResumeContent;
+        }),
+        expectedUpdatedAt: lastServerUpdatedAtRef.current,
+      });
+
       const response = await fetch(`/api/resumes/${resumeId}/autosave`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
         },
-        body: nextPayloadString,
+        body: requestPayload,
       });
 
       if (!response.ok) {
         const errorPayload = (await response.json().catch(() => null)) as
-          | { error?: string }
+          | AutosaveErrorResponse
           | null;
+
+        if (sequence !== saveSequenceRef.current) {
+          return;
+        }
+
+        if (response.status === 409 && errorPayload?.code === 'write_conflict') {
+          throw new AutosaveConflictError(
+            errorPayload.error ||
+              'Resume baska bir oturumda guncellendi. Lutfen sayfayi yenileyin.',
+            errorPayload.currentUpdatedAt ?? null
+          );
+        }
+
         throw new Error(errorPayload?.error || 'Autosave basarisiz oldu.');
       }
 
@@ -211,22 +250,36 @@ export default function ResumeEditorClient({
       }
 
       lastSavedPayloadRef.current = nextPayloadString;
+      lastServerUpdatedAtRef.current = responseData.updatedAt;
       setLastSavedAt(responseData.updatedAt);
+      setIsAutosaveBlocked(false);
       setSaveStatus('saved');
     },
     [resumeId]
   );
 
   const runSaveNow = useCallback(async () => {
+    if (isAutosaveBlocked) {
+      return;
+    }
+
     try {
       await savePayload(payloadString);
     } catch (error) {
       setSaveStatus('error');
-      setSaveError(
-        error instanceof Error ? error.message : 'Autosave basarisiz oldu.'
-      );
+      if (error instanceof AutosaveConflictError) {
+        if (error.currentUpdatedAt) {
+          lastServerUpdatedAtRef.current = error.currentUpdatedAt;
+          setLastSavedAt(error.currentUpdatedAt);
+        }
+        setIsAutosaveBlocked(true);
+        setSaveError(error.message);
+        return;
+      }
+
+      setSaveError(error instanceof Error ? error.message : 'Autosave basarisiz oldu.');
     }
-  }, [payloadString, savePayload]);
+  }, [isAutosaveBlocked, payloadString, savePayload]);
 
   const runAtsAnalysis = useCallback(async () => {
     setAtsLoading(true);
@@ -360,6 +413,10 @@ export default function ResumeEditorClient({
   }, []);
 
   useEffect(() => {
+    if (isAutosaveBlocked) {
+      return;
+    }
+
     if (payloadString === lastSavedPayloadRef.current) {
       if (saveStatus === 'saving') {
         setSaveStatus('saved');
@@ -375,7 +432,7 @@ export default function ResumeEditorClient({
     return () => {
       window.clearTimeout(timer);
     };
-  }, [payloadString, runSaveNow, saveStatus]);
+  }, [isAutosaveBlocked, payloadString, runSaveNow, saveStatus]);
 
   const isDirty = payloadString !== lastSavedPayloadRef.current;
   const isSettingsDirty = settingsPayloadString !== lastSavedSettingsRef.current;
@@ -1237,7 +1294,8 @@ export default function ResumeEditorClient({
             onClick={() => {
               void runSaveNow();
             }}
-            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+            disabled={isAutosaveBlocked}
+            className='rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400'
           >
             Simdi kaydet
           </button>
@@ -1260,6 +1318,16 @@ export default function ResumeEditorClient({
           <p className='mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700'>
             {saveError}
           </p>
+        ) : null}
+
+        {isAutosaveBlocked ? (
+          <button
+            type='button'
+            onClick={() => window.location.reload()}
+            className='mt-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-500'
+          >
+            Sayfayi yenile
+          </button>
         ) : null}
       </div>
     </section>

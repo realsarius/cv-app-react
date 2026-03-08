@@ -25,7 +25,24 @@ export type ResumeEditorState = {
 export type SaveResumeEditorInput = {
   title?: string;
   content: ResumeContent;
+  expectedUpdatedAt?: Date;
 };
+
+export type SaveResumeEditorResult =
+  | {
+      status: 'saved';
+      resume: {
+        id: string;
+        title: string;
+        currentVersionNo: number;
+        updatedAt: Date;
+      };
+    }
+  | {
+      status: 'conflict';
+      currentVersionNo: number;
+      currentUpdatedAt: Date;
+    };
 
 export async function getResumeEditorState(
   userId: string,
@@ -97,13 +114,14 @@ export async function saveResumeEditorState(
   userId: string,
   resumeId: string,
   input: SaveResumeEditorInput
-) {
+): Promise<SaveResumeEditorResult | null> {
   return withUserRls(userId, async (tx) => {
     const [resume] = await tx
       .select({
         id: resumes.id,
         title: resumes.title,
         currentVersionNo: resumes.currentVersionNo,
+        updatedAt: resumes.updatedAt,
       })
       .from(resumes)
       .where(and(eq(resumes.id, resumeId), eq(resumes.userId, userId)))
@@ -111,6 +129,17 @@ export async function saveResumeEditorState(
 
     if (!resume) {
       return null;
+    }
+
+    if (
+      input.expectedUpdatedAt &&
+      resume.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()
+    ) {
+      return {
+        status: 'conflict',
+        currentVersionNo: resume.currentVersionNo,
+        currentUpdatedAt: resume.updatedAt,
+      };
     }
 
     const nextVersionNo = resume.currentVersionNo + 1;
@@ -137,6 +166,9 @@ export async function saveResumeEditorState(
         updatedAt: resumes.updatedAt,
       });
 
-    return updatedResume;
+    return {
+      status: 'saved',
+      resume: updatedResume,
+    };
   });
 }
