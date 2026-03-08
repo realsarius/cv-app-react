@@ -22,10 +22,138 @@
     "logout": "Çıkış yap"
   },
   "landing": {
-    "title": "Özgeçmiş Oluşturucu",
-    "description": "CV oluşturma uygulamasına hoş geldiniz. Hesabınıza giriş yaparak taslaklarınızı yönetebilir, düzenleyebilir ve ATS analizini kullanabilirsiniz.",
-    "login": "Giriş yap",
-    "register": "Kayıt ol"
+    "meta": {
+      "title": "CV App — ATS Uyumlu Özgeçmiş Oluşturucu",
+      "description": "ATS sistemlerini geçen, profesyonel özgeçmişler oluşturun."
+    },
+    "nav": {
+      "brand": "CV App",
+      "features": "Özellikler",
+      "templates": "Şablonlar",
+      "pricing": "Fiyatlandırma",
+      "login": "Giriş Yap",
+      "cta": "Ücretsiz Başla",
+      "dashboard": "Panele Git",
+      "menuOpen": "Menüyü aç",
+      "menuClose": "Menüyü kapat",
+      "localeSwitch": "Dili {locale} yap"
+    },
+    "hero": {
+      "badge": "ATS Uyumlu · Ücretsiz Başla",
+      "headline": "İş Başvurularında Öne Çıkan Özgeçmiş",
+      "subheadline": "ATS sistemlerini geçin, işe alım yöneticilerinin dikkatini çekin. Dakikalar içinde profesyonel özgeçmiş oluşturun.",
+      "cta": "Ücretsiz Özgeçmiş Oluştur",
+      "ctaSecondary": "Örnek CV Görüntüle",
+      "socialProof": "2.000+ kişi bu ay iş buldu",
+      "dashboardCta": "Panele Git",
+      "previewTitle": "Canlı Önizleme"
+    },
+    "features": {
+      "title": "İş Başvurusunu Kolaylaştıran Her Şey",
+      "subtitle": "Hazır içerik blokları ve pratik araçlarla özgeçmişini daha hızlı güncelle.",
+      "items": {
+        "ats": {
+          "title": "ATS Skor Analizi",
+          "description": "İş ilanıyla eşleştir, eksik anahtar kelimeleri hızlıca gör."
+        },
+        "autosave": {
+          "title": "Otomatik Kayıt",
+          "description": "Yaptığın değişiklikler buluta otomatik kaydedilir."
+        },
+        "pdf": {
+          "title": "PDF Export",
+          "description": "ATS uyumlu, tek tıkla indirilebilir PDF çıktısı al."
+        },
+        "templates": {
+          "title": "Çoklu Şablon",
+          "description": "Farklı sektörlere uygun düzenler arasından seçim yap."
+        },
+        "share": {
+          "title": "Public CV Linki",
+          "description": "CV'ni link ile paylaş, başvuru sürecini hızlandır."
+        },
+        "ai": {
+          "title": "AI Öneriler",
+          "description": "Deneyim açıklamaları için metin önerileri ile daha hızlı yaz."
+        }
+      }
+    },
+    "templates": {
+      "title": "Hazır Şablon Galerisi",
+      "subtitle": "Başvurduğun role göre uygun şablon seç, içeriği hemen düzenlemeye başla.",
+      "viewAll": "Tüm şablonları gör",
+      "use": "Bu şablonu kullan",
+      "free": "Ücretsiz",
+      "pro": "Pro",
+      "popular": "Popüler",
+      "locked": "Pro ile açılır",
+      "items": {
+        "classic": {
+          "name": "Klasik",
+          "description": "Sade ve kurumsal görünüm."
+        },
+        "modern": {
+          "name": "Modern",
+          "description": "İki kolonlu, dikkat çeken düzen."
+        },
+        "minimal": {
+          "name": "Minimal",
+          "description": "Tipografi odaklı temiz tasarım."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Sana Uygun Planı Seç",
+      "subtitle": "Ücretsiz başla, ihtiyacın arttığında Pro plana geç.",
+      "monthly": "Aylık",
+      "yearly": "Yıllık",
+      "discount": "%20 indirim",
+      "free": {
+        "name": "Ücretsiz",
+        "price": "₺0",
+        "period": "/ ay",
+        "cta": "Ücretsiz Başla",
+        "features": {
+          "resumeLimit": "3 özgeçmişe kadar",
+          "templateLimit": "1 şablon (Klasik)",
+          "pdfLimit": "PDF export (aylık 10)",
+          "ats": "ATS analizi",
+          "publicLink": "Public CV linki"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "priceMonthly": "Yakında",
+        "priceYearly": "Yakında",
+        "period": "/ ay",
+        "cta": "Pro'ya Geç",
+        "comingNote": "Ödeme entegrasyonu tamamlandığında aktif olacak.",
+        "features": {
+          "resumeUnlimited": "Sınırsız özgeçmiş",
+          "templatesAll": "Tüm şablonlar",
+          "pdfUnlimited": "Sınırsız PDF export",
+          "aiSuggestions": "AI içerik önerisi",
+          "coverLetter": "Cover letter üretici",
+          "qr": "QR kod",
+          "prioritySupport": "Öncelikli destek"
+        }
+      }
+    },
+    "footer": {
+      "description": "ATS odaklı özgeçmiş oluştur, analiz et ve paylaş.",
+      "product": "Ürün",
+      "resources": "Kaynaklar",
+      "legal": "Yasal",
+      "features": "Özellikler",
+      "templates": "Şablonlar",
+      "pricing": "Fiyatlandırma",
+      "login": "Giriş Yap",
+      "register": "Kayıt Ol",
+      "dashboard": "Panele Git",
+      "privacy": "Gizlilik",
+      "terms": "Kullanım Koşulları",
+      "rights": "Tüm hakları saklıdır."
+    }
   },
   "auth": {
     "login": {

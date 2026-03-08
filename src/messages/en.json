@@ -22,10 +22,138 @@
     "logout": "Sign out"
   },
   "landing": {
-    "title": "Resume Builder",
-    "description": "Welcome to the resume builder app. Sign in to manage drafts, edit content and run ATS analysis.",
-    "login": "Sign in",
-    "register": "Sign up"
+    "meta": {
+      "title": "CV App — ATS-Friendly Resume Builder",
+      "description": "Build professional resumes that pass ATS filters."
+    },
+    "nav": {
+      "brand": "CV App",
+      "features": "Features",
+      "templates": "Templates",
+      "pricing": "Pricing",
+      "login": "Sign In",
+      "cta": "Start Free",
+      "dashboard": "Go to Dashboard",
+      "menuOpen": "Open menu",
+      "menuClose": "Close menu",
+      "localeSwitch": "Switch language to {locale}"
+    },
+    "hero": {
+      "badge": "ATS-Friendly · Free to Start",
+      "headline": "Stand Out With a Resume That Gets Interviews",
+      "subheadline": "Beat ATS filters and impress hiring managers. Build a professional resume in minutes.",
+      "cta": "Create Your Resume Free",
+      "ctaSecondary": "View Sample CV",
+      "socialProof": "2,000+ people landed jobs this month",
+      "dashboardCta": "Go to Dashboard",
+      "previewTitle": "Live Preview"
+    },
+    "features": {
+      "title": "Everything You Need to Land the Job",
+      "subtitle": "Use practical tools to improve your resume before every application.",
+      "items": {
+        "ats": {
+          "title": "ATS Score Analysis",
+          "description": "Match against job descriptions and spot missing keywords instantly."
+        },
+        "autosave": {
+          "title": "Auto-Save",
+          "description": "Your edits are saved to the cloud automatically."
+        },
+        "pdf": {
+          "title": "PDF Export",
+          "description": "Download ATS-friendly PDF output with one click."
+        },
+        "templates": {
+          "title": "Multiple Templates",
+          "description": "Choose layouts that fit different industries and roles."
+        },
+        "share": {
+          "title": "Public CV Link",
+          "description": "Share your resume with a link and move faster in hiring workflows."
+        },
+        "ai": {
+          "title": "AI Suggestions",
+          "description": "Get smart writing suggestions for experience and project sections."
+        }
+      }
+    },
+    "templates": {
+      "title": "Template Gallery",
+      "subtitle": "Pick a layout that matches your role and start editing right away.",
+      "viewAll": "View all templates",
+      "use": "Use this template",
+      "free": "Free",
+      "pro": "Pro",
+      "popular": "Popular",
+      "locked": "Unlocked with Pro",
+      "items": {
+        "classic": {
+          "name": "Classic",
+          "description": "Simple and corporate layout."
+        },
+        "modern": {
+          "name": "Modern",
+          "description": "Two-column layout with strong hierarchy."
+        },
+        "minimal": {
+          "name": "Minimal",
+          "description": "Typography-first clean layout."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Choose the Plan That Fits You",
+      "subtitle": "Start for free and upgrade when you need more flexibility.",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "discount": "20% off",
+      "free": {
+        "name": "Free",
+        "price": "$0",
+        "period": "/ month",
+        "cta": "Start Free",
+        "features": {
+          "resumeLimit": "Up to 3 resumes",
+          "templateLimit": "1 template (Classic)",
+          "pdfLimit": "PDF export (10/month)",
+          "ats": "ATS analysis",
+          "publicLink": "Public CV link"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "priceMonthly": "Coming soon",
+        "priceYearly": "Coming soon",
+        "period": "/ month",
+        "cta": "Upgrade to Pro",
+        "comingNote": "Will be active after payment integration is completed.",
+        "features": {
+          "resumeUnlimited": "Unlimited resumes",
+          "templatesAll": "All templates",
+          "pdfUnlimited": "Unlimited PDF export",
+          "aiSuggestions": "AI content suggestions",
+          "coverLetter": "Cover letter generator",
+          "qr": "QR code",
+          "prioritySupport": "Priority support"
+        }
+      }
+    },
+    "footer": {
+      "description": "Create, analyze and share ATS-focused resumes.",
+      "product": "Product",
+      "resources": "Resources",
+      "legal": "Legal",
+      "features": "Features",
+      "templates": "Templates",
+      "pricing": "Pricing",
+      "login": "Sign In",
+      "register": "Sign Up",
+      "dashboard": "Dashboard",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "rights": "All rights reserved."
+    }
   },
   "auth": {
     "login": {
