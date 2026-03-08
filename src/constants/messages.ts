@@ -1,46 +1,50 @@
+import trMessages from '@/messages/tr.json';
+
+function trimTrailingDot(value: string) {
+  return value.endsWith('.') ? value.slice(0, -1) : value;
+}
+
+// Geçiş sürecinde mevcut importları bozmamak için eski "messages" API'si korunur.
 export const messages = {
   common: {
-    supabaseEnvMissing: 'Supabase ortam değişkenleri eksik',
-    databaseUrlMissing: 'DATABASE_URL veya DATABASE_DEV_URL eksik',
-    unauthorizedRequest: 'Yetkisiz istek.',
-    invalidPayload: 'Gönderilen veri formatı geçersiz.',
+    supabaseEnvMissing: trimTrailingDot(trMessages.common.supabaseEnvMissing),
+    databaseUrlMissing: trimTrailingDot(trMessages.common.databaseUrlMissing),
+    unauthorizedRequest: trMessages.common.unauthorizedRequest,
+    invalidPayload: trMessages.common.invalidPayload,
   },
   auth: {
-    invalidLoginCredentials: 'Giriş bilgileri geçersiz',
-    loginRateLimited:
-      'Çok fazla giriş denemesi algılandı. Lütfen biraz sonra tekrar deneyin',
-    registerInvalidInput: 'Kayıt bilgileri geçersiz',
-    registerRateLimited:
-      'Çok fazla kayıt denemesi algılandı. Lütfen daha sonra tekrar deneyin',
-    emailNotConfirmed:
-      'E-posta adresi doğrulanmadı. Lütfen e-posta kutunuzu kontrol edin.',
-    verifyLinkInvalidOrExpired: 'Doğrulama bağlantısı geçersiz veya süresi dolmuş.',
-    verificationCodeRequired: 'E-posta ve doğrulama kodu zorunludur.',
-    verificationCodeInvalidOrExpired: 'Doğrulama kodu geçersiz veya süresi dolmuş.',
+    invalidLoginCredentials: trimTrailingDot(
+      trMessages.auth.errors.invalidLoginCredentials
+    ),
+    loginRateLimited: trimTrailingDot(trMessages.auth.errors.loginRateLimited),
+    registerInvalidInput: trimTrailingDot(trMessages.auth.errors.registerInvalidInput),
+    registerRateLimited: trimTrailingDot(trMessages.auth.errors.registerRateLimited),
+    emailNotConfirmed: trMessages.auth.errors.emailNotConfirmed,
+    verifyLinkInvalidOrExpired: trMessages.auth.errors.verifyLinkInvalidOrExpired,
+    verificationCodeRequired: trMessages.auth.errors.verificationCodeRequired,
+    verificationCodeInvalidOrExpired:
+      trMessages.auth.errors.verificationCodeInvalidOrExpired,
   },
   profile: {
-    fullNameTooLong: 'Ad soyad 120 karakterden uzun olamaz',
-    profileUpdated: 'Profil güncellendi',
+    fullNameTooLong: trimTrailingDot(trMessages.profile.errors.fullNameTooLong),
+    profileUpdated: trimTrailingDot(trMessages.profile.success.profileUpdated),
   },
   resume: {
-    idInvalid: 'Özgeçmiş kimliği geçersiz',
-    notFound: 'Özgeçmiş bulunamadı',
-    createFailed: 'Özgeçmiş oluşturulamadı.',
-    titleTooLong: 'Başlık 120 karakterden uzun olamaz',
-    autosaveFailed: 'Otomatik kayıt başarısız oldu.',
-    autosaveRateLimited:
-      'Çok fazla otomatik kaydetme isteği gönderildi. Lütfen kısa bir süre bekleyip tekrar deneyin.',
-    updatedInAnotherSession:
-      'Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyin.',
+    idInvalid: trimTrailingDot(trMessages.resume.errors.idInvalid),
+    notFound: trimTrailingDot(trMessages.resume.errors.notFound),
+    createFailed: trMessages.resume.errors.createFailed,
+    titleTooLong: trimTrailingDot(trMessages.resume.errors.titleTooLong),
+    autosaveFailed: trMessages.resume.errors.autosaveFailed,
+    autosaveRateLimited: trMessages.resume.errors.autosaveRateLimited,
+    updatedInAnotherSession: trMessages.resume.errors.updatedInAnotherSession,
     updatedInAnotherSessionDetailed:
-      'Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyip değişiklikleri tekrar uygulayın.',
-    exportRateLimited:
-      'Çok fazla PDF export isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.',
-    exportIdInvalid: 'resumeId formatı geçersiz.',
+      trMessages.resume.errors.updatedInAnotherSessionDetailed,
+    exportRateLimited: trMessages.resume.errors.exportRateLimited,
+    exportIdInvalid: trMessages.resume.errors.exportIdInvalid,
   },
   ats: {
-    analysisFailed: 'ATS analizi başarısız oldu.',
-    rateLimited:
-      'Çok fazla ATS analizi isteği gönderildi. Lütfen biraz sonra tekrar deneyin.',
+    analysisFailed: trMessages.ats.errors.analysisFailed,
+    rateLimited: trMessages.ats.errors.rateLimited,
   },
 } as const;
+
