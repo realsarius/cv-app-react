@@ -78,4 +78,27 @@ describe('createResumePdf', () => {
     expect(header).toBe('%PDF');
     expect(pdfBytes.length).toBeGreaterThan(1500);
   });
+
+  it('yeni template anahtarlari ile pdf olusturulur', async () => {
+    const templateKeys: ResumeVisualSettings['templateKey'][] = [
+      'atlantic-blue',
+      'two-column',
+    ];
+
+    for (const templateKey of templateKeys) {
+      const pdfBytes = await createResumePdf({
+        title: 'Template Resume',
+        content: sampleContent,
+        settings: {
+          ...sampleSettings,
+          templateKey,
+        },
+      });
+
+      const header = Buffer.from(pdfBytes).subarray(0, 4).toString('utf-8');
+
+      expect(header).toBe('%PDF');
+      expect(pdfBytes.length).toBeGreaterThan(1500);
+    }
+  });
 });

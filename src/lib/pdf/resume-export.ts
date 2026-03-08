@@ -86,7 +86,64 @@ function formatRange(startDate: string, endDate: string) {
   return EMPTY_LINE;
 }
 
-function buildPalette(colorScheme: ResumeVisualSettings['colorScheme']): Palette {
+function buildPalette(
+  colorScheme: ResumeVisualSettings['colorScheme'],
+  templateKey: ResumeVisualSettings['templateKey']
+): Palette {
+  if (templateKey === 'atlantic-blue') {
+    if (colorScheme === 'mono') {
+      return {
+        heading: rgb(0.08, 0.08, 0.08),
+        body: rgb(0.16, 0.16, 0.16),
+        muted: rgb(0.33, 0.33, 0.33),
+        divider: rgb(0.75, 0.75, 0.75),
+      };
+    }
+
+    if (colorScheme === 'slate') {
+      return {
+        heading: rgb(0.06, 0.15, 0.28),
+        body: rgb(0.13, 0.22, 0.34),
+        muted: rgb(0.26, 0.39, 0.55),
+        divider: rgb(0.72, 0.79, 0.86),
+      };
+    }
+
+    return {
+      heading: rgb(0.07, 0.22, 0.4),
+      body: rgb(0.17, 0.28, 0.42),
+      muted: rgb(0.29, 0.43, 0.62),
+      divider: rgb(0.79, 0.86, 0.93),
+    };
+  }
+
+  if (templateKey === 'two-column') {
+    if (colorScheme === 'mono') {
+      return {
+        heading: rgb(0.1, 0.1, 0.1),
+        body: rgb(0.16, 0.16, 0.16),
+        muted: rgb(0.35, 0.35, 0.35),
+        divider: rgb(0.76, 0.76, 0.76),
+      };
+    }
+
+    if (colorScheme === 'slate') {
+      return {
+        heading: rgb(0.09, 0.11, 0.16),
+        body: rgb(0.15, 0.19, 0.25),
+        muted: rgb(0.33, 0.39, 0.46),
+        divider: rgb(0.71, 0.76, 0.82),
+      };
+    }
+
+    return {
+      heading: rgb(0.12, 0.15, 0.2),
+      body: rgb(0.18, 0.22, 0.28),
+      muted: rgb(0.36, 0.42, 0.49),
+      divider: rgb(0.78, 0.82, 0.87),
+    };
+  }
+
   if (colorScheme === 'mono') {
     return {
       heading: rgb(0.08, 0.08, 0.08),
@@ -279,17 +336,32 @@ export async function createResumePdf(input: ResumePdfInput) {
   const bodyFont = await doc.embedFont(StandardFonts.Helvetica);
   const headingFont = await doc.embedFont(StandardFonts.HelveticaBold);
 
-  const palette = buildPalette(input.settings.colorScheme);
+  const isAtlanticTemplate = input.settings.templateKey === 'atlantic-blue';
+  const isTwoColumnTemplate = input.settings.templateKey === 'two-column';
+  const useDenseLayout =
+    input.settings.templateKey === 'ats-compact' || isTwoColumnTemplate;
+  const palette = buildPalette(input.settings.colorScheme, input.settings.templateKey);
   const scale = clamp(input.settings.fontScale, 0.85, 1.3);
   const spacingScale = clamp(input.settings.spacingScale, 0.8, 1.4);
-  const compact = input.settings.templateKey === 'ats-compact';
 
-  const baseSize = compact ? 10.5 * scale : 11 * scale;
-  const headingSize = compact ? 11.5 * scale : 12.5 * scale;
-  const heroNameSize = compact ? 24 * scale : 27 * scale;
-  const heroTitleSize = compact ? 12 * scale : 13 * scale;
-  const lineHeight = baseSize * (compact ? 1.35 : 1.45) * spacingScale;
-  const sectionGap = compact ? lineHeight * 0.65 : lineHeight * 0.9;
+  const baseSize = useDenseLayout ? 10.5 * scale : 11 * scale;
+  const headingSize = useDenseLayout ? 11.5 * scale : 12.5 * scale;
+  const heroNameSize = isAtlanticTemplate
+    ? 25 * scale
+    : useDenseLayout
+      ? 24 * scale
+      : 27 * scale;
+  const heroTitleSize = isAtlanticTemplate
+    ? 12.2 * scale
+    : useDenseLayout
+      ? 12 * scale
+      : 13 * scale;
+  const lineHeight = baseSize * (useDenseLayout ? 1.35 : 1.45) * spacingScale;
+  const sectionGap = isAtlanticTemplate
+    ? lineHeight * 0.78
+    : useDenseLayout
+      ? lineHeight * 0.65
+      : lineHeight * 0.9;
 
   const firstPage = createPage(doc);
   const ctx: DrawContext = {
@@ -335,10 +407,10 @@ export async function createResumePdf(input: ResumePdfInput) {
   ctx.page.drawLine({
     start: { x: ctx.margin, y: ctx.y },
     end: { x: ctx.margin + ctx.width, y: ctx.y },
-    thickness: 0.8,
+    thickness: isAtlanticTemplate ? 1.05 : 0.8,
     color: palette.divider,
   });
-  ctx.y -= sectionGap;
+  ctx.y -= isTwoColumnTemplate ? sectionGap * 0.92 : sectionGap;
 
   if (input.content.profile.trim()) {
     drawSectionTitle(
