@@ -1,33 +1,36 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 type ResumePrintActionsProps = {
   resumeId: string;
 };
 
 export default function ResumePrintActions({ resumeId }: ResumePrintActionsProps) {
+  const t = useTranslations('resume.editor');
+
   return (
     <div className='flex flex-wrap items-center gap-2 print:hidden'>
       <Link
         href={`/resumes/${resumeId}`}
         className='btn-secondary'
       >
-        Editöre dön
+        {t('backToEditor')}
       </Link>
       <Link
         href={`/api/resumes/${resumeId}/export`}
         target='_blank'
         className='btn-secondary'
       >
-        PDF indir
+        {t('downloadPdf')}
       </Link>
       <button
         type='button'
         onClick={() => window.print()}
         className='btn-primary'
       >
-        Yazdır / PDF al
+        {t('print')}
       </button>
     </div>
   );

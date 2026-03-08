@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { messages } from '@/constants/messages';
 import { saveResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { resumeContentSchema } from '@/features/resume-editor/content';
@@ -9,6 +8,7 @@ import {
   checkRateLimit,
   extractClientIp,
 } from '@/lib/security/rate-limit';
+import { getRequestMessages } from '@/lib/i18n/request-messages';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -29,10 +29,12 @@ type RouteContext = {
 };
 
 export async function POST(request: NextRequest, context: RouteContext) {
+  const messages = getRequestMessages(request);
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: `${messages.common.supabaseEnvMissing}.`,
+        error: messages.common.supabaseEnvMissing,
       },
       { status: 503 }
     );
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'DATABASE_URL veya DATABASE_DEV_URL tanımlı değil.',
+        error: messages.common.databaseUrlMissing,
       },
       { status: 503 }
     );
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsedParams.success) {
     return NextResponse.json(
       {
-        error: messages.resume.exportIdInvalid,
+        error: messages.resume.errors.exportIdInvalid,
       },
       { status: 400 }
     );
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       {
-        error: messages.resume.autosaveRateLimited,
+        error: messages.resume.errors.autosaveRateLimited,
       },
       {
         status: 429,
@@ -117,7 +119,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!savedResume) {
     return NextResponse.json(
       {
-        error: `${messages.resume.notFound}.`,
+        error: messages.resume.errors.notFound,
       },
       { status: 404 }
     );
@@ -126,7 +128,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (savedResume.status === 'conflict') {
     return NextResponse.json(
       {
-        error: messages.resume.updatedInAnotherSessionDetailed,
+        error: messages.resume.errors.updatedInAnotherSessionDetailed,
         code: 'write_conflict',
         currentVersionNo: savedResume.currentVersionNo,
         currentUpdatedAt: savedResume.currentUpdatedAt.toISOString(),

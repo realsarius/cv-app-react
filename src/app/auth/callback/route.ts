@@ -1,6 +1,6 @@
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { messages } from '@/constants/messages';
+import { getRequestMessages } from '@/lib/i18n/request-messages';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -40,8 +40,10 @@ function redirectToLoginWithError(request: NextRequest, message: string) {
 }
 
 export async function GET(request: NextRequest) {
+  const messages = getRequestMessages(request);
+
   if (!isSupabaseConfigured()) {
-    return redirectToLoginWithError(request, `${messages.common.supabaseEnvMissing}.`);
+    return redirectToLoginWithError(request, messages.common.supabaseEnvMissing);
   }
 
   const requestUrl = new URL(request.url);
@@ -92,6 +94,6 @@ export async function GET(request: NextRequest) {
 
   return redirectToLoginWithError(
     request,
-    messages.auth.verifyLinkInvalidOrExpired
+    messages.auth.errors.verifyLinkInvalidOrExpired
   );
 }

@@ -1,5 +1,4 @@
 import { desc, eq } from 'drizzle-orm';
-import { messages } from '@/constants/messages';
 import { resumeVersions, resumes } from '@/db/schema';
 import { createEmptyResumeContent } from '@/features/resume-editor/content';
 import { withUserRls } from './rls';
@@ -19,13 +18,13 @@ export async function listUserResumes(userId: string) {
   );
 }
 
-export async function createDraftResume(userId: string, title?: string) {
+export async function createDraftResume(userId: string, title: string) {
   const createdResume = await withUserRls(userId, async (tx) => {
     const [insertedResume] = await tx
       .insert(resumes)
       .values({
         userId,
-        title: title?.trim() || 'Adsız Özgeçmiş',
+        title: title.trim(),
         status: 'draft',
         currentVersionNo: 1,
       })
@@ -37,7 +36,7 @@ export async function createDraftResume(userId: string, title?: string) {
       });
 
     if (!insertedResume) {
-      throw new Error(messages.resume.createFailed);
+      throw new Error('RESUME_CREATE_FAILED');
     }
 
     await tx.insert(resumeVersions).values({

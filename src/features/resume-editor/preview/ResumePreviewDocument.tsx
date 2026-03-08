@@ -1,4 +1,5 @@
 import type { ResumeContent } from '@/features/resume-editor/content';
+import { useTranslations } from 'next-intl';
 
 type PreviewVisualSettings = {
   templateKey: 'ats-classic' | 'ats-compact';
@@ -15,7 +16,7 @@ type ResumePreviewDocumentProps = {
   className?: string;
 };
 
-function formatRange(startDate: string, endDate: string) {
+function formatRange(startDate: string, endDate: string, ongoingLabel: string) {
   const start = startDate.trim();
   const end = endDate.trim();
 
@@ -24,7 +25,7 @@ function formatRange(startDate: string, endDate: string) {
   }
 
   if (start) {
-    return `${start} - Devam ediyor`;
+    return `${start} - ${ongoingLabel}`;
   }
 
   if (end) {
@@ -74,6 +75,7 @@ export default function ResumePreviewDocument({
   printFriendly = false,
   className,
 }: ResumePreviewDocumentProps) {
+  const t = useTranslations('resume.previewDocument');
   const isCompactTemplate = settings.templateKey === 'ats-compact';
   const palette = buildPalette(settings.colorScheme);
   const sectionSpacing = isCompactTemplate ? 'mt-4' : 'mt-6';
@@ -123,13 +125,13 @@ export default function ResumePreviewDocument({
           className={`font-bold ${palette.title}`}
           style={{ fontSize: `${typography.title}em`, lineHeight: 1.1 }}
         >
-          {content.personalDetails.fullName || title || 'İsim Soyisim'}
+          {content.personalDetails.fullName || title || t('fullNameFallback')}
         </h2>
         <p
           className={`mt-1 ${palette.body}`}
           style={{ fontSize: `${typography.subtitle}em`, lineHeight: articleLineHeight }}
         >
-          {content.personalDetails.jobTitle || 'Pozisyon'}
+          {content.personalDetails.jobTitle || t('positionFallback')}
         </p>
         <p
           className={`mt-2 ${palette.muted}`}
@@ -151,7 +153,7 @@ export default function ResumePreviewDocument({
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
           >
-            Profil
+            {t('sections.profile')}
           </h3>
           <p
             className={`mt-2 whitespace-pre-wrap ${palette.body}`}
@@ -168,7 +170,7 @@ export default function ResumePreviewDocument({
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
           >
-            Deneyim
+            {t('sections.experience')}
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.experiences.map((item) => (
@@ -178,15 +180,15 @@ export default function ResumePreviewDocument({
                     className={`font-semibold ${palette.title}`}
                     style={{ fontSize: `${typography.body}em` }}
                   >
-                    {item.title || 'Pozisyon'}
+                    {item.title || t('positionFallback')}
                     {item.company ? ` - ${item.company}` : ''}
                   </p>
-                  {formatRange(item.startDate, item.endDate) ? (
+                  {formatRange(item.startDate, item.endDate, t('range.ongoing')) ? (
                     <p
                       className={palette.sectionLabel}
                       style={{ fontSize: `${typography.meta}em` }}
                     >
-                      {formatRange(item.startDate, item.endDate)}
+                      {formatRange(item.startDate, item.endDate, t('range.ongoing'))}
                     </p>
                   ) : null}
                 </div>
@@ -218,7 +220,7 @@ export default function ResumePreviewDocument({
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
           >
-            Eğitim
+            {t('sections.education')}
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.educations.map((item) => (
@@ -228,15 +230,15 @@ export default function ResumePreviewDocument({
                     className={`font-semibold ${palette.title}`}
                     style={{ fontSize: `${typography.body}em` }}
                   >
-                    {item.school || 'Okul'}
+                    {item.school || t('schoolFallback')}
                     {item.degree ? ` - ${item.degree}` : ''}
                   </p>
-                  {formatRange(item.startDate, item.endDate) ? (
+                  {formatRange(item.startDate, item.endDate, t('range.ongoing')) ? (
                     <p
                       className={palette.sectionLabel}
                       style={{ fontSize: `${typography.meta}em` }}
                     >
-                      {formatRange(item.startDate, item.endDate)}
+                      {formatRange(item.startDate, item.endDate, t('range.ongoing'))}
                     </p>
                   ) : null}
                 </div>
@@ -268,7 +270,7 @@ export default function ResumePreviewDocument({
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
           >
-            Projeler
+            {t('sections.projects')}
           </h3>
           <div className={`mt-3 ${contentSpacing}`}>
             {content.projects.map((item) => (
@@ -277,7 +279,7 @@ export default function ResumePreviewDocument({
                   className={`font-semibold ${palette.title}`}
                   style={{ fontSize: `${typography.body}em` }}
                 >
-                  {item.title || 'Proje'}
+                  {item.title || t('projectFallback')}
                   {item.subtitle ? ` - ${item.subtitle}` : ''}
                 </p>
                 {item.stack ? (

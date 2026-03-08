@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { messages } from '@/constants/messages';
 import { getResumeEditorState } from '@/lib/db/resume-editor';
 import { isDatabaseConfigured } from '@/lib/db/env';
+import { getRequestMessages } from '@/lib/i18n/request-messages';
 import { createResumePdf } from '@/lib/pdf/resume-export';
 import {
   buildRateLimitHeaders,
@@ -34,10 +34,12 @@ function buildExportFileName(title: string) {
 export const runtime = 'nodejs';
 
 export async function GET(request: Request, context: RouteContext) {
+  const messages = getRequestMessages(request);
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
-        error: `${messages.common.supabaseEnvMissing}.`,
+        error: messages.common.supabaseEnvMissing,
       },
       { status: 503 }
     );
@@ -46,7 +48,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       {
-        error: 'DATABASE_URL veya DATABASE_DEV_URL tanımlı değil.',
+        error: messages.common.databaseUrlMissing,
       },
       { status: 503 }
     );
@@ -56,7 +58,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!parsedParams.success) {
     return NextResponse.json(
       {
-        error: messages.resume.exportIdInvalid,
+        error: messages.resume.errors.exportIdInvalid,
       },
       { status: 400 }
     );
@@ -87,7 +89,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       {
-        error: messages.resume.exportRateLimited,
+        error: messages.resume.errors.exportRateLimited,
       },
       {
         status: 429,
@@ -100,7 +102,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (!editorState) {
     return NextResponse.json(
       {
-        error: `${messages.resume.notFound}.`,
+        error: messages.resume.errors.notFound,
       },
       { status: 404 }
     );

@@ -1,0 +1,276 @@
+{
+  "meta": {
+    "title": "Özgeçmiş Oluşturucu",
+    "description": "Next.js ve Supabase tabanlı CV oluşturma uygulaması"
+  },
+  "common": {
+    "supabaseEnvMissing": "Supabase ortam değişkenleri eksik.",
+    "databaseUrlMissing": "DATABASE_URL veya DATABASE_DEV_URL eksik.",
+    "unauthorizedRequest": "Yetkisiz istek.",
+    "invalidPayload": "Gönderilen veri formatı geçersiz.",
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu.",
+    "unknown": "Bilinmiyor",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "back": "Geri"
+  },
+  "nav": {
+    "brand": "Özgeçmiş Oluşturucu",
+    "dashboard": "Panel",
+    "settings": "Profil",
+    "logout": "Çıkış yap"
+  },
+  "landing": {
+    "title": "Özgeçmiş Oluşturucu",
+    "description": "CV oluşturma uygulamasına hoş geldiniz. Hesabınıza giriş yaparak taslaklarınızı yönetebilir, düzenleyebilir ve ATS analizini kullanabilirsiniz.",
+    "login": "Giriş yap",
+    "register": "Kayıt ol"
+  },
+  "auth": {
+    "login": {
+      "title": "Giriş yap",
+      "description": "Hesabınıza giriş yaparak CV taslaklarınıza kaldığınız yerden devam edin.",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş yap",
+      "noAccount": "Hesabın yok mu?",
+      "register": "Kayıt ol"
+    },
+    "register": {
+      "title": "Kayıt ol",
+      "description": "Supabase Auth ile güvenli şekilde yeni hesap oluştur.",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Kayıt ol",
+      "hasAccount": "Zaten hesabın var mı?",
+      "login": "Giriş yap"
+    },
+    "checkEmail": {
+      "title": "E-postanı doğrula",
+      "description": "Kayıt tamamlandı. Hesabını aktifleştirmek için e-postana gelen doğrulama bağlantısına tıkla.",
+      "descriptionFallback": "Bağlantı açılmazsa maildeki kodu aşağıdan girerek devam edebilirsin.",
+      "email": "E-posta",
+      "code": "Doğrulama kodu",
+      "codeHint": "Maildeki kodu aynen gir. Kod uzunluğu projeye göre 6-12 haneli olabilir.",
+      "submit": "Kodu doğrula",
+      "backToLoginPrefix": "Dilersen önce",
+      "backToLoginLink": "giriş ekranına",
+      "backToLoginSuffix": "dönebilirsin."
+    },
+    "errors": {
+      "invalidLoginCredentials": "Giriş bilgileri geçersiz.",
+      "loginRateLimited": "Çok fazla giriş denemesi algılandı. Lütfen biraz sonra tekrar deneyin.",
+      "registerInvalidInput": "Kayıt bilgileri geçersiz.",
+      "registerRateLimited": "Çok fazla kayıt denemesi algılandı. Lütfen daha sonra tekrar deneyin.",
+      "emailNotConfirmed": "E-posta adresi doğrulanmadı. Lütfen e-posta kutunuzu kontrol edin.",
+      "verifyLinkInvalidOrExpired": "Doğrulama bağlantısı geçersiz veya süresi dolmuş.",
+      "verificationCodeRequired": "E-posta ve doğrulama kodu zorunludur.",
+      "verificationCodeInvalidOrExpired": "Doğrulama kodu geçersiz veya süresi dolmuş."
+    }
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "Hoş geldin",
+    "dbConnectionError": "Veritabanı bağlantısı kurulamadı. DATABASE_URL değerini kontrol edin.",
+    "dbMissing": "`DATABASE_URL` eksik olduğu için özgeçmiş listesi yüklenemiyor.",
+    "newDraftTitle": "Yeni taslak oluştur",
+    "newDraftPlaceholder": "Örnek: Frontend Developer CV",
+    "newDraftDefaultTitle": "Adsız Özgeçmiş",
+    "newDraftSubmit": "Taslak oluştur",
+    "resumeListTitle": "Özgeçmiş listesi",
+    "emptyResumes": "Henüz özgeçmiş yok. İlk taslağını oluşturarak başlayabilirsin.",
+    "lastUpdated": "Son güncelleme",
+    "openEditor": "Editörü aç"
+  },
+  "settings": {
+    "title": "Profil ayarları",
+    "description": "Hesap bilgilerini güncelleyebilir, hesap durumunu kontrol edebilirsin.",
+    "summaryTitle": "Hesap özeti",
+    "profileTitle": "Profil bilgileri",
+    "profileDescription": "Buradaki ad soyad bilgisi panelde karşılama metninde ve yeni özgeçmiş taslaklarında kullanılır.",
+    "userId": "Kullanıcı ID",
+    "provider": "Kimlik sağlayıcı",
+    "emailVerification": "E-posta doğrulama",
+    "verified": "Doğrulandı",
+    "notVerified": "Doğrulanmadı",
+    "accountCreated": "Hesap oluşturma",
+    "lastSignIn": "Son giriş",
+    "profileUpdatedAt": "Profil güncelleme",
+    "email": "E-posta",
+    "fullName": "Ad soyad",
+    "fullNamePlaceholder": "Ad soyad girin",
+    "submit": "Profili güncelle"
+  },
+  "resume": {
+    "editor": {
+      "title": "Özgeçmiş düzenleyici",
+      "backToDashboard": "Panele dön",
+      "backToEditor": "Editöre dön",
+      "preview": "Önizle / Yazdır",
+      "downloadPdf": "PDF indir",
+      "print": "Yazdır / PDF al",
+      "resumeTitle": "Özgeçmiş başlığı",
+      "resumeTitlePlaceholder": "Örnek: Frontend Developer CV",
+      "viewSettingsTitle": "Özgeçmiş görünüm ayarları",
+      "saveSettings": "Ayarları kaydet",
+      "saving": "Kaydediliyor",
+      "saved": "Kaydedildi",
+      "error": "Hata",
+      "dirty": "Değişiklik var",
+      "ready": "Hazır",
+      "statusLabel": "Durum:",
+      "lastSaved": "Son kayıt",
+      "settingsSaveFailed": "Ayarlar kaydedilemedi.",
+      "viewSettingsDescription": "Önizleme sayfasında kullanılacak şablon, renk ve boşluk ayarlarını yönet.",
+      "templateLabel": "Şablon",
+      "templateClassic": "ATS Classic",
+      "templateCompact": "ATS Compact",
+      "colorSchemeLabel": "Renk düzeni",
+      "colorNeutral": "Neutral",
+      "colorSlate": "Slate",
+      "colorMono": "Mono",
+      "fontScale": "Font ölçeği ({value}x)",
+      "spacingScale": "Satır ve bölüm boşluğu ({value}x)",
+      "personalInfoTitle": "Kişisel bilgiler",
+      "personalFullNamePlaceholder": "Ad soyad",
+      "personalJobTitlePlaceholder": "Pozisyon",
+      "personalEmailPlaceholder": "E-posta",
+      "personalPhonePlaceholder": "Telefon",
+      "personalAddressPlaceholder": "Adres",
+      "contentSectionsTitle": "İçerik bölümleri",
+      "contentSectionsDescription": "Sadece ihtiyacınız olan bölümleri ekleyin.",
+      "addContent": "İçerik ekle",
+      "allSectionsAdded": "Tüm bölümler eklendi",
+      "profileSummaryTitle": "Profil özeti",
+      "profileSummaryPlaceholder": "Kısa kariyer özeti...",
+      "removeSection": "Bölümü kaldır",
+      "experienceSectionTitle": "Deneyimler",
+      "addExperience": "Deneyim ekle",
+      "experienceRecord": "Deneyim kaydı",
+      "delete": "Sil",
+      "positionPlaceholder": "Pozisyon",
+      "companyPlaceholder": "Şirket",
+      "cityPlaceholder": "Şehir",
+      "countryPlaceholder": "Ülke",
+      "startDatePlaceholder": "Başlangıç",
+      "endDatePlaceholder": "Bitiş",
+      "experienceDescriptionPlaceholder": "Sorumluluklar ve etkiler...",
+      "educationSectionTitle": "Eğitim",
+      "addEducation": "Eğitim ekle",
+      "educationRecord": "Eğitim kaydı",
+      "schoolPlaceholder": "Okul",
+      "degreePlaceholder": "Bölüm / Derece",
+      "educationDescriptionPlaceholder": "Eğitim özet notu...",
+      "projectSectionTitle": "Projeler",
+      "addProject": "Proje ekle",
+      "projectRecord": "Proje kaydı",
+      "projectNamePlaceholder": "Proje adı",
+      "projectSubtitlePlaceholder": "Alt başlık",
+      "stackPlaceholder": "Kullanılan teknolojiler (React, Next.js, PostgreSQL...)",
+      "projectDescriptionPlaceholder": "Proje açıklaması...",
+      "atsTitle": "ATS analizi",
+      "analyzeAts": "ATS analiz et",
+      "analyzing": "Analiz ediliyor",
+      "atsDescription": "İş ilanı metnini ekleyerek anahtar kelime kapsamı ve temel ATS sinyallerini hesapla.",
+      "jobTitleOptionalPlaceholder": "İş unvanı (opsiyonel)",
+      "companyOptionalPlaceholder": "Şirket (opsiyonel)",
+      "jobDescriptionPlaceholder": "İş ilanını buraya yapıştır...",
+      "minJobDescription": "ATS analizi için en az 50 karakterlik iş ilanı metni gerekli.",
+      "overallScore": "Toplam skor:",
+      "algorithm": "Algoritma",
+      "keywordCoverage": "Anahtar kelime kapsamı",
+      "sectionCompleteness": "Bölüm bütünlüğü",
+      "readability": "Okunabilirlik",
+      "roleAlignment": "Pozisyon uyumu",
+      "matchedKeywords": "Eşleşen anahtar kelimeler",
+      "matchedKeywordsEmpty": "Eşleşen kelime bulunamadı.",
+      "missingKeywords": "Eksik anahtar kelimeler",
+      "missingKeywordsEmpty": "Eksik anahtar kelime bulunmadı.",
+      "suggestions": "Öneriler",
+      "atsHistory": "ATS geçmişi",
+      "atsHistoryEmpty": "Henüz kayıtlı ATS analizi bulunmuyor.",
+      "jobTitleNotSpecified": "İş unvanı belirtilmedi",
+      "companyNotSpecified": "Şirket belirtilmedi",
+      "autosaveDelayInfo": "Otomatik kaydetme 1.5 sn gecikme ile çalışır.",
+      "saveNow": "Şimdi kaydet",
+      "refreshPage": "Sayfayı yenile",
+      "livePreview": "Canlı önizleme",
+      "openSeparatePage": "Ayrı sayfada aç",
+      "addContentDialogAriaLabel": "İçerik bölümü ekle",
+      "addContentDialogTitle": "İçerik ekle",
+      "addContentDialogDescription": "İhtiyacınız olan bölümleri seçin, istemediklerinizi gizleyin.",
+      "close": "Kapat",
+      "sectionAlreadyAdded": "Bu bölüm zaten eklendi",
+      "addSection": "Bölümü ekle",
+      "addable": {
+        "profile": {
+          "label": "Profil özeti",
+          "description": "Kısa bir kariyer özeti ekleyin."
+        },
+        "experiences": {
+          "label": "Deneyimler",
+          "description": "Çalıştığınız roller ve etkilerinizi ekleyin."
+        },
+        "educations": {
+          "label": "Eğitim",
+          "description": "Okul, bölüm ve tarih bilgilerinizi ekleyin."
+        },
+        "projects": {
+          "label": "Projeler",
+          "description": "Öne çıkarmak istediğiniz projeleri ekleyin."
+        },
+        "ats": {
+          "label": "ATS analizi",
+          "description": "İş ilanına göre anahtar kelime analizini açın."
+        }
+      }
+    },
+    "preview": {
+      "title": "ATS önizleme"
+    },
+    "previewDocument": {
+      "fullNameFallback": "İsim Soyisim",
+      "positionFallback": "Pozisyon",
+      "schoolFallback": "Okul",
+      "projectFallback": "Proje",
+      "sections": {
+        "profile": "Profil",
+        "experience": "Deneyim",
+        "education": "Eğitim",
+        "projects": "Projeler"
+      },
+      "range": {
+        "ongoing": "Devam ediyor"
+      }
+    },
+    "errors": {
+      "idInvalid": "Özgeçmiş kimliği geçersiz.",
+      "notFound": "Özgeçmiş bulunamadı.",
+      "createFailed": "Özgeçmiş oluşturulamadı.",
+      "titleTooLong": "Başlık 120 karakterden uzun olamaz.",
+      "autosaveFailed": "Otomatik kayıt başarısız oldu.",
+      "autosaveRateLimited": "Çok fazla otomatik kaydetme isteği gönderildi. Lütfen kısa bir süre bekleyip tekrar deneyin.",
+      "updatedInAnotherSession": "Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyin.",
+      "updatedInAnotherSessionDetailed": "Özgeçmiş başka bir oturumda güncellendi. Lütfen sayfayı yenileyip değişiklikleri tekrar uygulayın.",
+      "exportRateLimited": "Çok fazla PDF export isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.",
+      "exportIdInvalid": "resumeId formatı geçersiz.",
+      "settingsRateLimited": "Çok fazla ayar kaydetme isteği gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.",
+      "settingsInvalidPayload": "Gönderilen ayar formatı geçersiz."
+    }
+  },
+  "profile": {
+    "errors": {
+      "fullNameTooLong": "Ad soyad 120 karakterden uzun olamaz."
+    },
+    "success": {
+      "profileUpdated": "Profil güncellendi."
+    }
+  },
+  "ats": {
+    "errors": {
+      "analysisFailed": "ATS analizi başarısız oldu.",
+      "rateLimited": "Çok fazla ATS analizi isteği gönderildi. Lütfen biraz sonra tekrar deneyin."
+    }
+  }
+}
