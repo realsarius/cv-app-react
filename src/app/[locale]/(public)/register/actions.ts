@@ -1,15 +1,19 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
+import { getPathname, redirect } from '@/i18n/navigation';
 import { messages } from '@/constants/messages';
 import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 
-function redirectWithError(pathname: string, message: string): never {
+function redirectWithError(pathname: string, message: string, locale: string) {
   const query = new URLSearchParams({ error: message }).toString();
-  redirect(`${pathname}?${query}`);
+  redirect({
+    href: `${pathname}?${query}`,
+    locale,
+  });
 }
 
 function resolveBaseUrl(requestHeaders: Headers) {
@@ -28,15 +32,19 @@ function resolveBaseUrl(requestHeaders: Headers) {
 }
 
 export async function registerAction(formData: FormData) {
+  const locale = await getLocale();
+
   if (!isSupabaseConfigured()) {
-    redirectWithError('/register', messages.common.supabaseEnvMissing);
+    redirectWithError('/register', messages.common.supabaseEnvMissing, locale);
+    return;
   }
 
   const email = formData.get('email');
   const password = formData.get('password');
 
   if (typeof email !== 'string' || typeof password !== 'string') {
-    redirectWithError('/register', messages.auth.registerInvalidInput);
+    redirectWithError('/register', messages.auth.registerInvalidInput, locale);
+    return;
   }
 
   const requestHeaders = await headers();
@@ -49,12 +57,16 @@ export async function registerAction(formData: FormData) {
   });
 
   if (!rateLimitResult.allowed) {
-    redirectWithError('/register', messages.auth.registerRateLimited);
+    redirectWithError('/register', messages.auth.registerRateLimited, locale);
+    return;
   }
 
   const supabase = await createServerSupabaseClient();
   const baseUrl = resolveBaseUrl(requestHeaders);
-  const callbackNext = '/dashboard';
+  const callbackNext = getPathname({
+    href: '/dashboard',
+    locale,
+  });
   const emailRedirectTo = baseUrl
     ? `${baseUrl}/auth/callback?next=${encodeURIComponent(callbackNext)}`
     : undefined;
@@ -68,8 +80,12 @@ export async function registerAction(formData: FormData) {
   });
 
   if (error) {
-    redirectWithError('/register', error.message);
+    redirectWithError('/register', error.message, locale);
+    return;
   }
 
-  redirect(`/register/check-email?email=${encodeURIComponent(email)}`);
+  redirect({
+    href: `/register/check-email?email=${encodeURIComponent(email)}`,
+    locale,
+  });
 }

@@ -1,6 +1,7 @@
 'use server';
 
-import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
+import { redirect } from '@/i18n/navigation';
 import { z } from 'zod';
 import { messages } from '@/constants/messages';
 import { ensureUserProfile, updateOwnProfile } from '@/lib/db/profiles';
@@ -12,8 +13,10 @@ const profileSchema = z.object({
 });
 
 export async function updateProfileAction(formData: FormData) {
+  const locale = await getLocale();
+
   if (!isDatabaseConfigured()) {
-    redirect('/settings?error=DATABASE_URL+veya+DATABASE_DEV_URL+eksik');
+    redirect({ href: '/settings?error=DATABASE_URL+veya+DATABASE_DEV_URL+eksik', locale });
   }
 
   const supabase = await createServerSupabaseClient();
@@ -22,7 +25,8 @@ export async function updateProfileAction(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect({ href: '/login', locale });
+    return;
   }
 
   const parsed = profileSchema.safeParse({
@@ -31,18 +35,25 @@ export async function updateProfileAction(formData: FormData) {
 
   if (!parsed.success) {
     redirect(
-      `/settings?${new URLSearchParams({
-        error: messages.profile.fullNameTooLong,
-      }).toString()}`
+      {
+        href: `/settings?${new URLSearchParams({
+          error: messages.profile.fullNameTooLong,
+        }).toString()}`,
+        locale,
+      }
     );
+    return;
   }
 
   await ensureUserProfile(user.id, user.email);
   await updateOwnProfile(user.id, parsed.data.fullName);
 
   redirect(
-    `/settings?${new URLSearchParams({
-      success: messages.profile.profileUpdated,
-    }).toString()}`
+    {
+      href: `/settings?${new URLSearchParams({
+        success: messages.profile.profileUpdated,
+      }).toString()}`,
+      locale,
+    }
   );
 }

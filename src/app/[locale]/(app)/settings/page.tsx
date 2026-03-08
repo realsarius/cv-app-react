@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import { redirect } from 'next/navigation';
+import { redirect } from '@/i18n/navigation';
 import { messages } from '@/constants/messages';
 import { ensureUserProfile, getOwnProfile } from '@/lib/db/profiles';
 import { isDatabaseConfigured } from '@/lib/db/env';
@@ -43,10 +43,14 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
   if (!isSupabaseConfigured()) {
     redirect(
-      `/login?${new URLSearchParams({
-        error: messages.common.supabaseEnvMissing,
-      }).toString()}`
+      {
+        href: `/login?${new URLSearchParams({
+          error: messages.common.supabaseEnvMissing,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -55,15 +59,20 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect({ href: '/login', locale });
+    return null;
   }
 
   if (!isDatabaseConfigured()) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.common.databaseUrlMissing,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.common.databaseUrlMissing,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   await ensureUserProfile(user.id, user.email);

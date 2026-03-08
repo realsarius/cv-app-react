@@ -1,5 +1,5 @@
-import { getTranslations } from 'next-intl/server';
-import { redirect } from 'next/navigation';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { redirect } from '@/i18n/navigation';
 import { z } from 'zod';
 import { messages } from '@/constants/messages';
 import PaginatedResumePreview from '@/features/resume-editor/preview/PaginatedResumePreview';
@@ -22,31 +22,46 @@ type ResumePreviewPageProps = {
 export const dynamic = 'force-dynamic';
 
 export default async function ResumePreviewPage({ params }: ResumePreviewPageProps) {
-  const t = await getTranslations('resume.preview');
+  const [t, locale] = await Promise.all([
+    getTranslations('resume.preview'),
+    getLocale(),
+  ]);
 
   if (!isSupabaseConfigured()) {
     redirect(
-      `/login?${new URLSearchParams({
-        error: messages.common.supabaseEnvMissing,
-      }).toString()}`
+      {
+        href: `/login?${new URLSearchParams({
+          error: messages.common.supabaseEnvMissing,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   if (!isDatabaseConfigured()) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.common.databaseUrlMissing,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.common.databaseUrlMissing,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   const parsedParams = paramsSchema.safeParse(params);
   if (!parsedParams.success) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.resume.idInvalid,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.resume.idInvalid,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -55,16 +70,21 @@ export default async function ResumePreviewPage({ params }: ResumePreviewPagePro
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect({ href: '/login', locale });
+    return null;
   }
 
   const editorState = await getResumeEditorState(user.id, parsedParams.data.resumeId);
   if (!editorState) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.resume.notFound,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.resume.notFound,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   return (

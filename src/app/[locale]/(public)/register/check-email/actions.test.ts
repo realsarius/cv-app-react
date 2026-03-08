@@ -1,11 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockRedirect = vi.fn((target: string) => {
-  throw new Error(`REDIRECT:${target}`);
-});
+const mockRedirect = vi.fn(
+  (target: string | { href: string; locale?: string }) => {
+    const href = typeof target === 'string' ? target : target.href;
+    throw new Error(`REDIRECT:${href}`);
+  }
+);
 const mockCreateServerSupabaseClient = vi.fn();
 const mockIsSupabaseConfigured = vi.fn();
 const mockVerifyOtp = vi.fn();
+const mockGetLocale = vi.fn();
 
 function buildFormData(email?: string, code?: string) {
   const formData = new FormData();
@@ -24,8 +28,11 @@ function buildFormData(email?: string, code?: string) {
 async function loadActionModule() {
   vi.resetModules();
 
-  vi.doMock('next/navigation', () => ({
+  vi.doMock('@/i18n/navigation', () => ({
     redirect: mockRedirect,
+  }));
+  vi.doMock('next-intl/server', () => ({
+    getLocale: mockGetLocale,
   }));
   vi.doMock('@/lib/supabase/server', () => ({
     createServerSupabaseClient: mockCreateServerSupabaseClient,
@@ -42,6 +49,7 @@ describe('verifyEmailCodeAction', () => {
     vi.clearAllMocks();
 
     mockIsSupabaseConfigured.mockReturnValue(true);
+    mockGetLocale.mockResolvedValue('tr');
     mockVerifyOtp.mockResolvedValue({
       error: null,
     });

@@ -1,6 +1,7 @@
 'use server';
 
-import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
+import { redirect } from '@/i18n/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import type { EmailOtpType } from '@supabase/supabase-js';
@@ -34,26 +35,34 @@ function buildCheckEmailRedirect(email: string, error: string) {
   return `/register/check-email?${query.toString()}`;
 }
 
-function redirectToLoginWithError(message: string): never {
+function redirectToLoginWithError(message: string, locale: string) {
   const query = new URLSearchParams({ error: message }).toString();
-  redirect(`/login?${query}`);
+  redirect({
+    href: `/login?${query}`,
+    locale,
+  });
 }
 
 export async function verifyEmailCodeAction(formData: FormData) {
+  const locale = await getLocale();
+
   if (!isSupabaseConfigured()) {
-    redirectToLoginWithError(messages.common.supabaseEnvMissing);
+    redirectToLoginWithError(messages.common.supabaseEnvMissing, locale);
+    return;
   }
 
   const email = normalizeEmail(formData.get('email'));
   const code = normalizeCode(formData.get('code'));
 
   if (!email || !code) {
-    redirect(
-      buildCheckEmailRedirect(
+    redirect({
+      href: buildCheckEmailRedirect(
         email,
         messages.auth.verificationCodeRequired
-      )
-    );
+      ),
+      locale,
+    });
+    return;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -74,13 +83,15 @@ export async function verifyEmailCodeAction(formData: FormData) {
   }
 
   if (!verificationSucceeded) {
-    redirect(
-      buildCheckEmailRedirect(
+    redirect({
+      href: buildCheckEmailRedirect(
         email,
         messages.auth.verificationCodeInvalidOrExpired
-      )
-    );
+      ),
+      locale,
+    });
+    return;
   }
 
-  redirect('/dashboard');
+  redirect({ href: '/dashboard', locale });
 }

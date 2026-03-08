@@ -1,6 +1,5 @@
-import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
-import { redirect } from 'next/navigation';
+import { Link, redirect } from '@/i18n/navigation';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { z } from 'zod';
 import { messages } from '@/constants/messages';
 import ResumeEditorClient from '@/features/resume-editor/ResumeEditorClient';
@@ -23,31 +22,46 @@ type ResumeEditorPageProps = {
 export const dynamic = 'force-dynamic';
 
 export default async function ResumeEditorPage({ params }: ResumeEditorPageProps) {
-  const t = await getTranslations('resume.editor');
+  const [t, locale] = await Promise.all([
+    getTranslations('resume.editor'),
+    getLocale(),
+  ]);
 
   if (!isSupabaseConfigured()) {
     redirect(
-      `/login?${new URLSearchParams({
-        error: messages.common.supabaseEnvMissing,
-      }).toString()}`
+      {
+        href: `/login?${new URLSearchParams({
+          error: messages.common.supabaseEnvMissing,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   if (!isDatabaseConfigured()) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.common.databaseUrlMissing,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.common.databaseUrlMissing,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   const parsedParams = paramsSchema.safeParse(params);
   if (!parsedParams.success) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.resume.idInvalid,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.resume.idInvalid,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -56,16 +70,21 @@ export default async function ResumeEditorPage({ params }: ResumeEditorPageProps
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect({ href: '/login', locale });
+    return null;
   }
 
   const editorState = await getResumeEditorState(user.id, parsedParams.data.resumeId);
   if (!editorState) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.resume.notFound,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.resume.notFound,
+        }).toString()}`,
+        locale,
+      }
     );
+    return null;
   }
 
   const jobTargetHistory = await listJobTargetHistory(

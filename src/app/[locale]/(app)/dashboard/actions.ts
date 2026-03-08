@@ -1,6 +1,7 @@
 'use server';
 
-import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
+import { redirect } from '@/i18n/navigation';
 import { z } from 'zod';
 import { messages } from '@/constants/messages';
 import { createDraftResume } from '@/lib/db/resumes';
@@ -12,8 +13,10 @@ const createResumeSchema = z.object({
 });
 
 export async function createDraftResumeAction(formData: FormData) {
+  const locale = await getLocale();
+
   if (!isDatabaseConfigured()) {
-    redirect('/dashboard?error=DATABASE_URL+eksik');
+    redirect({ href: '/dashboard?error=DATABASE_URL+eksik', locale });
   }
 
   const supabase = await createServerSupabaseClient();
@@ -22,7 +25,8 @@ export async function createDraftResumeAction(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect({ href: '/login', locale });
+    return;
   }
 
   const rawTitle = formData.get('title');
@@ -32,12 +36,16 @@ export async function createDraftResumeAction(formData: FormData) {
 
   if (!parsed.success) {
     redirect(
-      `/dashboard?${new URLSearchParams({
-        error: messages.resume.titleTooLong,
-      }).toString()}`
+      {
+        href: `/dashboard?${new URLSearchParams({
+          error: messages.resume.titleTooLong,
+        }).toString()}`,
+        locale,
+      }
     );
+    return;
   }
 
   const createdResume = await createDraftResume(user.id, parsed.data.title);
-  redirect(`/resumes/${createdResume.id}`);
+  redirect({ href: `/resumes/${createdResume.id}`, locale });
 }

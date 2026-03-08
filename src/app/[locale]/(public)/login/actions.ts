@@ -1,15 +1,19 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
+import { redirect } from '@/i18n/navigation';
 import { messages } from '@/constants/messages';
 import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 
-function redirectWithError(pathname: string, message: string): never {
+function redirectWithError(pathname: string, message: string, locale: string) {
   const query = new URLSearchParams({ error: message }).toString();
-  redirect(`${pathname}?${query}`);
+  redirect({
+    href: `${pathname}?${query}`,
+    locale,
+  });
 }
 
 function mapAuthErrorMessage(message: string) {
@@ -22,15 +26,19 @@ function mapAuthErrorMessage(message: string) {
 }
 
 export async function loginAction(formData: FormData) {
+  const locale = await getLocale();
+
   if (!isSupabaseConfigured()) {
-    redirectWithError('/login', messages.common.supabaseEnvMissing);
+    redirectWithError('/login', messages.common.supabaseEnvMissing, locale);
+    return;
   }
 
   const email = formData.get('email');
   const password = formData.get('password');
 
   if (typeof email !== 'string' || typeof password !== 'string') {
-    redirectWithError('/login', messages.auth.invalidLoginCredentials);
+    redirectWithError('/login', messages.auth.invalidLoginCredentials, locale);
+    return;
   }
 
   const requestHeaders = await headers();
@@ -43,7 +51,8 @@ export async function loginAction(formData: FormData) {
   });
 
   if (!rateLimitResult.allowed) {
-    redirectWithError('/login', messages.auth.loginRateLimited);
+    redirectWithError('/login', messages.auth.loginRateLimited, locale);
+    return;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -55,8 +64,9 @@ export async function loginAction(formData: FormData) {
 
   if (error) {
     const mappedMessage = mapAuthErrorMessage(error.message);
-    redirectWithError('/login', mappedMessage);
+    redirectWithError('/login', mappedMessage, locale);
+    return;
   }
 
-  redirect('/dashboard');
+  redirect({ href: '/dashboard', locale });
 }

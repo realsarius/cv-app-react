@@ -1,13 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockRedirect = vi.fn((target: string) => {
-  throw new Error(`REDIRECT:${target}`);
-});
+const mockRedirect = vi.fn(
+  (target: string | { href: string; locale?: string }) => {
+    const href = typeof target === 'string' ? target : target.href;
+    throw new Error(`REDIRECT:${href}`);
+  }
+);
 const mockHeaders = vi.fn();
 const mockCreateServerSupabaseClient = vi.fn();
 const mockIsSupabaseConfigured = vi.fn();
 const mockCheckRateLimit = vi.fn();
 const mockExtractClientIp = vi.fn();
+const mockGetLocale = vi.fn();
 
 function buildFormData(email?: string, password?: string) {
   const formData = new FormData();
@@ -24,8 +28,11 @@ function buildFormData(email?: string, password?: string) {
 async function loadActionModule() {
   vi.resetModules();
 
-  vi.doMock('next/navigation', () => ({
+  vi.doMock('@/i18n/navigation', () => ({
     redirect: mockRedirect,
+  }));
+  vi.doMock('next-intl/server', () => ({
+    getLocale: mockGetLocale,
   }));
   vi.doMock('next/headers', () => ({
     headers: mockHeaders,
@@ -49,6 +56,7 @@ describe('loginAction', () => {
     vi.clearAllMocks();
 
     mockIsSupabaseConfigured.mockReturnValue(true);
+    mockGetLocale.mockResolvedValue('tr');
     mockHeaders.mockResolvedValue({
       get: vi.fn().mockReturnValue('203.0.113.10'),
     });
