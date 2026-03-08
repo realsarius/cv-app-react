@@ -12,6 +12,8 @@ Bu repo, eski React + Vite CV uygulamasinin Next.js App Router tabanli yapiya mo
 - RLS policy kurallari migration dosyasina eklendi.
 - Resume editor sayfasi eklendi: `/resumes/[resumeId]`.
 - Kisisel bilgiler ve profil ozeti icin 1.5 sn debounce autosave akisi eklendi.
+- Profil ayarlari sayfasi eklendi: `/settings`.
+- Auth kullanicisi icin `profiles` tablosunda otomatik profil bootstrap akisi eklendi.
 
 ## Kurulum
 

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ensureUserProfile } from '@/lib/db/profiles';
 import { listUserResumes } from '@/lib/db/resumes';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -29,10 +30,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
 
   let dbError: string | null = null;
+  let profileName: string | null = null;
   let userResumes: Awaited<ReturnType<typeof listUserResumes>> = [];
 
   if (isDatabaseConfigured()) {
     try {
+      const profile = await ensureUserProfile(user.id, user.email);
+      profileName = profile?.fullName ?? null;
       userResumes = await listUserResumes(user.id);
     } catch {
       dbError =
@@ -45,7 +49,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <header>
         <h1 className='text-3xl font-bold text-slate-900'>Dashboard</h1>
         <p className='mt-1 text-slate-700'>
-          Hos geldin <span className='font-semibold'>{user.email}</span>
+          Hos geldin{' '}
+          <span className='font-semibold'>{profileName || user.email}</span>
         </p>
       </header>
 

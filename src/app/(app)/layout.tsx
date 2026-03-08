@@ -10,9 +10,25 @@ export default function AppLayout({ children }: AppLayoutProps) {
     <div className='min-h-screen'>
       <header className='border-b border-slate-200 bg-white/90 backdrop-blur'>
         <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4'>
-          <Link href='/dashboard' className='text-lg font-bold text-slate-900'>
-            Resume Builder
-          </Link>
+          <div className='flex items-center gap-5'>
+            <Link href='/dashboard' className='text-lg font-bold text-slate-900'>
+              Resume Builder
+            </Link>
+            <nav className='flex items-center gap-2'>
+              <Link
+                href='/dashboard'
+                className='rounded-md px-2 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-100'
+              >
+                Dashboard
+              </Link>
+              <Link
+                href='/settings'
+                className='rounded-md px-2 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-100'
+              >
+                Profil
+              </Link>
+            </nav>
+          </div>
 
           <form action={signOutAction}>
             <button
