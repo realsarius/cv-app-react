@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { calculateAtsScore } from '@/lib/ats/scoring';
 import {
+  buildRateLimitHeaders,
+  checkRateLimit,
+  extractClientIp,
+} from '@/lib/security/rate-limit';
+import {
   saveJobTargetAnalysis,
   trimJobTargetHistory,
 } from '@/lib/db/job-targets';
@@ -42,6 +47,26 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const clientIp = extractClientIp((name) => request.headers.get(name));
+  const rateLimitResult = checkRateLimit({
+    bucket: 'ats-score',
+    identifier: user.id || clientIp || 'anonymous',
+    limit: 20,
+    windowMs: 60_000,
+  });
+
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Cok fazla ATS analizi istegi gonderildi. Lutfen biraz sonra tekrar deneyin.',
+      },
+      {
+        status: 429,
+        headers: buildRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = requestSchema.safeParse(body);
 
@@ -71,8 +96,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({
-    ...score,
-    savedTarget,
-  });
+  return NextResponse.json(
+    {
+      ...score,
+      savedTarget,
+    },
+    {
+      headers: buildRateLimitHeaders(rateLimitResult, false),
+    }
+  );
 }
