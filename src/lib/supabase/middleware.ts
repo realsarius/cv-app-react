@@ -41,9 +41,21 @@ function buildLocalizedPath(path: string, locale: (typeof routing.locales)[numbe
   return `${`/${locale}`}${path === '/' ? '' : path}`;
 }
 
-export async function updateSession(request: NextRequest, response: NextResponse) {
+function applyTraceId(response: NextResponse, traceId?: string) {
+  if (traceId) {
+    response.headers.set('x-trace-id', traceId);
+  }
+
+  return response;
+}
+
+export async function updateSession(
+  request: NextRequest,
+  response: NextResponse,
+  traceId?: string
+) {
   if (!hasSupabaseEnv()) {
-    return response;
+    return applyTraceId(response, traceId);
   }
 
   const supabase = createServerClient(
@@ -88,14 +100,14 @@ export async function updateSession(request: NextRequest, response: NextResponse
   if (!user && isProtectedPath) {
     const url = request.nextUrl.clone();
     url.pathname = buildLocalizedPath('/login', locale);
-    return NextResponse.redirect(url);
+    return applyTraceId(NextResponse.redirect(url), traceId);
   }
 
   if (user && isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = buildLocalizedPath('/dashboard', locale);
-    return NextResponse.redirect(url);
+    return applyTraceId(NextResponse.redirect(url), traceId);
   }
 
-  return response;
+  return applyTraceId(response, traceId);
 }

@@ -3,6 +3,10 @@
 import { headers } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
+import { LOGGING_ENABLED } from '@/config/logging';
+import { logger } from '@/lib/logging/logger';
+import { hashEmailForAudit } from '@/lib/logging/privacy';
+import { getClientInfo, resolveTraceId } from '@/lib/logging/trace';
 import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -51,6 +55,9 @@ export async function loginAction(formData: FormData) {
   }
 
   const requestHeaders = await headers();
+  const traceId = resolveTraceId(requestHeaders);
+  const { ip, userAgent } = getClientInfo(requestHeaders);
+  const emailHash = hashEmailForAudit(email);
   const clientIp = extractClientIp((name) => requestHeaders.get(name));
   const rateLimitResult = checkRateLimit({
     bucket: 'auth-login',
@@ -66,15 +73,45 @@ export async function loginAction(formData: FormData) {
 
   const supabase = await createServerSupabaseClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    const mappedMessage = mapAuthErrorMessage(error.message, tAuthErrors('emailNotConfirmed'));
+    if (LOGGING_ENABLED) {
+      await logger.auth({
+        traceId,
+        userId: null,
+        emailHash,
+        event: 'login',
+        provider: 'email',
+        ip,
+        userAgent,
+        success: false,
+        failReason: error.message,
+      });
+    }
+
+    const mappedMessage = mapAuthErrorMessage(
+      error.message,
+      tAuthErrors('emailNotConfirmed')
+    );
     redirectWithError('/login', mappedMessage, locale);
     return;
+  }
+
+  if (LOGGING_ENABLED) {
+    await logger.auth({
+      traceId,
+      userId: data.user?.id ?? null,
+      emailHash,
+      event: 'login',
+      provider: 'email',
+      ip,
+      userAgent,
+      success: true,
+    });
   }
 
   redirect({ href: '/dashboard', locale });

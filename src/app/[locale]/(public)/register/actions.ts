@@ -3,6 +3,10 @@
 import { headers } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { getPathname, redirect } from '@/i18n/navigation';
+import { LOGGING_ENABLED } from '@/config/logging';
+import { logger } from '@/lib/logging/logger';
+import { hashEmailForAudit } from '@/lib/logging/privacy';
+import { getClientInfo, resolveTraceId } from '@/lib/logging/trace';
 import { checkRateLimit, extractClientIp } from '@/lib/security/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -57,6 +61,9 @@ export async function registerAction(formData: FormData) {
   }
 
   const requestHeaders = await headers();
+  const traceId = resolveTraceId(requestHeaders);
+  const { ip, userAgent } = getClientInfo(requestHeaders);
+  const emailHash = hashEmailForAudit(email);
   const clientIp = extractClientIp((name) => requestHeaders.get(name));
   const rateLimitResult = checkRateLimit({
     bucket: 'auth-register',
@@ -80,7 +87,7 @@ export async function registerAction(formData: FormData) {
     ? `${baseUrl}/auth/callback?next=${encodeURIComponent(callbackNext)}`
     : undefined;
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -89,8 +96,35 @@ export async function registerAction(formData: FormData) {
   });
 
   if (error) {
+    if (LOGGING_ENABLED) {
+      await logger.auth({
+        traceId,
+        userId: null,
+        emailHash,
+        event: 'register',
+        provider: 'email',
+        ip,
+        userAgent,
+        success: false,
+        failReason: error.message,
+      });
+    }
+
     redirectWithError('/register', error.message, locale);
     return;
+  }
+
+  if (LOGGING_ENABLED) {
+    await logger.auth({
+      traceId,
+      userId: data.user?.id ?? null,
+      emailHash,
+      event: 'register',
+      provider: 'email',
+      ip,
+      userAgent,
+      success: true,
+    });
   }
 
   redirect({
