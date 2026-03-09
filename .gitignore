@@ -106,4 +106,3 @@ dist
 .tern-port
 
 .gitignore
-package-lock.json
