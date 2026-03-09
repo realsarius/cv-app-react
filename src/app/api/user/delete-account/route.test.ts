@@ -139,5 +139,29 @@ describe('DELETE /api/user/delete-account', () => {
     expect(response.status).toBe(503);
     expect(mockDeleteUserData).not.toHaveBeenCalled();
   });
-});
 
+  it('yetkisiz istekte admin ayari eksik olsa da 401 dondurur', async () => {
+    mockIsSupabaseAdminConfigured.mockReturnValue(false);
+    mockCreateServerSupabaseClient.mockResolvedValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: {
+            user: null,
+          },
+        }),
+        signOut: mockSignOut,
+      },
+    });
+
+    const { DELETE } = await loadRouteModule();
+    const response = await DELETE(
+      new Request('http://localhost/api/user/delete-account', {
+        method: 'DELETE',
+      }) as NextRequest
+    );
+
+    expect(response.status).toBe(401);
+    expect(mockDeleteUserData).not.toHaveBeenCalled();
+    expect(mockCreateSupabaseAdminClient).not.toHaveBeenCalled();
+  });
+});

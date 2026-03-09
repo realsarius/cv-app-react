@@ -31,6 +31,20 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json(
+      {
+        error: messages.common.unauthorizedRequest,
+      },
+      { status: 401 }
+    );
+  }
+
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       {
@@ -46,20 +60,6 @@ export async function DELETE(request: NextRequest) {
         error: 'Supabase admin anahtari eksik.',
       },
       { status: 503 }
-    );
-  }
-
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json(
-      {
-        error: messages.common.unauthorizedRequest,
-      },
-      { status: 401 }
     );
   }
 
