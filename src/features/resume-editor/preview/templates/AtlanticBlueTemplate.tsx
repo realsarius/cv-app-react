@@ -1,4 +1,8 @@
-import type { ResumeContent } from '@/features/resume-editor/content';
+import type {
+  ResumeContent,
+  ResumeContentSectionOrderKey,
+} from '@/features/resume-editor/content';
+import { resolveSectionOrder } from '@/features/resume-editor/section-order';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
 import { useTranslations } from 'next-intl';
 
@@ -85,6 +89,16 @@ export default function AtlanticBlueTemplate({
     1.3,
     Math.min(2, Number((1.56 * settings.spacingScale).toFixed(2)))
   );
+  const sectionOrderIndex = resolveSectionOrder(content.sectionOrder).reduce(
+    (acc, sectionKey, index) => {
+      acc[sectionKey] = index;
+      return acc;
+    },
+    {} as Record<ResumeContentSectionOrderKey, number>
+  );
+  const getSectionOrderStyle = (sectionKey: ResumeContentSectionOrderKey) => ({
+    order: sectionOrderIndex[sectionKey] ?? 99,
+  });
   const articleClassName = [
     'w-full overflow-hidden border bg-white shadow-sm',
     printFriendly
@@ -118,9 +132,12 @@ export default function AtlanticBlueTemplate({
         </p>
       </header>
 
-      <div className='space-y-5 p-6'>
+      <div className='flex flex-col gap-5 p-6'>
         {content.profile ? (
-          <section className={`border-b pb-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-b pb-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('profile')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.profile')}
             </h3>
@@ -129,7 +146,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.experiences.length > 0 ? (
-          <section className={`border-b pb-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-b pb-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('experiences')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.experience')}
             </h3>
@@ -164,7 +184,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.educations.length > 0 ? (
-          <section className={`border-b pb-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-b pb-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('educations')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.education')}
             </h3>
@@ -199,7 +222,7 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.projects.length > 0 ? (
-          <section>
+          <section style={getSectionOrderStyle('projects')}>
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.projects')}
             </h3>
@@ -228,7 +251,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.skills.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('skills')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.skills')}
             </h3>
@@ -244,7 +270,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.languages.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('languages')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.languages')}
             </h3>
@@ -262,7 +291,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.certificates.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('certificates')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.certificates')}
             </h3>
@@ -284,7 +316,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.awards.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('awards')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.awards')}
             </h3>
@@ -307,7 +342,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.interests.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('interests')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.interests')}
             </h3>
@@ -318,7 +356,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.courses.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('courses')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.courses')}
             </h3>
@@ -337,7 +378,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.references.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('references')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.references')}
             </h3>
@@ -360,7 +404,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.organisations.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('organisations')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.organisations')}
             </h3>
@@ -386,7 +433,10 @@ export default function AtlanticBlueTemplate({
         ) : null}
 
         {content.publications.length > 0 ? (
-          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+          <section
+            className={`border-t pt-4 ${theme.sectionDivider}`}
+            style={getSectionOrderStyle('publications')}
+          >
             <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
               {t('sections.publications')}
             </h3>
@@ -414,6 +464,7 @@ export default function AtlanticBlueTemplate({
               <section
                 key={section.id}
                 className={`border-t pt-4 ${theme.sectionDivider}`}
+                style={getSectionOrderStyle('customSections')}
               >
                 <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
                   {section.title || t('sections.customSections')}

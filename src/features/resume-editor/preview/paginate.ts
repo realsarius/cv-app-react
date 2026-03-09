@@ -13,7 +13,9 @@ import type {
   ResumeProjectItem,
   ResumeReferenceItem,
   ResumeSkillItem,
+  ResumeContentSectionOrderKey,
 } from '@/features/resume-editor/content';
+import { resolveSectionOrder } from '@/features/resume-editor/section-order';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
 
 type PreviewVisualSettings = {
@@ -236,24 +238,37 @@ function createPageCapacity(settings: PreviewVisualSettings) {
   return Math.max(34, Math.floor(base / density));
 }
 
+type PaginatedListSectionKey = Exclude<ResumeContentSectionOrderKey, 'profile'>;
+
+function addProfileSection(
+  pages: ResumeContent[],
+  remainingRef: { value: number },
+  capacity: number,
+  profile: string
+) {
+  const normalizedProfile = profile.trim();
+  if (!normalizedProfile) {
+    return;
+  }
+
+  const profileCost = estimateProfileCost(normalizedProfile);
+  const current = pages[pages.length - 1]!;
+
+  if (profileCost > remainingRef.value && hasContent(current)) {
+    pages.push(createPageSkeleton(current.personalDetails, current.sectionOrder));
+    remainingRef.value = capacity;
+  }
+
+  const nextCurrent = pages[pages.length - 1]!;
+  nextCurrent.profile = normalizedProfile;
+  remainingRef.value = Math.max(0, remainingRef.value - profileCost);
+}
+
 function addSectionItems<TItem>(
   pages: ResumeContent[],
   remainingRef: { value: number },
   capacity: number,
-  section:
-    | 'experiences'
-    | 'educations'
-    | 'projects'
-    | 'skills'
-    | 'languages'
-    | 'certificates'
-    | 'awards'
-    | 'interests'
-    | 'courses'
-    | 'references'
-    | 'organisations'
-    | 'publications'
-    | 'customSections',
+  section: PaginatedListSectionKey,
   items: TItem[],
   estimateCost: (item: TItem) => number
 ) {
@@ -290,128 +305,167 @@ export function paginateResumeContent(
   ];
   const remaining = { value: capacity };
 
-  if (content.profile.trim()) {
-    const profileCost = estimateProfileCost(content.profile);
-    pages[0]!.profile = content.profile;
-    remaining.value = Math.max(0, remaining.value - profileCost);
-  }
+  const orderedSections = resolveSectionOrder(content.sectionOrder);
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'experiences',
-    content.experiences,
-    estimateExperienceCost
-  );
+  orderedSections.forEach((sectionKey) => {
+    if (sectionKey === 'profile') {
+      addProfileSection(pages, remaining, capacity, content.profile);
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'educations',
-    content.educations,
-    estimateEducationCost
-  );
+    if (sectionKey === 'experiences') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.experiences,
+        estimateExperienceCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'projects',
-    content.projects,
-    estimateProjectCost
-  );
+    if (sectionKey === 'educations') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.educations,
+        estimateEducationCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'skills',
-    content.skills,
-    estimateSkillCost
-  );
+    if (sectionKey === 'projects') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.projects,
+        estimateProjectCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'languages',
-    content.languages,
-    estimateLanguageCost
-  );
+    if (sectionKey === 'skills') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.skills,
+        estimateSkillCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'certificates',
-    content.certificates,
-    estimateCertificateCost
-  );
+    if (sectionKey === 'languages') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.languages,
+        estimateLanguageCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'awards',
-    content.awards,
-    estimateAwardCost
-  );
+    if (sectionKey === 'certificates') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.certificates,
+        estimateCertificateCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'interests',
-    content.interests,
-    estimateInterestCost
-  );
+    if (sectionKey === 'awards') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.awards,
+        estimateAwardCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'courses',
-    content.courses,
-    estimateCourseCost
-  );
+    if (sectionKey === 'interests') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.interests,
+        estimateInterestCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'references',
-    content.references,
-    estimateReferenceCost
-  );
+    if (sectionKey === 'courses') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.courses,
+        estimateCourseCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'organisations',
-    content.organisations,
-    estimateOrganisationCost
-  );
+    if (sectionKey === 'references') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.references,
+        estimateReferenceCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'publications',
-    content.publications,
-    estimatePublicationCost
-  );
+    if (sectionKey === 'organisations') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.organisations,
+        estimateOrganisationCost
+      );
+      return;
+    }
 
-  addSectionItems(
-    pages,
-    remaining,
-    capacity,
-    'customSections',
-    content.customSections,
-    estimateCustomSectionCost
-  );
+    if (sectionKey === 'publications') {
+      addSectionItems(
+        pages,
+        remaining,
+        capacity,
+        sectionKey,
+        content.publications,
+        estimatePublicationCost
+      );
+      return;
+    }
+
+    addSectionItems(
+      pages,
+      remaining,
+      capacity,
+      sectionKey,
+      content.customSections,
+      estimateCustomSectionCost
+    );
+  });
 
   if (pages.length === 1 && !hasContent(pages[0]!)) {
     return [content];

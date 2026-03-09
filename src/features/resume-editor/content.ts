@@ -9,7 +9,7 @@ const LANGUAGE_PROFICIENCY_LEVELS = [
   'basic',
 ] as const;
 const SKILL_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert'] as const;
-const CONTENT_SECTION_ORDER_KEYS = [
+export const RESUME_CONTENT_SECTION_ORDER_KEYS = [
   'profile',
   'experiences',
   'educations',
@@ -173,9 +173,9 @@ export const resumeContentSchema = z.object({
   publications: z.array(publicationItemSchema).max(20).default([]),
   customSections: z.array(customSectionSchema).max(10).default([]),
   sectionOrder: z
-    .array(z.enum(CONTENT_SECTION_ORDER_KEYS))
+    .array(z.enum(RESUME_CONTENT_SECTION_ORDER_KEYS))
     .max(20)
-    .default([...CONTENT_SECTION_ORDER_KEYS]),
+    .default([...RESUME_CONTENT_SECTION_ORDER_KEYS]),
 });
 
 export type ResumeContent = z.infer<typeof resumeContentSchema>;
@@ -195,7 +195,7 @@ export type ResumePublicationItem = z.infer<typeof publicationItemSchema>;
 export type ResumeCustomSectionItem = z.infer<typeof customSectionItemSchema>;
 export type ResumeCustomSection = z.infer<typeof customSectionSchema>;
 export type ResumeContentSectionOrderKey =
-  (typeof CONTENT_SECTION_ORDER_KEYS)[number];
+  (typeof RESUME_CONTENT_SECTION_ORDER_KEYS)[number];
 export type ResumeLanguageProficiency = (typeof LANGUAGE_PROFICIENCY_LEVELS)[number];
 export type ResumeSkillLevel = (typeof SKILL_LEVELS)[number];
 
@@ -221,7 +221,7 @@ const EMPTY_RESUME_CONTENT: ResumeContent = {
   organisations: [],
   publications: [],
   customSections: [],
-  sectionOrder: [...CONTENT_SECTION_ORDER_KEYS],
+  sectionOrder: [...RESUME_CONTENT_SECTION_ORDER_KEYS],
 };
 
 export function createEmptyResumeContent(): ResumeContent {

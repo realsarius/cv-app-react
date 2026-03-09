@@ -1,4 +1,8 @@
-import type { ResumeContent } from '@/features/resume-editor/content';
+import type {
+  ResumeContent,
+  ResumeContentSectionOrderKey,
+} from '@/features/resume-editor/content';
+import { resolveSectionOrder } from '@/features/resume-editor/section-order';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
 import { useTranslations } from 'next-intl';
 
@@ -85,6 +89,16 @@ export default function TwoColumnTemplate({
     1.3,
     Math.min(2, Number((1.5 * settings.spacingScale).toFixed(2)))
   );
+  const sectionOrderIndex = resolveSectionOrder(content.sectionOrder).reduce(
+    (acc, sectionKey, index) => {
+      acc[sectionKey] = index;
+      return acc;
+    },
+    {} as Record<ResumeContentSectionOrderKey, number>
+  );
+  const getSectionOrderStyle = (sectionKey: ResumeContentSectionOrderKey) => ({
+    order: sectionOrderIndex[sectionKey] ?? 99,
+  });
   const articleClassName = [
     'w-full overflow-hidden border bg-white shadow-sm',
     printFriendly
@@ -105,7 +119,9 @@ export default function TwoColumnTemplate({
       className={articleClassName}
     >
       <div className='grid min-h-full grid-cols-1 md:grid-cols-[35%_65%]'>
-        <aside className={`border-b p-5 md:border-b-0 md:border-r ${theme.asideBg} ${theme.asideBorder}`}>
+        <aside
+          className={`flex flex-col border-b p-5 md:border-b-0 md:border-r ${theme.asideBg} ${theme.asideBorder}`}
+        >
           <div className='cv-header'>
             <h2 className={`text-[1.65em] font-bold leading-tight ${theme.heading}`}>
               {content.personalDetails.fullName || title || t('fullNameFallback')}
@@ -122,7 +138,10 @@ export default function TwoColumnTemplate({
           </div>
 
           {content.profile ? (
-            <section className={`mt-6 border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`mt-6 border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('profile')}
+            >
               <h3 className={`text-[0.82em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.profile')}
               </h3>
@@ -133,9 +152,12 @@ export default function TwoColumnTemplate({
           ) : null}
         </aside>
 
-        <main className='space-y-5 p-6'>
+        <main className='flex flex-col gap-5 p-6'>
           {content.experiences.length > 0 ? (
-            <section className={`border-b pb-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-b pb-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('experiences')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.experience')}
               </h3>
@@ -170,7 +192,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.educations.length > 0 ? (
-            <section className={`border-b pb-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-b pb-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('educations')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.education')}
               </h3>
@@ -205,7 +230,7 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.projects.length > 0 ? (
-            <section>
+            <section style={getSectionOrderStyle('projects')}>
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.projects')}
               </h3>
@@ -234,7 +259,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.skills.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('skills')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.skills')}
               </h3>
@@ -250,7 +278,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.languages.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('languages')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.languages')}
               </h3>
@@ -268,7 +299,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.certificates.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('certificates')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.certificates')}
               </h3>
@@ -290,7 +324,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.awards.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('awards')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.awards')}
               </h3>
@@ -313,7 +350,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.interests.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('interests')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.interests')}
               </h3>
@@ -324,7 +364,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.courses.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('courses')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.courses')}
               </h3>
@@ -343,7 +386,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.references.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('references')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.references')}
               </h3>
@@ -366,7 +412,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.organisations.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('organisations')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.organisations')}
               </h3>
@@ -392,7 +441,10 @@ export default function TwoColumnTemplate({
           ) : null}
 
           {content.publications.length > 0 ? (
-            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <section
+              className={`border-t pt-4 ${theme.sectionDivider}`}
+              style={getSectionOrderStyle('publications')}
+            >
               <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                 {t('sections.publications')}
               </h3>
@@ -420,6 +472,7 @@ export default function TwoColumnTemplate({
                 <section
                   key={section.id}
                   className={`border-t pt-4 ${theme.sectionDivider}`}
+                  style={getSectionOrderStyle('customSections')}
                 >
                   <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
                     {section.title || t('sections.customSections')}
