@@ -1,0 +1,123 @@
+name: CV App CI
+
+on:
+  push:
+    branches: ['main', 'master']
+  pull_request:
+    branches: ['main', 'master']
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-key
+      INTERNAL_LOG_SECRET: ci-internal-log-secret
+      CRON_SECRET: ci-cron-secret
+      LOG_IP_HASH_SALT: ci-log-ip-hash-salt
+      LOGGING_ENABLED: 'false'
+      DATABASE_TEST_HOST: localhost
+      DATABASE_TEST_PORT: '5451'
+      DATABASE_TEST_NAME: cv_app_test
+      DATABASE_TEST_USER: cv_test_user
+      DATABASE_TEST_PASSWORD: test_password
+      DATABASE_TEST_URL: postgresql://cv_test_user:test_password@localhost:5451/cv_app_test
+      DATABASE_URL: postgresql://cv_test_user:test_password@localhost:5451/cv_app_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start test database (Docker)
+        run: docker compose --profile test up -d postgres-test
+
+      - name: Wait for test database
+        run: |
+          for i in $(seq 1 30); do
+            STATUS="$(docker inspect --format='{{.State.Health.Status}}' cv-db-test 2>/dev/null || echo starting)"
+            if [ "$STATUS" = "healthy" ]; then
+              echo "postgres-test is healthy"
+              exit 0
+            fi
+            echo "postgres-test not healthy yet ($i/30), waiting 2s..."
+            sleep 2
+          done
+          echo "postgres-test failed to become healthy"
+          docker compose --profile test logs --no-color postgres-test || true
+          exit 1
+
+      - name: Run test migrations
+        run: npm run db:migrate:test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Build production Docker image
+        run: docker build -t cv-app:${{ github.sha }} .
+
+      - name: Smoke test container (/api/health)
+        run: |
+          docker run -d --rm --name cv-app-smoke \
+            -p 3011:3000 \
+            -e NODE_ENV=production \
+            -e NEXT_PUBLIC_SUPABASE_URL="https://example.supabase.co" \
+            -e NEXT_PUBLIC_SUPABASE_ANON_KEY="ci-anon-key" \
+            -e SUPABASE_SERVICE_ROLE_KEY="ci-service-role-key" \
+            -e INTERNAL_LOG_SECRET="ci-internal-log-secret" \
+            -e CRON_SECRET="ci-cron-secret" \
+            -e LOG_IP_HASH_SALT="ci-log-ip-hash-salt" \
+            -e DATABASE_URL="postgresql://cv_test_user:test_password@localhost:5432/cv_app_test" \
+            cv-app:${{ github.sha }}
+
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3011/api/health >/dev/null; then
+              echo "Smoke check passed."
+              exit 0
+            fi
+            echo "App not ready yet ($i/30), waiting 2s..."
+            sleep 2
+          done
+
+          echo "Smoke check failed, printing container logs."
+          docker logs cv-app-smoke || true
+          exit 1
+
+      - name: Upload CI diagnostics (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-diagnostics-${{ github.run_id }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            /tmp/*.log
+
+      - name: Cleanup containers
+        if: always()
+        run: |
+          docker rm -f cv-app-smoke >/dev/null 2>&1 || true
+          docker compose --profile test down -v

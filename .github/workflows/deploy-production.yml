@@ -1,0 +1,120 @@
+name: Deploy Production (Docker + Hetzner)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Deploy edilecek branch veya tag
+        required: true
+        default: main
+      run_migrations:
+        description: Deploy sonrası migration çalıştırılsın mı?
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: production
+    permissions:
+      contents: read
+    env:
+      TARGET_REF: ${{ inputs.ref }}
+      RUN_MIGRATIONS: ${{ inputs.run_migrations }}
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+
+    steps:
+      - name: Validate required secrets
+        run: |
+          test -n "$DEPLOY_HOST" || (echo "DEPLOY_HOST secret is missing" && exit 1)
+          test -n "$DEPLOY_USER" || (echo "DEPLOY_USER secret is missing" && exit 1)
+          test -n "$DEPLOY_PATH" || (echo "DEPLOY_PATH secret is missing" && exit 1)
+          test -n "$DEPLOY_SSH_PRIVATE_KEY" || (echo "DEPLOY_SSH_PRIVATE_KEY secret is missing" && exit 1)
+          if [ -z "$DEPLOY_PORT" ]; then
+            echo "DEPLOY_PORT not set, using 22"
+            echo "DEPLOY_PORT=22" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+
+      - name: Trust deploy host
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy on server
+        run: |
+          ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "set -euo pipefail; \
+            cd '$DEPLOY_PATH'; \
+            git fetch --all --prune; \
+            git checkout '$TARGET_REF'; \
+            git pull --ff-only origin '$TARGET_REF'; \
+            test -f .env.prod || (echo '.env.prod dosyası bulunamadı' && exit 1); \
+            docker compose --env-file .env.prod --profile prod config >/dev/null; \
+            docker compose --env-file .env.prod --profile prod pull postgres-prod || true; \
+            docker compose --env-file .env.prod --profile prod up -d --build --remove-orphans postgres-prod app-prod; \
+            if [ '$RUN_MIGRATIONS' = 'true' ]; then docker compose --env-file .env.prod --profile prod exec -T app-prod npm run db:migrate:prod; fi; \
+            docker compose --env-file .env.prod --profile prod ps"
+
+      - name: Post-deploy smoke check
+        run: |
+          ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "set -euo pipefail; \
+            cd '$DEPLOY_PATH'; \
+            set -a; source .env.prod; set +a; \
+            APP_PORT=\${APP_PROD_PORT:-3011}; \
+            echo 'Servis başlangıcı için 20 saniye bekleniyor...'; \
+            sleep 20; \
+            for i in \$(seq 1 24); do \
+              if curl -fsS http://127.0.0.1:\${APP_PORT}/api/health >/dev/null; then \
+                echo 'Smoke check passed.'; \
+                exit 0; \
+              fi; \
+              echo \"Uygulama hazır değil (\$i/24), 5 saniye bekleniyor...\"; \
+              sleep 5; \
+            done; \
+            echo 'Smoke check başarısız. Durum ve loglar alınıyor...'; \
+            docker compose --env-file .env.prod --profile prod ps; \
+            docker compose --env-file .env.prod --profile prod logs --tail=200 --no-color app-prod postgres-prod; \
+            exit 1"
+
+      - name: Collect remote diagnostics (on failure)
+        if: failure()
+        run: |
+          REMOTE_LOG="/tmp/cv-app-deploy-${GITHUB_RUN_ID}.log"
+
+          ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "set -euo pipefail; \
+            cd '$DEPLOY_PATH'; \
+            { \
+              echo '=== docker compose ps ==='; \
+              docker compose --env-file .env.prod --profile prod ps; \
+              echo; \
+              echo '=== docker compose logs ==='; \
+              docker compose --env-file .env.prod --profile prod logs --tail=300 --no-color; \
+            } > '$REMOTE_LOG'"
+
+          scp -P "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_LOG" /tmp/deploy-diagnostics.log || true
+
+      - name: Upload deploy diagnostics artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-diagnostics-${{ github.run_id }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: /tmp/deploy-diagnostics.log
