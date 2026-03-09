@@ -3,10 +3,12 @@ import { z } from 'zod';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { getRequestMessages } from '@/lib/i18n/request-messages';
 import { upsertResumeSettings } from '@/lib/db/resume-settings';
+import { AUDIT_ACTIONS } from '@/lib/logging/actions';
+import { logger } from '@/lib/logging/logger';
+import { getClientInfo, resolveTraceId } from '@/lib/logging/trace';
 import {
   buildRateLimitHeaders,
   checkRateLimit,
-  extractClientIp,
 } from '@/lib/security/rate-limit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -31,6 +33,9 @@ type RouteContext = {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   const messages = getRequestMessages(request);
+  const traceId = resolveTraceId(request.headers);
+  const requestPath = new URL(request.url).pathname;
+  const clientInfo = getClientInfo(request.headers, requestPath);
 
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
@@ -74,10 +79,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
-  const clientIp = extractClientIp((name) => request.headers.get(name));
   const rateLimitResult = checkRateLimit({
     bucket: 'resume-settings',
-    identifier: `${user.id}:${parsedParams.data.resumeId}:${clientIp || 'na'}`,
+    identifier: `${user.id}:${parsedParams.data.resumeId}:${clientInfo.ip || 'na'}`,
     limit: 20,
     windowMs: 60_000,
   });
@@ -120,6 +124,22 @@ export async function POST(request: NextRequest, context: RouteContext) {
       { status: 404 }
     );
   }
+
+  await logger.audit({
+    traceId,
+    userId: user.id,
+    action: AUDIT_ACTIONS.SETTINGS_UPDATED,
+    resourceType: 'resume',
+    resourceId: parsedParams.data.resumeId,
+    ip: clientInfo.ip,
+    userAgent: clientInfo.userAgent,
+    metadata: {
+      templateKey: savedSettings.templateKey,
+      fontScale: savedSettings.fontScale,
+      spacingScale: savedSettings.spacingScale,
+      colorScheme: savedSettings.colorScheme,
+    },
+  });
 
   return NextResponse.json(
     {

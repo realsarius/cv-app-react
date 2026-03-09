@@ -6,6 +6,23 @@ const DEFAULT_ALWAYS_LOG_PATH_PREFIXES = [
   '/register',
 ] as const;
 
+function parseBoolean(value: string | undefined, fallback: boolean) {
+  if (value == null) {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'true' || normalized === '1') {
+    return true;
+  }
+
+  if (normalized === 'false' || normalized === '0') {
+    return false;
+  }
+
+  return fallback;
+}
+
 function parseFloatInRange(
   value: string | undefined,
   fallback: number,
@@ -70,3 +87,7 @@ export const LOG_ALWAYS_PATH_PREFIXES = parsePathPrefixes(
   process.env.LOG_ALWAYS_PATH_PREFIXES
 );
 
+export const LOGGING_ENABLED = parseBoolean(
+  process.env.LOGGING_ENABLED,
+  process.env.NODE_ENV !== 'test'
+);

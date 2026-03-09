@@ -13,6 +13,10 @@ export function generateTraceId() {
   return fallbackTraceId();
 }
 
+export function resolveTraceId(headers: Headers) {
+  return headers.get('x-trace-id') || generateTraceId();
+}
+
 export function normalizePath(pathname: string) {
   if (!pathname) {
     return '/';
@@ -41,4 +45,3 @@ export function getClientInfo(headers: Headers, pathname?: string) {
     locale,
   };
 }
-

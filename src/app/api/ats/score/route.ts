@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { calculateAtsScore } from '@/lib/ats/scoring';
+import { AUDIT_ACTIONS } from '@/lib/logging/actions';
+import { logger } from '@/lib/logging/logger';
+import { getClientInfo, resolveTraceId } from '@/lib/logging/trace';
 import {
   buildRateLimitHeaders,
   checkRateLimit,
-  extractClientIp,
 } from '@/lib/security/rate-limit';
 import {
   saveJobTargetAnalysis,
@@ -26,6 +28,9 @@ const requestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   const messages = getRequestMessages(request);
+  const traceId = resolveTraceId(request.headers);
+  const requestPath = new URL(request.url).pathname;
+  const clientInfo = getClientInfo(request.headers, requestPath);
 
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
@@ -50,10 +55,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const clientIp = extractClientIp((name) => request.headers.get(name));
   const rateLimitResult = checkRateLimit({
     bucket: 'ats-score',
-    identifier: user.id || clientIp || 'anonymous',
+    identifier: user.id || clientInfo.ip || 'anonymous',
     limit: 20,
     windowMs: 60_000,
   });
@@ -98,6 +102,22 @@ export async function POST(request: NextRequest) {
       await trimJobTargetHistory(user.id, parsed.data.resumeId, 20);
     }
   }
+
+  await logger.audit({
+    traceId,
+    userId: user.id,
+    action: AUDIT_ACTIONS.ATS_ANALYZED,
+    resourceType: parsed.data.resumeId ? 'resume' : 'ats',
+    resourceId: parsed.data.resumeId,
+    ip: clientInfo.ip,
+    userAgent: clientInfo.userAgent,
+    metadata: {
+      overallScore: score.overallScore,
+      matchedKeywordCount: score.matchedKeywords.length,
+      missingKeywordCount: score.missingKeywords.length,
+      resumeId: parsed.data.resumeId ?? null,
+    },
+  });
 
   return NextResponse.json(
     {

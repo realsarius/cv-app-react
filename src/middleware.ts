@@ -1,5 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
 import { type NextFetchEvent, type NextRequest, type NextResponse } from 'next/server';
+import { LOGGING_ENABLED } from '@/config/logging';
 import { routing } from '@/i18n/routing';
 import { shouldLogRequest } from '@/lib/logging/sampling';
 import { getClientInfo, generateTraceId, normalizePath } from '@/lib/logging/trace';
@@ -20,6 +21,10 @@ type RequestLogPayload = {
 };
 
 function sendRequestLog(origin: string, payload: RequestLogPayload) {
+  if (!LOGGING_ENABLED) {
+    return Promise.resolve();
+  }
+
   const internalSecret = process.env.INTERNAL_LOG_SECRET;
   if (!internalSecret) {
     return Promise.resolve();
@@ -57,6 +62,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
 
   const durationMs = Date.now() - startTime;
   if (
+    LOGGING_ENABLED &&
     shouldLogRequest({
       traceId,
       path: pathname,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { LOGGING_ENABLED } from '@/config/logging';
 import { logger } from '@/lib/logging/logger';
 
 const requestLogSchema = z.object({
@@ -18,6 +19,10 @@ const requestLogSchema = z.object({
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+  if (!LOGGING_ENABLED) {
+    return NextResponse.json({ ok: true });
+  }
+
   const internalSecret = process.env.INTERNAL_LOG_SECRET;
   if (!internalSecret) {
     return NextResponse.json(
@@ -54,4 +59,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
-

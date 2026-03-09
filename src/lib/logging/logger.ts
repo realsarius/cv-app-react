@@ -1,4 +1,5 @@
 import { getDb } from '@/lib/db/client';
+import { LOGGING_ENABLED } from '@/config/logging';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { auditLogs, authEvents, requestLogs } from '@/db/schema';
 import type { AuditAction } from './actions';
@@ -68,7 +69,7 @@ function mapAuthEventToAuditAction(event: AuthEventName): AuditAction {
 }
 
 async function safeInsert(action: () => Promise<unknown>) {
-  if (!isDatabaseConfigured()) {
+  if (!LOGGING_ENABLED || !isDatabaseConfigured()) {
     return;
   }
 
@@ -144,4 +145,3 @@ export const logger = {
     });
   },
 };
-
