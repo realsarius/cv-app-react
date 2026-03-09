@@ -1471,7 +1471,7 @@ export default function ResumeEditorClient({
 
   return (
     <section className='grid gap-6 lg:grid-cols-12'>
-      <div className='space-y-6 lg:col-span-7'>
+      <div className='space-y-6 lg:col-span-6'>
       <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <h2 className='text-lg font-semibold text-stone-900'>{t('resumeTitle')}</h2>
         <input
@@ -3804,7 +3804,7 @@ export default function ResumeEditorClient({
       </div>
       </div>
 
-      <aside className='no-print h-fit lg:col-span-5 lg:sticky lg:top-6'>
+      <aside className='no-print h-fit lg:col-span-6 lg:sticky lg:top-6'>
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>{t('livePreview')}</h2>
