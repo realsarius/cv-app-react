@@ -1,10 +1,15 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
 import { z } from 'zod';
+import { LOGGING_ENABLED } from '@/config/logging';
 import { createDraftResume } from '@/lib/db/resumes';
 import { isDatabaseConfigured } from '@/lib/db/env';
+import { AUDIT_ACTIONS } from '@/lib/logging/actions';
+import { logger } from '@/lib/logging/logger';
+import { getClientInfo, resolveTraceId } from '@/lib/logging/trace';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 const createResumeSchema = z.object({
@@ -69,6 +74,26 @@ export async function createDraftResumeAction(formData: FormData) {
         ? parsed.data.title
         : tDashboard('newDraftDefaultTitle');
     createdResume = await createDraftResume(user.id, resolvedTitle);
+
+    if (LOGGING_ENABLED) {
+      const requestHeaders = await headers();
+      const traceId = resolveTraceId(requestHeaders);
+      const clientInfo = getClientInfo(requestHeaders);
+
+      await logger.audit({
+        traceId,
+        userId: user.id,
+        action: AUDIT_ACTIONS.RESUME_CREATED,
+        resourceType: 'resume',
+        resourceId: createdResume.id,
+        ip: clientInfo.ip,
+        userAgent: clientInfo.userAgent,
+        metadata: {
+          title: createdResume.title,
+          status: createdResume.status,
+        },
+      });
+    }
   } catch {
     redirect(
       {
