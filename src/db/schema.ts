@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   check,
   index,
   integer,
@@ -134,5 +135,89 @@ export const resumeSettings = pgTable(
       table.resumeId
     ),
     updatedAtIndex: index('resume_settings_updated_at_idx').on(table.updatedAt),
+  })
+);
+
+export const requestLogs = pgTable(
+  'request_logs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    traceId: text('trace_id').notNull(),
+    userId: uuid('user_id'),
+    method: text('method').notNull(),
+    path: text('path').notNull(),
+    statusCode: integer('status_code'),
+    durationMs: integer('duration_ms'),
+    ip: text('ip'),
+    userAgent: text('user_agent'),
+    locale: text('locale'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    createdAtIndex: index('request_logs_created_at_idx').on(table.createdAt),
+    traceIdIndex: index('request_logs_trace_id_idx').on(table.traceId),
+    userIdIndex: index('request_logs_user_id_idx').on(table.userId),
+    pathIndex: index('request_logs_path_idx').on(table.path),
+  })
+);
+
+export const auditLogs = pgTable(
+  'audit_logs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    traceId: text('trace_id').notNull(),
+    userId: uuid('user_id').notNull(),
+    action: text('action').notNull(),
+    resourceType: text('resource_type'),
+    resourceId: uuid('resource_id'),
+    metadata: jsonb('metadata').$type<Record<string, unknown> | null>(),
+    ip: text('ip'),
+    userAgent: text('user_agent'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    userCreatedAtIndex: index('audit_logs_user_id_created_at_idx').on(
+      table.userId,
+      table.createdAt
+    ),
+    actionCreatedAtIndex: index('audit_logs_action_created_at_idx').on(
+      table.action,
+      table.createdAt
+    ),
+    traceIdIndex: index('audit_logs_trace_id_idx').on(table.traceId),
+  })
+);
+
+export const authEvents = pgTable(
+  'auth_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    traceId: text('trace_id').notNull(),
+    userId: uuid('user_id'),
+    emailHash: text('email_hash'),
+    event: text('event').notNull(),
+    provider: text('provider'),
+    ip: text('ip'),
+    userAgent: text('user_agent'),
+    success: boolean('success').notNull().default(true),
+    failReason: text('fail_reason'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    userCreatedAtIndex: index('auth_events_user_id_created_at_idx').on(
+      table.userId,
+      table.createdAt
+    ),
+    eventCreatedAtIndex: index('auth_events_event_created_at_idx').on(
+      table.event,
+      table.createdAt
+    ),
+    traceIdIndex: index('auth_events_trace_id_idx').on(table.traceId),
   })
 );

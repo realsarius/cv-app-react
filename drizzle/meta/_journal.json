@@ -29,6 +29,13 @@
       "when": 1772972988138,
       "tag": "0003_drop_auth_user_fks",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773041985261,
+      "tag": "0004_sleepy_roulette",
+      "breakpoints": true
     }
   ]
 }
