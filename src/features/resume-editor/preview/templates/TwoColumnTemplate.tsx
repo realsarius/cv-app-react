@@ -232,6 +232,62 @@ export default function TwoColumnTemplate({
               </div>
             </section>
           ) : null}
+
+          {content.skills.length > 0 ? (
+            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+              <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
+                {t('sections.skills')}
+              </h3>
+              <div className='mt-3 space-y-3'>
+                {content.skills.map((item) => (
+                  <div key={item.id}>
+                    <p className={`text-[0.94em] font-semibold ${theme.body}`}>{item.name}</p>
+                    <p className={`text-[0.78em] ${theme.muted}`}>{t(`skillLevel.${item.level}`)}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {content.languages.length > 0 ? (
+            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+              <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
+                {t('sections.languages')}
+              </h3>
+              <div className='mt-3 space-y-3'>
+                {content.languages.map((item) => (
+                  <div key={item.id}>
+                    <p className={`text-[0.94em] font-semibold ${theme.body}`}>{item.name}</p>
+                    <p className={`text-[0.78em] ${theme.muted}`}>
+                      {t(`languageLevel.${item.proficiency}`)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {content.certificates.length > 0 ? (
+            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+              <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
+                {t('sections.certificates')}
+              </h3>
+              <div className='mt-3 space-y-3'>
+                {content.certificates.map((item) => (
+                  <div key={item.id}>
+                    <p className={`text-[0.94em] font-semibold ${theme.body}`}>{item.name}</p>
+                    <p className={`text-[0.78em] ${theme.muted}`}>
+                      {[item.issuer, item.date].filter(Boolean).join(' | ')}
+                    </p>
+                    {item.credentialId ? (
+                      <p className={`text-[0.78em] ${theme.muted}`}>{item.credentialId}</p>
+                    ) : null}
+                    {item.url ? <p className={`text-[0.78em] ${theme.muted}`}>{item.url}</p> : null}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </main>
       </div>
     </article>

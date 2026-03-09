@@ -8,16 +8,23 @@ import {
   normalizeResumeTemplateKey,
 } from '@/templates/resume/registry';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
+import {
+  ADDABLE_SECTION_REGISTRY,
+  type AddableSectionKey,
+} from './sections/addable-section-registry';
 import PaginatedResumePreview from './preview/PaginatedResumePreview';
 import {
   PREVIEW_PAGE_BASE_HEIGHT,
   PREVIEW_PAGE_BASE_WIDTH,
 } from './preview/paginate';
 import type {
+  ResumeCertificateItem,
   ResumeContent,
   ResumeEducationItem,
   ResumeExperienceItem,
+  ResumeLanguageItem,
   ResumeProjectItem,
+  ResumeSkillItem,
 } from './content';
 
 type ResumeEditorClientProps = {
@@ -85,7 +92,7 @@ type ResumeSettingsResponse = {
 };
 
 type AddableSection = {
-  key: 'profile' | 'experiences' | 'educations' | 'projects' | 'ats';
+  key: AddableSectionKey;
   label: string;
   description: string;
   isAdded: boolean;
@@ -158,6 +165,33 @@ function createEmptyProjectItem(): ResumeProjectItem {
     country: '',
     stack: '',
     description: '',
+  };
+}
+
+function createEmptySkillItem(): ResumeSkillItem {
+  return {
+    id: createItemId(),
+    name: '',
+    level: 'intermediate',
+  };
+}
+
+function createEmptyLanguageItem(): ResumeLanguageItem {
+  return {
+    id: createItemId(),
+    name: '',
+    proficiency: 'intermediate',
+  };
+}
+
+function createEmptyCertificateItem(): ResumeCertificateItem {
+  return {
+    id: createItemId(),
+    name: '',
+    issuer: '',
+    date: '',
+    url: '',
+    credentialId: '',
   };
 }
 
@@ -535,6 +569,99 @@ export default function ResumeEditorClient({
     }));
   }, []);
 
+  const addSkill = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      skills: [...prev.skills, createEmptySkillItem()],
+    }));
+  }, []);
+
+  const addSkillsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      skills: prev.skills.length > 0 ? prev.skills : [createEmptySkillItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeSkill = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeSkillsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      skills: [],
+    }));
+  }, []);
+
+  const addLanguage = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      languages: [...prev.languages, createEmptyLanguageItem()],
+    }));
+  }, []);
+
+  const addLanguagesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      languages:
+        prev.languages.length > 0
+          ? prev.languages
+          : [createEmptyLanguageItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeLanguage = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      languages: prev.languages.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeLanguagesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      languages: [],
+    }));
+  }, []);
+
+  const addCertificate = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      certificates: [...prev.certificates, createEmptyCertificateItem()],
+    }));
+  }, []);
+
+  const addCertificatesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      certificates:
+        prev.certificates.length > 0
+          ? prev.certificates
+          : [createEmptyCertificateItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeCertificate = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      certificates: prev.certificates.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeCertificatesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      certificates: [],
+    }));
+  }, []);
+
   const addAtsSection = useCallback(() => {
     setIsAtsSectionEnabled(true);
     setIsAddContentDialogOpen(false);
@@ -577,55 +704,80 @@ export default function ResumeEditorClient({
   const isDirty = payloadString !== lastSavedPayloadRef.current;
   const isSettingsDirty = settingsPayloadString !== lastSavedSettingsRef.current;
   const canRunAtsAnalysis = jobDescription.trim().length >= 50;
-  const addableSections = useMemo<AddableSection[]>(
-    () => [
+
+  const addableSectionState = useMemo<
+    Record<
+      AddableSectionKey,
       {
-        key: 'profile',
-        label: t('addable.profile.label'),
-        description: t('addable.profile.description'),
+        isAdded: boolean;
+        onAdd: () => void;
+      }
+    >
+  >(
+    () => ({
+      profile: {
         isAdded: isProfileSectionEnabled,
         onAdd: addProfileSection,
       },
-      {
-        key: 'experiences',
-        label: t('addable.experiences.label'),
-        description: t('addable.experiences.description'),
+      experiences: {
         isAdded: content.experiences.length > 0,
         onAdd: addExperienceSection,
       },
-      {
-        key: 'educations',
-        label: t('addable.educations.label'),
-        description: t('addable.educations.description'),
+      educations: {
         isAdded: content.educations.length > 0,
         onAdd: addEducationSection,
       },
-      {
-        key: 'projects',
-        label: t('addable.projects.label'),
-        description: t('addable.projects.description'),
+      projects: {
         isAdded: content.projects.length > 0,
         onAdd: addProjectSection,
       },
-      {
-        key: 'ats',
-        label: t('addable.ats.label'),
-        description: t('addable.ats.description'),
+      skills: {
+        isAdded: content.skills.length > 0,
+        onAdd: addSkillsSection,
+      },
+      languages: {
+        isAdded: content.languages.length > 0,
+        onAdd: addLanguagesSection,
+      },
+      certificates: {
+        isAdded: content.certificates.length > 0,
+        onAdd: addCertificatesSection,
+      },
+      ats: {
         isAdded: isAtsSectionEnabled,
         onAdd: addAtsSection,
       },
-    ],
+    }),
     [
       addAtsSection,
+      addCertificatesSection,
       addEducationSection,
       addExperienceSection,
+      addLanguagesSection,
       addProfileSection,
       addProjectSection,
+      addSkillsSection,
+      content.certificates.length,
       content.educations.length,
       content.experiences.length,
+      content.languages.length,
       content.projects.length,
+      content.skills.length,
       isAtsSectionEnabled,
       isProfileSectionEnabled,
+    ]
+  );
+
+  const addableSections = useMemo<AddableSection[]>(
+    () =>
+      ADDABLE_SECTION_REGISTRY.map((section) => ({
+        key: section.key,
+        label: t(section.labelKey),
+        description: t(section.descriptionKey),
+        ...addableSectionState[section.key],
+      })),
+    [
+      addableSectionState,
       t,
     ]
   );
@@ -1454,6 +1606,330 @@ export default function ResumeEditorClient({
           ))}
         </div>
       </div>
+      ) : null}
+
+      {content.skills.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('skillsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addSkill}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addSkill')}
+              </button>
+              <button
+                type='button'
+                onClick={removeSkillsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.skills.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('skillRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeSkill(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        skills: prev.skills.map((skill) =>
+                          skill.id === item.id
+                            ? { ...skill, name: event.target.value }
+                            : skill
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('skillNamePlaceholder')}
+                  />
+                  <select
+                    value={item.level}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        skills: prev.skills.map((skill) =>
+                          skill.id === item.id
+                            ? {
+                                ...skill,
+                                level:
+                                  event.target.value === 'beginner' ||
+                                  event.target.value === 'advanced' ||
+                                  event.target.value === 'expert'
+                                    ? event.target.value
+                                    : 'intermediate',
+                              }
+                            : skill
+                        ),
+                      }))
+                    }
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  >
+                    <option value='beginner'>{t('skillLevel.beginner')}</option>
+                    <option value='intermediate'>
+                      {t('skillLevel.intermediate')}
+                    </option>
+                    <option value='advanced'>{t('skillLevel.advanced')}</option>
+                    <option value='expert'>{t('skillLevel.expert')}</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.languages.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('languagesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addLanguage}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addLanguage')}
+              </button>
+              <button
+                type='button'
+                onClick={removeLanguagesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.languages.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('languageRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeLanguage(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        languages: prev.languages.map((language) =>
+                          language.id === item.id
+                            ? { ...language, name: event.target.value }
+                            : language
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('languageNamePlaceholder')}
+                  />
+                  <select
+                    value={item.proficiency}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        languages: prev.languages.map((language) =>
+                          language.id === item.id
+                            ? {
+                                ...language,
+                                proficiency:
+                                  event.target.value === 'native' ||
+                                  event.target.value === 'fluent' ||
+                                  event.target.value === 'advanced' ||
+                                  event.target.value === 'basic'
+                                    ? event.target.value
+                                    : 'intermediate',
+                              }
+                            : language
+                        ),
+                      }))
+                    }
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  >
+                    <option value='native'>{t('languageLevel.native')}</option>
+                    <option value='fluent'>{t('languageLevel.fluent')}</option>
+                    <option value='advanced'>{t('languageLevel.advanced')}</option>
+                    <option value='intermediate'>
+                      {t('languageLevel.intermediate')}
+                    </option>
+                    <option value='basic'>{t('languageLevel.basic')}</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.certificates.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('certificatesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addCertificate}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addCertificate')}
+              </button>
+              <button
+                type='button'
+                onClick={removeCertificatesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.certificates.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('certificateRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeCertificate(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, name: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('certificateNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.issuer}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, issuer: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('issuerPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.date}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, date: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('certificateDatePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.credentialId}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, credentialId: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('credentialIdPlaceholder')}
+                  />
+                </div>
+
+                <input
+                  type='url'
+                  value={item.url}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      certificates: prev.certificates.map((certificate) =>
+                        certificate.id === item.id
+                          ? { ...certificate, url: event.target.value }
+                          : certificate
+                      ),
+                    }))
+                  }
+                  maxLength={240}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('certificateUrlPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       {isAtsSectionEnabled ? (

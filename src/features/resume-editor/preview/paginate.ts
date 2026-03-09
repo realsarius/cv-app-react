@@ -1,8 +1,11 @@
 import type {
+  ResumeCertificateItem,
   ResumeContent,
   ResumeEducationItem,
   ResumeExperienceItem,
+  ResumeLanguageItem,
   ResumeProjectItem,
+  ResumeSkillItem,
 } from '@/features/resume-editor/content';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
 
@@ -76,12 +79,36 @@ function estimateProjectCost(item: ResumeProjectItem) {
   );
 }
 
+function estimateSkillCost(item: ResumeSkillItem) {
+  const heading = `${item.name} ${item.level}`.trim();
+  return 2.8 + estimateLineCount(heading, 70) * 1;
+}
+
+function estimateLanguageCost(item: ResumeLanguageItem) {
+  const heading = `${item.name} ${item.proficiency}`.trim();
+  return 2.8 + estimateLineCount(heading, 70) * 1;
+}
+
+function estimateCertificateCost(item: ResumeCertificateItem) {
+  const heading = `${item.name} ${item.issuer}`.trim();
+  const meta = `${item.date} ${item.credentialId}`.trim();
+  return (
+    3.3 +
+    estimateLineCount(heading, 64) * 1.05 +
+    estimateLineCount(meta, 68) * 0.9 +
+    estimateLineCount(item.url, 78) * 0.8
+  );
+}
+
 function hasContent(page: ResumeContent) {
   return Boolean(
     page.profile ||
       page.experiences.length > 0 ||
       page.educations.length > 0 ||
-      page.projects.length > 0
+      page.projects.length > 0 ||
+      page.skills.length > 0 ||
+      page.languages.length > 0 ||
+      page.certificates.length > 0
   );
 }
 
@@ -92,6 +119,9 @@ function createPageSkeleton(personalDetails: ResumeContent['personalDetails']) {
     experiences: [],
     educations: [],
     projects: [],
+    skills: [],
+    languages: [],
+    certificates: [],
   } satisfies ResumeContent;
 }
 
@@ -113,7 +143,13 @@ function addSectionItems<TItem>(
   pages: ResumeContent[],
   remainingRef: { value: number },
   capacity: number,
-  section: 'experiences' | 'educations' | 'projects',
+  section:
+    | 'experiences'
+    | 'educations'
+    | 'projects'
+    | 'skills'
+    | 'languages'
+    | 'certificates',
   items: TItem[],
   estimateCost: (item: TItem) => number
 ) {
@@ -179,6 +215,33 @@ export function paginateResumeContent(
     'projects',
     content.projects,
     estimateProjectCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'skills',
+    content.skills,
+    estimateSkillCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'languages',
+    content.languages,
+    estimateLanguageCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'certificates',
+    content.certificates,
+    estimateCertificateCost
   );
 
   if (pages.length === 1 && !hasContent(pages[0]!)) {

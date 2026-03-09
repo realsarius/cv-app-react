@@ -48,6 +48,30 @@ const fullContent: ResumeContent = {
       description: 'Keyword coverage ve scoring modulu eklendi.',
     },
   ],
+  skills: [
+    {
+      id: 'skill-1',
+      name: 'React',
+      level: 'expert',
+    },
+  ],
+  languages: [
+    {
+      id: 'lang-1',
+      name: 'English',
+      proficiency: 'fluent',
+    },
+  ],
+  certificates: [
+    {
+      id: 'cert-1',
+      name: 'Professional Scrum Master',
+      issuer: 'Scrum.org',
+      date: '2025-04',
+      url: '',
+      credentialId: 'PSM-I-001',
+    },
+  ],
 };
 
 describe('calculateAtsScore', () => {
@@ -80,6 +104,9 @@ describe('calculateAtsScore', () => {
       experiences: [],
       educations: [],
       projects: [],
+      skills: [],
+      languages: [],
+      certificates: [],
     };
 
     const result = calculateAtsScore(

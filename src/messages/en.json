@@ -302,6 +302,35 @@
       "projectSubtitlePlaceholder": "Subtitle",
       "stackPlaceholder": "Technologies used (React, Next.js, PostgreSQL...)",
       "projectDescriptionPlaceholder": "Project description...",
+      "skillsSectionTitle": "Skills",
+      "addSkill": "Add skill",
+      "skillRecord": "Skill record",
+      "skillNamePlaceholder": "Skill name",
+      "skillLevel": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert"
+      },
+      "languagesSectionTitle": "Languages",
+      "addLanguage": "Add language",
+      "languageRecord": "Language record",
+      "languageNamePlaceholder": "Language name",
+      "languageLevel": {
+        "native": "Native",
+        "fluent": "Fluent",
+        "advanced": "Advanced",
+        "intermediate": "Intermediate",
+        "basic": "Basic"
+      },
+      "certificatesSectionTitle": "Certificates",
+      "addCertificate": "Add certificate",
+      "certificateRecord": "Certificate record",
+      "certificateNamePlaceholder": "Certificate name",
+      "issuerPlaceholder": "Issuing organization",
+      "certificateDatePlaceholder": "Date (MM/YYYY)",
+      "credentialIdPlaceholder": "Credential ID",
+      "certificateUrlPlaceholder": "Verification link (optional)",
       "atsTitle": "ATS analysis",
       "analyzeAts": "Run ATS analysis",
       "analyzing": "Analyzing",
@@ -353,6 +382,18 @@
           "label": "Projects",
           "description": "Add the projects you want to highlight."
         },
+        "skills": {
+          "label": "Skills",
+          "description": "Add your hard and soft skills with proficiency levels."
+        },
+        "languages": {
+          "label": "Languages",
+          "description": "Add languages you speak with proficiency."
+        },
+        "certificates": {
+          "label": "Certificates",
+          "description": "Add your certificates and credentials."
+        },
         "ats": {
           "label": "ATS analysis",
           "description": "Enable keyword analysis based on the job description."
@@ -371,7 +412,23 @@
         "profile": "Profile",
         "experience": "Experience",
         "education": "Education",
-        "projects": "Projects"
+        "projects": "Projects",
+        "skills": "Skills",
+        "languages": "Languages",
+        "certificates": "Certificates"
+      },
+      "skillLevel": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert"
+      },
+      "languageLevel": {
+        "native": "Native",
+        "fluent": "Fluent",
+        "advanced": "Advanced",
+        "intermediate": "Intermediate",
+        "basic": "Basic"
       },
       "range": {
         "ongoing": "Present"

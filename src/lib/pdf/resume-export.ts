@@ -531,5 +531,92 @@ export async function createResumePdf(input: ResumePdfInput) {
     });
   }
 
+  if (input.content.skills.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(ctx, 'Skills', headingFont, baseSize * 0.95, lineHeight, palette);
+
+    input.content.skills.forEach((item) => {
+      drawLabeledEntry(
+        ctx,
+        item.name.trim() || 'Skill',
+        item.level.trim(),
+        EMPTY_LINE,
+        {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        }
+      );
+    });
+  }
+
+  if (input.content.languages.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(
+      ctx,
+      'Languages',
+      headingFont,
+      baseSize * 0.95,
+      lineHeight,
+      palette
+    );
+
+    input.content.languages.forEach((item) => {
+      drawLabeledEntry(
+        ctx,
+        item.name.trim() || 'Language',
+        item.proficiency.trim(),
+        EMPTY_LINE,
+        {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        }
+      );
+    });
+  }
+
+  if (input.content.certificates.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(
+      ctx,
+      'Certificates',
+      headingFont,
+      baseSize * 0.95,
+      lineHeight,
+      palette
+    );
+
+    input.content.certificates.forEach((item) => {
+      const subtitle = [item.issuer.trim(), item.date.trim()]
+        .filter(Boolean)
+        .join(' | ');
+      const body = [item.credentialId.trim(), item.url.trim()]
+        .filter(Boolean)
+        .join('\n');
+
+      drawLabeledEntry(
+        ctx,
+        item.name.trim() || 'Certificate',
+        subtitle,
+        body,
+        {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        }
+      );
+    });
+  }
+
   return doc.save();
 }

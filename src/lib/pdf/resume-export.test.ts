@@ -48,6 +48,30 @@ const sampleContent: ResumeContent = {
       description: 'Resume duzenleme, ATS analizi ve PDF export akislari.',
     },
   ],
+  skills: [
+    {
+      id: 'skill-1',
+      name: 'React',
+      level: 'expert',
+    },
+  ],
+  languages: [
+    {
+      id: 'language-1',
+      name: 'English',
+      proficiency: 'fluent',
+    },
+  ],
+  certificates: [
+    {
+      id: 'certificate-1',
+      name: 'AWS Certified Cloud Practitioner',
+      issuer: 'Amazon Web Services',
+      date: '2025-10',
+      url: '',
+      credentialId: 'AWS-CCP-001',
+    },
+  ],
 };
 
 const sampleSettings: ResumeVisualSettings = {
