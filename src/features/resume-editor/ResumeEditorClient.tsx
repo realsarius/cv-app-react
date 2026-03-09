@@ -107,6 +107,8 @@ type AddableSection = {
   onAdd: () => void;
 };
 
+const ATS_SECTION_VISIBILITY_STORAGE_KEY = 'resume-editor:ats-section-visible';
+
 class AutosaveConflictError extends Error {
   readonly currentUpdatedAt: string | null;
 
@@ -136,6 +138,46 @@ function createItemId() {
   }
 
   return `item-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getAtsSectionVisibilityStorageKey(resumeId: string) {
+  return `${ATS_SECTION_VISIBILITY_STORAGE_KEY}:${resumeId}`;
+}
+
+function readAtsSectionVisibility(resumeId: string): boolean | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const value = window.localStorage.getItem(getAtsSectionVisibilityStorageKey(resumeId));
+    if (value === 'true') {
+      return true;
+    }
+
+    if (value === 'false') {
+      return false;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function writeAtsSectionVisibility(resumeId: string, isEnabled: boolean) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      getAtsSectionVisibilityStorageKey(resumeId),
+      String(isEnabled)
+    );
+  } catch {
+    // Ignore storage errors (private mode / disabled storage).
+  }
 }
 
 function createEmptyExperienceItem(): ResumeExperienceItem {
@@ -316,6 +358,7 @@ export default function ResumeEditorClient({
   const [isAtsSectionEnabled, setIsAtsSectionEnabled] = useState(
     initialAtsHistory.length > 0
   );
+  const [isAtsVisibilityLoaded, setIsAtsVisibilityLoaded] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [company, setCompany] = useState('');
@@ -347,6 +390,22 @@ export default function ResumeEditorClient({
       colorScheme: initialSettings.colorScheme,
     })
   );
+
+  const defaultAtsSectionVisibility = initialAtsHistory.length > 0;
+
+  useEffect(() => {
+    const storedVisibility = readAtsSectionVisibility(resumeId);
+    setIsAtsSectionEnabled(storedVisibility ?? defaultAtsSectionVisibility);
+    setIsAtsVisibilityLoaded(true);
+  }, [defaultAtsSectionVisibility, resumeId]);
+
+  useEffect(() => {
+    if (!isAtsVisibilityLoaded) {
+      return;
+    }
+
+    writeAtsSectionVisibility(resumeId, isAtsSectionEnabled);
+  }, [isAtsSectionEnabled, isAtsVisibilityLoaded, resumeId]);
 
   const payload = useMemo(
     () => ({
