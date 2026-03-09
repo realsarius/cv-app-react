@@ -302,6 +302,85 @@
       "projectSubtitlePlaceholder": "Subtitle",
       "stackPlaceholder": "Technologies used (React, Next.js, PostgreSQL...)",
       "projectDescriptionPlaceholder": "Project description...",
+      "skillsSectionTitle": "Skills",
+      "addSkill": "Add skill",
+      "skillRecord": "Skill record",
+      "skillNamePlaceholder": "Skill name",
+      "skillLevel": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert"
+      },
+      "languagesSectionTitle": "Languages",
+      "addLanguage": "Add language",
+      "languageRecord": "Language record",
+      "languageNamePlaceholder": "Language name",
+      "languageLevel": {
+        "native": "Native",
+        "fluent": "Fluent",
+        "advanced": "Advanced",
+        "intermediate": "Intermediate",
+        "basic": "Basic"
+      },
+      "certificatesSectionTitle": "Certificates",
+      "addCertificate": "Add certificate",
+      "certificateRecord": "Certificate record",
+      "certificateNamePlaceholder": "Certificate name",
+      "issuerPlaceholder": "Issuing organization",
+      "certificateDatePlaceholder": "Date (MM/YYYY)",
+      "credentialIdPlaceholder": "Credential ID",
+      "certificateUrlPlaceholder": "Verification link (optional)",
+      "awardsSectionTitle": "Awards",
+      "addAward": "Add award",
+      "awardRecord": "Award record",
+      "awardTitlePlaceholder": "Award title",
+      "awardDatePlaceholder": "Date (MM/YYYY)",
+      "awardDescriptionPlaceholder": "Award description (optional)",
+      "interestsSectionTitle": "Interests",
+      "addInterest": "Add interest",
+      "interestRecord": "Interest record",
+      "interestNamePlaceholder": "Interest",
+      "coursesSectionTitle": "Courses",
+      "addCourse": "Add course",
+      "courseRecord": "Course record",
+      "courseNamePlaceholder": "Course name",
+      "institutionPlaceholder": "Institution",
+      "courseDatePlaceholder": "Date (MM/YYYY)",
+      "courseUrlPlaceholder": "Course link (optional)",
+      "referencesSectionTitle": "References",
+      "addReference": "Add reference",
+      "referenceRecord": "Reference record",
+      "referenceNamePlaceholder": "Full name",
+      "referenceTitlePlaceholder": "Title",
+      "relationshipPlaceholder": "Relationship (e.g. Team lead)",
+      "referenceEmailPlaceholder": "Email",
+      "referencePhonePlaceholder": "Phone",
+      "organisationsSectionTitle": "Organisations",
+      "addOrganisation": "Add organisation",
+      "organisationRecord": "Organisation record",
+      "organisationNamePlaceholder": "Organisation name",
+      "organisationRolePlaceholder": "Role",
+      "organisationDescriptionPlaceholder": "Description (optional)",
+      "publicationsSectionTitle": "Publications",
+      "addPublication": "Add publication",
+      "publicationRecord": "Publication record",
+      "publicationTitlePlaceholder": "Publication title",
+      "publisherPlaceholder": "Publisher / platform",
+      "publicationDatePlaceholder": "Date (MM/YYYY)",
+      "publicationUrlPlaceholder": "Publication link (optional)",
+      "publicationDescriptionPlaceholder": "Publication description (optional)",
+      "customSectionsTitle": "Custom sections",
+      "addCustomSection": "Add custom section",
+      "customSectionRecord": "Custom section record",
+      "customSectionTitlePlaceholder": "Section title",
+      "removeCustomSection": "Delete section",
+      "addCustomItem": "Add item",
+      "customItemRecord": "Custom item",
+      "customItemHeadingPlaceholder": "Heading",
+      "customItemSubheadingPlaceholder": "Subheading",
+      "customItemDatePlaceholder": "Date",
+      "customItemDescriptionPlaceholder": "Description",
       "atsTitle": "ATS analysis",
       "analyzeAts": "Run ATS analysis",
       "analyzing": "Analyzing",
@@ -353,6 +432,46 @@
           "label": "Projects",
           "description": "Add the projects you want to highlight."
         },
+        "skills": {
+          "label": "Skills",
+          "description": "Add your hard and soft skills with proficiency levels."
+        },
+        "languages": {
+          "label": "Languages",
+          "description": "Add languages you speak with proficiency."
+        },
+        "certificates": {
+          "label": "Certificates",
+          "description": "Add your certificates and credentials."
+        },
+        "awards": {
+          "label": "Awards",
+          "description": "Add your recognitions and achievements."
+        },
+        "interests": {
+          "label": "Interests",
+          "description": "Add interests that support your career story."
+        },
+        "courses": {
+          "label": "Courses",
+          "description": "Add completed courses and relevant links."
+        },
+        "references": {
+          "label": "References",
+          "description": "Add references for applications when needed."
+        },
+        "organisations": {
+          "label": "Organisations",
+          "description": "Add memberships or volunteer organisations."
+        },
+        "publications": {
+          "label": "Publications",
+          "description": "Add your articles, publications or content outputs."
+        },
+        "customSections": {
+          "label": "Custom section",
+          "description": "Add content that does not fit standard sections."
+        },
         "ats": {
           "label": "ATS analysis",
           "description": "Enable keyword analysis based on the job description."
@@ -371,7 +490,30 @@
         "profile": "Profile",
         "experience": "Experience",
         "education": "Education",
-        "projects": "Projects"
+        "projects": "Projects",
+        "skills": "Skills",
+        "languages": "Languages",
+        "certificates": "Certificates",
+        "awards": "Awards",
+        "interests": "Interests",
+        "courses": "Courses",
+        "references": "References",
+        "organisations": "Organisations",
+        "publications": "Publications",
+        "customSections": "Custom Section"
+      },
+      "skillLevel": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert"
+      },
+      "languageLevel": {
+        "native": "Native",
+        "fluent": "Fluent",
+        "advanced": "Advanced",
+        "intermediate": "Intermediate",
+        "basic": "Basic"
       },
       "range": {
         "ongoing": "Present"

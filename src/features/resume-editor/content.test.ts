@@ -23,6 +23,10 @@ describe('resume content schema', () => {
 
     expect(second.experiences).toHaveLength(0);
     expect(first.projects).toHaveLength(0);
+    expect(second.skills).toHaveLength(0);
+    expect(second.awards).toHaveLength(0);
+    expect(second.publications).toHaveLength(0);
+    expect(second.customSections).toHaveLength(0);
   });
 
   it('gecersiz icerik icin guvenli default dondurur', () => {
@@ -34,6 +38,9 @@ describe('resume content schema', () => {
     expect(parsed.personalDetails.fullName).toBe('');
     expect(parsed.profile).toBe('');
     expect(parsed.educations).toEqual([]);
+    expect(parsed.certificates).toEqual([]);
+    expect(parsed.references).toEqual([]);
+    expect(parsed.sectionOrder).toContain('profile');
   });
 
   it('gelen alanlari trimleyerek parse eder', () => {
@@ -55,5 +62,8 @@ describe('resume content schema', () => {
     expect(parsed.personalDetails.jobTitle).toBe('Frontend Developer');
     expect(parsed.personalDetails.email).toBe('berk@example.com');
     expect(parsed.profile).toBe('Merhaba dunya');
+    expect(parsed.languages).toEqual([]);
+    expect(parsed.organisations).toEqual([]);
+    expect(parsed.sectionOrder).toContain('customSections');
   });
 });

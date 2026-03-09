@@ -48,6 +48,116 @@ const sampleContent: ResumeContent = {
       description: 'Resume duzenleme, ATS analizi ve PDF export akislari.',
     },
   ],
+  skills: [
+    {
+      id: 'skill-1',
+      name: 'React',
+      level: 'expert',
+    },
+  ],
+  languages: [
+    {
+      id: 'language-1',
+      name: 'English',
+      proficiency: 'fluent',
+    },
+  ],
+  certificates: [
+    {
+      id: 'certificate-1',
+      name: 'AWS Certified Cloud Practitioner',
+      issuer: 'Amazon Web Services',
+      date: '2025-10',
+      url: '',
+      credentialId: 'AWS-CCP-001',
+    },
+  ],
+  awards: [
+    {
+      id: 'award-1',
+      title: 'Hackathon Winner',
+      issuer: 'Acme',
+      date: '2024',
+      description: 'Won internal innovation hackathon.',
+    },
+  ],
+  interests: [
+    {
+      id: 'interest-1',
+      name: 'Developer communities',
+    },
+  ],
+  courses: [
+    {
+      id: 'course-1',
+      name: 'System Design Fundamentals',
+      institution: 'Udemy',
+      date: '2025',
+      url: '',
+    },
+  ],
+  references: [
+    {
+      id: 'reference-1',
+      name: 'Ahmet Kaya',
+      title: 'Tech Lead',
+      company: 'Acme',
+      email: 'ahmet@example.com',
+      phone: '',
+      relationship: 'Manager',
+    },
+  ],
+  organisations: [
+    {
+      id: 'organisation-1',
+      name: 'Women in Tech',
+      role: 'Mentor',
+      startDate: '2022',
+      endDate: '',
+      description: 'Mentoring junior developers.',
+    },
+  ],
+  publications: [
+    {
+      id: 'publication-1',
+      title: 'Modern Resume Design Principles',
+      publisher: 'Dev.to',
+      date: '2025',
+      url: '',
+      description: 'Publication on ATS-friendly resume writing practices.',
+    },
+  ],
+  customSections: [
+    {
+      id: 'custom-section-1',
+      title: 'Hackathon Highlights',
+      items: [
+        {
+          id: 'custom-item-1',
+          heading: 'Fintech Challenge',
+          subheading: '1st Place',
+          date: '2024',
+          description: 'Built a full-stack prototype within 48 hours.',
+        },
+      ],
+    },
+  ],
+  sectionOrder: [
+    'profile',
+    'experiences',
+    'educations',
+    'projects',
+    'skills',
+    'languages',
+    'certificates',
+    'awards',
+    'interests',
+    'courses',
+    'references',
+    'organisations',
+    'publications',
+    'customSections',
+  ],
 };
 
 const sampleSettings: ResumeVisualSettings = {

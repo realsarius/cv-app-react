@@ -1,4 +1,8 @@
-import type { ResumeContent } from '@/features/resume-editor/content';
+import type {
+  ResumeContent,
+  ResumeContentSectionOrderKey,
+} from '@/features/resume-editor/content';
+import { resolveSectionOrder } from '@/features/resume-editor/section-order';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
 import { useTranslations } from 'next-intl';
 import AtlanticBlueTemplate from './templates/AtlanticBlueTemplate';
@@ -128,6 +132,18 @@ export default function ResumePreviewDocument({
         meta: 0.8,
       };
 
+  const sectionOrderIndex = resolveSectionOrder(content.sectionOrder).reduce(
+    (acc, sectionKey, index) => {
+      acc[sectionKey] = index;
+      return acc;
+    },
+    {} as Record<ResumeContentSectionOrderKey, number>
+  );
+
+  const getSectionOrderStyle = (sectionKey: ResumeContentSectionOrderKey) => ({
+    order: sectionOrderIndex[sectionKey] ?? 99,
+  });
+
   const articleClassName = [
     'w-full border bg-white shadow-sm',
     printFriendly
@@ -175,8 +191,12 @@ export default function ResumePreviewDocument({
         </p>
       </header>
 
+      <div className='flex flex-col'>
       {content.profile ? (
-        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+        <section
+          className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}
+          style={getSectionOrderStyle('profile')}
+        >
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -193,7 +213,10 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.experiences.length > 0 ? (
-        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+        <section
+          className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}
+          style={getSectionOrderStyle('experiences')}
+        >
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -243,7 +266,10 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.educations.length > 0 ? (
-        <section className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}>
+        <section
+          className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}
+          style={getSectionOrderStyle('educations')}
+        >
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -293,7 +319,7 @@ export default function ResumePreviewDocument({
       ) : null}
 
       {content.projects.length > 0 ? (
-        <section className={sectionSpacing}>
+        <section className={sectionSpacing} style={getSectionOrderStyle('projects')}>
           <h3
             className={`font-semibold ${palette.sectionLabel}`}
             style={{ fontSize: `${typography.section}em` }}
@@ -339,6 +365,389 @@ export default function ResumePreviewDocument({
           </div>
         </section>
       ) : null}
+
+      {content.skills.length > 0 ? (
+        <section
+          className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}
+          style={getSectionOrderStyle('skills')}
+        >
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.skills')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.skills.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {t(`skillLevel.${item.level}`)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.languages.length > 0 ? (
+        <section
+          className={`${sectionSpacing} border-b pb-4 ${palette.sectionDivider}`}
+          style={getSectionOrderStyle('languages')}
+        >
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.languages')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.languages.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {t(`languageLevel.${item.proficiency}`)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.certificates.length > 0 ? (
+        <section
+          className={sectionSpacing}
+          style={getSectionOrderStyle('certificates')}
+        >
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.certificates')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.certificates.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.issuer, item.date].filter(Boolean).join(' | ')}
+                </p>
+                {item.credentialId ? (
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
+                    {item.credentialId}
+                  </p>
+                ) : null}
+                {item.url ? (
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
+                    {item.url}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.awards.length > 0 ? (
+        <section className={sectionSpacing} style={getSectionOrderStyle('awards')}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.awards')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.awards.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.title}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.issuer, item.date].filter(Boolean).join(' | ')}
+                </p>
+                {item.description ? (
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.interests.length > 0 ? (
+        <section className={sectionSpacing} style={getSectionOrderStyle('interests')}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.interests')}
+          </h3>
+          <p
+            className={`mt-2 ${palette.body}`}
+            style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+          >
+            {content.interests
+              .map((item) => item.name)
+              .filter(Boolean)
+              .join(', ')}
+          </p>
+        </section>
+      ) : null}
+
+      {content.courses.length > 0 ? (
+        <section className={sectionSpacing} style={getSectionOrderStyle('courses')}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.courses')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.courses.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.institution, item.date].filter(Boolean).join(' | ')}
+                </p>
+                {item.url ? (
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
+                    {item.url}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.references.length > 0 ? (
+        <section className={sectionSpacing} style={getSectionOrderStyle('references')}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.references')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.references.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.title, item.company, item.relationship]
+                    .filter(Boolean)
+                    .join(' | ')}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.email, item.phone].filter(Boolean).join(' | ')}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.organisations.length > 0 ? (
+        <section
+          className={sectionSpacing}
+          style={getSectionOrderStyle('organisations')}
+        >
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.organisations')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.organisations.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                  {item.role ? ` - ${item.role}` : ''}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {formatRange(item.startDate, item.endDate, t('range.ongoing'))}
+                </p>
+                {item.description ? (
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.publications.length > 0 ? (
+        <section
+          className={sectionSpacing}
+          style={getSectionOrderStyle('publications')}
+        >
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.publications')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.publications.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.title}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.publisher, item.date].filter(Boolean).join(' | ')}
+                </p>
+                {item.url ? (
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
+                    {item.url}
+                  </p>
+                ) : null}
+                {item.description ? (
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.customSections.length > 0 ? (
+        <>
+          {content.customSections.map((section) => (
+            <section
+              key={section.id}
+              className={sectionSpacing}
+              style={getSectionOrderStyle('customSections')}
+            >
+              <h3
+                className={`font-semibold ${palette.sectionLabel}`}
+                style={{ fontSize: `${typography.section}em` }}
+              >
+                {section.title || t('sections.customSections')}
+              </h3>
+              <div className={`mt-3 ${contentSpacing}`}>
+                {section.items.map((item) => (
+                  <div key={item.id}>
+                    {item.heading ? (
+                      <p
+                        className={`font-semibold ${palette.title}`}
+                        style={{ fontSize: `${typography.body}em` }}
+                      >
+                        {item.heading}
+                        {item.subheading ? ` - ${item.subheading}` : ''}
+                      </p>
+                    ) : null}
+                    {item.date ? (
+                      <p
+                        className={palette.sectionLabel}
+                        style={{ fontSize: `${typography.meta}em` }}
+                      >
+                        {item.date}
+                      </p>
+                    ) : null}
+                    {item.description ? (
+                      <p
+                        className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                        style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                      >
+                        {item.description}
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </>
+      ) : null}
+      </div>
     </article>
   );
 }

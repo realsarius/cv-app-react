@@ -48,6 +48,116 @@ const fullContent: ResumeContent = {
       description: 'Keyword coverage ve scoring modulu eklendi.',
     },
   ],
+  skills: [
+    {
+      id: 'skill-1',
+      name: 'React',
+      level: 'expert',
+    },
+  ],
+  languages: [
+    {
+      id: 'lang-1',
+      name: 'English',
+      proficiency: 'fluent',
+    },
+  ],
+  certificates: [
+    {
+      id: 'cert-1',
+      name: 'Professional Scrum Master',
+      issuer: 'Scrum.org',
+      date: '2025-04',
+      url: '',
+      credentialId: 'PSM-I-001',
+    },
+  ],
+  awards: [
+    {
+      id: 'award-1',
+      title: 'Engineering Excellence Award',
+      issuer: 'Acme',
+      date: '2024',
+      description: 'Best cross-team delivery award.',
+    },
+  ],
+  interests: [
+    {
+      id: 'interest-1',
+      name: 'Open source',
+    },
+  ],
+  courses: [
+    {
+      id: 'course-1',
+      name: 'Advanced TypeScript',
+      institution: 'Frontend Masters',
+      date: '2025',
+      url: '',
+    },
+  ],
+  references: [
+    {
+      id: 'reference-1',
+      name: 'Jane Doe',
+      title: 'Engineering Manager',
+      company: 'Acme',
+      email: 'jane@example.com',
+      phone: '',
+      relationship: 'Manager',
+    },
+  ],
+  organisations: [
+    {
+      id: 'organisation-1',
+      name: 'GDG Istanbul',
+      role: 'Volunteer',
+      startDate: '2023',
+      endDate: '',
+      description: 'Community events support.',
+    },
+  ],
+  publications: [
+    {
+      id: 'publication-1',
+      title: 'Scaling Frontend Performance',
+      publisher: 'Medium',
+      date: '2025',
+      url: '',
+      description: 'Article about performance optimizations in React apps.',
+    },
+  ],
+  customSections: [
+    {
+      id: 'custom-section-1',
+      title: 'Volunteer Work',
+      items: [
+        {
+          id: 'custom-item-1',
+          heading: 'Community Mentor',
+          subheading: 'Frontend Istanbul',
+          date: '2024',
+          description: 'Mentored junior developers in weekly sessions.',
+        },
+      ],
+    },
+  ],
+  sectionOrder: [
+    'profile',
+    'experiences',
+    'educations',
+    'projects',
+    'skills',
+    'languages',
+    'certificates',
+    'awards',
+    'interests',
+    'courses',
+    'references',
+    'organisations',
+    'publications',
+    'customSections',
+  ],
 };
 
 describe('calculateAtsScore', () => {
@@ -80,6 +190,32 @@ describe('calculateAtsScore', () => {
       experiences: [],
       educations: [],
       projects: [],
+      skills: [],
+      languages: [],
+      certificates: [],
+      awards: [],
+      interests: [],
+      courses: [],
+      references: [],
+      organisations: [],
+      publications: [],
+      customSections: [],
+      sectionOrder: [
+        'profile',
+        'experiences',
+        'educations',
+        'projects',
+        'skills',
+        'languages',
+        'certificates',
+        'awards',
+        'interests',
+        'courses',
+        'references',
+        'organisations',
+        'publications',
+        'customSections',
+      ],
     };
 
     const result = calculateAtsScore(

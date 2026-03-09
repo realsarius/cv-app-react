@@ -7,7 +7,11 @@ import {
   type PDFFont,
   type PDFPage,
 } from 'pdf-lib';
-import type { ResumeContent } from '@/features/resume-editor/content';
+import type {
+  ResumeContent,
+  ResumeContentSectionOrderKey,
+} from '@/features/resume-editor/content';
+import { resolveSectionOrder } from '@/features/resume-editor/section-order';
 import type { ResumeVisualSettings } from '@/lib/db/resume-settings';
 
 type ResumePdfInput = {
@@ -412,124 +416,465 @@ export async function createResumePdf(input: ResumePdfInput) {
   });
   ctx.y -= isTwoColumnTemplate ? sectionGap * 0.92 : sectionGap;
 
-  if (input.content.profile.trim()) {
-    drawSectionTitle(
-      ctx,
-      'Profile',
-      headingFont,
-      baseSize * 0.95,
-      lineHeight,
-      palette
-    );
+  let renderedSectionCount = 0;
+  const startSection = () => {
+    if (renderedSectionCount > 0) {
+      ctx.y -= sectionGap * 0.4;
+    }
+    renderedSectionCount += 1;
+  };
 
-    drawWrappedText(ctx, input.content.profile, {
-      font: bodyFont,
-      size: baseSize,
-      color: palette.body,
-      lineHeight,
-      gapAfterParagraph: lineHeight * 0.25,
-    });
+  const renderers: Record<ResumeContentSectionOrderKey, () => void> = {
+    profile: () => {
+      if (!input.content.profile.trim()) {
+        return;
+      }
 
-    ctx.y -= sectionGap;
-  }
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Profile',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      drawWrappedText(ctx, input.content.profile, {
+        font: bodyFont,
+        size: baseSize,
+        color: palette.body,
+        lineHeight,
+        gapAfterParagraph: lineHeight * 0.25,
+      });
+    },
+    experiences: () => {
+      if (input.content.experiences.length === 0) {
+        return;
+      }
 
-  if (input.content.experiences.length > 0) {
-    drawSectionTitle(
-      ctx,
-      'Experience',
-      headingFont,
-      baseSize * 0.95,
-      lineHeight,
-      palette
-    );
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Experience',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.experiences.forEach((item) => {
+        const title =
+          `${item.title.trim() || 'Role'}${
+            item.company.trim() ? ` - ${item.company.trim()}` : EMPTY_LINE
+          }`;
+        const range = formatRange(item.startDate, item.endDate);
+        const location = [item.city.trim(), item.country.trim()]
+          .filter(Boolean)
+          .join(', ');
+        const subtitle = [range, location].filter(Boolean).join(' | ');
 
-    input.content.experiences.forEach((item) => {
-      const title =
-        `${item.title.trim() || 'Role'}${
-          item.company.trim() ? ` - ${item.company.trim()}` : EMPTY_LINE
+        drawLabeledEntry(ctx, title, subtitle, item.description, {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        });
+      });
+    },
+    educations: () => {
+      if (input.content.educations.length === 0) {
+        return;
+      }
+
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Education',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.educations.forEach((item) => {
+        const title =
+          `${item.school.trim() || 'School'}${
+            item.degree.trim() ? ` - ${item.degree.trim()}` : EMPTY_LINE
+          }`;
+        const range = formatRange(item.startDate, item.endDate);
+        const location = [item.city.trim(), item.country.trim()]
+          .filter(Boolean)
+          .join(', ');
+        const subtitle = [range, location].filter(Boolean).join(' | ');
+
+        drawLabeledEntry(ctx, title, subtitle, item.description, {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        });
+      });
+    },
+    projects: () => {
+      if (input.content.projects.length === 0) {
+        return;
+      }
+
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Projects',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.projects.forEach((item) => {
+        const title = `${item.title.trim() || 'Project'}${
+          item.subtitle.trim() ? ` - ${item.subtitle.trim()}` : EMPTY_LINE
         }`;
-      const range = formatRange(item.startDate, item.endDate);
-      const location = [item.city.trim(), item.country.trim()]
-        .filter(Boolean)
-        .join(', ');
-      const subtitle = [range, location].filter(Boolean).join(' | ');
+        const location = [item.city.trim(), item.country.trim()]
+          .filter(Boolean)
+          .join(', ');
+        const subtitle = [item.stack.trim(), location].filter(Boolean).join(' | ');
 
-      drawLabeledEntry(ctx, title, subtitle, item.description, {
-        headingFont,
-        bodyFont,
-        headingSize,
-        bodySize: baseSize,
-        lineHeight,
-        palette,
+        drawLabeledEntry(ctx, title, subtitle, item.description, {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        });
       });
-    });
+    },
+    skills: () => {
+      if (input.content.skills.length === 0) {
+        return;
+      }
 
-    ctx.y -= sectionGap * 0.4;
-  }
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Skills',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.skills.forEach((item) => {
+        drawLabeledEntry(
+          ctx,
+          item.name.trim() || 'Skill',
+          item.level.trim(),
+          EMPTY_LINE,
+          {
+            headingFont,
+            bodyFont,
+            headingSize,
+            bodySize: baseSize,
+            lineHeight,
+            palette,
+          }
+        );
+      });
+    },
+    languages: () => {
+      if (input.content.languages.length === 0) {
+        return;
+      }
 
-  if (input.content.educations.length > 0) {
-    drawSectionTitle(
-      ctx,
-      'Education',
-      headingFont,
-      baseSize * 0.95,
-      lineHeight,
-      palette
-    );
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Languages',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.languages.forEach((item) => {
+        drawLabeledEntry(
+          ctx,
+          item.name.trim() || 'Language',
+          item.proficiency.trim(),
+          EMPTY_LINE,
+          {
+            headingFont,
+            bodyFont,
+            headingSize,
+            bodySize: baseSize,
+            lineHeight,
+            palette,
+          }
+        );
+      });
+    },
+    certificates: () => {
+      if (input.content.certificates.length === 0) {
+        return;
+      }
 
-    input.content.educations.forEach((item) => {
-      const title =
-        `${item.school.trim() || 'School'}${
-          item.degree.trim() ? ` - ${item.degree.trim()}` : EMPTY_LINE
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Certificates',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.certificates.forEach((item) => {
+        const subtitle = [item.issuer.trim(), item.date.trim()]
+          .filter(Boolean)
+          .join(' | ');
+        const body = [item.credentialId.trim(), item.url.trim()]
+          .filter(Boolean)
+          .join('\n');
+
+        drawLabeledEntry(
+          ctx,
+          item.name.trim() || 'Certificate',
+          subtitle,
+          body,
+          {
+            headingFont,
+            bodyFont,
+            headingSize,
+            bodySize: baseSize,
+            lineHeight,
+            palette,
+          }
+        );
+      });
+    },
+    awards: () => {
+      if (input.content.awards.length === 0) {
+        return;
+      }
+
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Awards',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.awards.forEach((item) => {
+        const subtitle = [item.issuer.trim(), item.date.trim()]
+          .filter(Boolean)
+          .join(' | ');
+        drawLabeledEntry(ctx, item.title.trim() || 'Award', subtitle, item.description, {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        });
+      });
+    },
+    interests: () => {
+      if (input.content.interests.length === 0) {
+        return;
+      }
+
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Interests',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      drawWrappedText(
+        ctx,
+        input.content.interests
+          .map((item) => item.name.trim())
+          .filter(Boolean)
+          .join(', '),
+        {
+          font: bodyFont,
+          size: baseSize,
+          color: palette.body,
+          lineHeight,
+        }
+      );
+    },
+    courses: () => {
+      if (input.content.courses.length === 0) {
+        return;
+      }
+
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Courses',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.courses.forEach((item) => {
+        const subtitle = [item.institution.trim(), item.date.trim()]
+          .filter(Boolean)
+          .join(' | ');
+        drawLabeledEntry(
+          ctx,
+          item.name.trim() || 'Course',
+          subtitle,
+          item.url.trim(),
+          {
+            headingFont,
+            bodyFont,
+            headingSize,
+            bodySize: baseSize,
+            lineHeight,
+            palette,
+          }
+        );
+      });
+    },
+    references: () => {
+      if (input.content.references.length === 0) {
+        return;
+      }
+
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'References',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.references.forEach((item) => {
+        const subtitle = [item.title.trim(), item.company.trim(), item.relationship.trim()]
+          .filter(Boolean)
+          .join(' | ');
+        const body = [item.email.trim(), item.phone.trim()]
+          .filter(Boolean)
+          .join(' | ');
+        drawLabeledEntry(ctx, item.name.trim() || 'Reference', subtitle, body, {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        });
+      });
+    },
+    organisations: () => {
+      if (input.content.organisations.length === 0) {
+        return;
+      }
+
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Organisations',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+      input.content.organisations.forEach((item) => {
+        const title = `${item.name.trim() || 'Organisation'}${
+          item.role.trim() ? ` - ${item.role.trim()}` : EMPTY_LINE
         }`;
-      const range = formatRange(item.startDate, item.endDate);
-      const location = [item.city.trim(), item.country.trim()]
-        .filter(Boolean)
-        .join(', ');
-      const subtitle = [range, location].filter(Boolean).join(' | ');
-
-      drawLabeledEntry(ctx, title, subtitle, item.description, {
-        headingFont,
-        bodyFont,
-        headingSize,
-        bodySize: baseSize,
-        lineHeight,
-        palette,
+        const subtitle = formatRange(item.startDate, item.endDate);
+        drawLabeledEntry(ctx, title, subtitle, item.description, {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        });
       });
-    });
+    },
+    publications: () => {
+      if (input.content.publications.length === 0) {
+        return;
+      }
 
-    ctx.y -= sectionGap * 0.4;
-  }
-
-  if (input.content.projects.length > 0) {
-    drawSectionTitle(
-      ctx,
-      'Projects',
-      headingFont,
-      baseSize * 0.95,
-      lineHeight,
-      palette
-    );
-
-    input.content.projects.forEach((item) => {
-      const title = `${item.title.trim() || 'Project'}${
-        item.subtitle.trim() ? ` - ${item.subtitle.trim()}` : EMPTY_LINE
-      }`;
-      const location = [item.city.trim(), item.country.trim()]
-        .filter(Boolean)
-        .join(', ');
-      const subtitle = [item.stack.trim(), location].filter(Boolean).join(' | ');
-
-      drawLabeledEntry(ctx, title, subtitle, item.description, {
+      startSection();
+      drawSectionTitle(
+        ctx,
+        'Publications',
         headingFont,
-        bodyFont,
-        headingSize,
-        bodySize: baseSize,
+        baseSize * 0.95,
         lineHeight,
-        palette,
+        palette
+      );
+      input.content.publications.forEach((item) => {
+        const subtitle = [item.publisher.trim(), item.date.trim()]
+          .filter(Boolean)
+          .join(' | ');
+        const body = [item.url.trim(), item.description.trim()]
+          .filter(Boolean)
+          .join('\n');
+
+        drawLabeledEntry(
+          ctx,
+          item.title.trim() || 'Publication',
+          subtitle,
+          body,
+          {
+            headingFont,
+            bodyFont,
+            headingSize,
+            bodySize: baseSize,
+            lineHeight,
+            palette,
+          }
+        );
       });
-    });
-  }
+    },
+    customSections: () => {
+      if (input.content.customSections.length === 0) {
+        return;
+      }
+
+      input.content.customSections.forEach((section) => {
+        startSection();
+        drawSectionTitle(
+          ctx,
+          section.title.trim() || 'Custom Section',
+          headingFont,
+          baseSize * 0.95,
+          lineHeight,
+          palette
+        );
+
+        section.items.forEach((item) => {
+          const title = `${item.heading.trim() || 'Item'}${
+            item.subheading.trim() ? ` - ${item.subheading.trim()}` : EMPTY_LINE
+          }`;
+
+          drawLabeledEntry(ctx, title, item.date.trim(), item.description.trim(), {
+            headingFont,
+            bodyFont,
+            headingSize,
+            bodySize: baseSize,
+            lineHeight,
+            palette,
+          });
+        });
+      });
+    },
+  };
+
+  resolveSectionOrder(input.content.sectionOrder).forEach((sectionKey) => {
+    renderers[sectionKey]();
+  });
 
   return doc.save();
 }

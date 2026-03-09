@@ -302,6 +302,85 @@
       "projectSubtitlePlaceholder": "Alt başlık",
       "stackPlaceholder": "Kullanılan teknolojiler (React, Next.js, PostgreSQL...)",
       "projectDescriptionPlaceholder": "Proje açıklaması...",
+      "skillsSectionTitle": "Beceriler",
+      "addSkill": "Beceri ekle",
+      "skillRecord": "Beceri kaydı",
+      "skillNamePlaceholder": "Beceri adı",
+      "skillLevel": {
+        "beginner": "Başlangıç",
+        "intermediate": "Orta",
+        "advanced": "İleri",
+        "expert": "Uzman"
+      },
+      "languagesSectionTitle": "Diller",
+      "addLanguage": "Dil ekle",
+      "languageRecord": "Dil kaydı",
+      "languageNamePlaceholder": "Dil adı",
+      "languageLevel": {
+        "native": "Ana dil",
+        "fluent": "Akıcı",
+        "advanced": "İleri",
+        "intermediate": "Orta",
+        "basic": "Temel"
+      },
+      "certificatesSectionTitle": "Sertifikalar",
+      "addCertificate": "Sertifika ekle",
+      "certificateRecord": "Sertifika kaydı",
+      "certificateNamePlaceholder": "Sertifika adı",
+      "issuerPlaceholder": "Veren kurum",
+      "certificateDatePlaceholder": "Tarih (AA/YYYY)",
+      "credentialIdPlaceholder": "Belge kimliği",
+      "certificateUrlPlaceholder": "Doğrulama linki (opsiyonel)",
+      "awardsSectionTitle": "Ödüller",
+      "addAward": "Ödül ekle",
+      "awardRecord": "Ödül kaydı",
+      "awardTitlePlaceholder": "Ödül başlığı",
+      "awardDatePlaceholder": "Tarih (AA/YYYY)",
+      "awardDescriptionPlaceholder": "Ödül açıklaması (opsiyonel)",
+      "interestsSectionTitle": "İlgi alanları",
+      "addInterest": "İlgi alanı ekle",
+      "interestRecord": "İlgi alanı kaydı",
+      "interestNamePlaceholder": "İlgi alanı",
+      "coursesSectionTitle": "Kurslar",
+      "addCourse": "Kurs ekle",
+      "courseRecord": "Kurs kaydı",
+      "courseNamePlaceholder": "Kurs adı",
+      "institutionPlaceholder": "Kurum",
+      "courseDatePlaceholder": "Tarih (AA/YYYY)",
+      "courseUrlPlaceholder": "Kurs linki (opsiyonel)",
+      "referencesSectionTitle": "Referanslar",
+      "addReference": "Referans ekle",
+      "referenceRecord": "Referans kaydı",
+      "referenceNamePlaceholder": "Ad soyad",
+      "referenceTitlePlaceholder": "Pozisyon",
+      "relationshipPlaceholder": "İlişki (örn. Takım lideri)",
+      "referenceEmailPlaceholder": "E-posta",
+      "referencePhonePlaceholder": "Telefon",
+      "organisationsSectionTitle": "Organizasyonlar",
+      "addOrganisation": "Organizasyon ekle",
+      "organisationRecord": "Organizasyon kaydı",
+      "organisationNamePlaceholder": "Organizasyon adı",
+      "organisationRolePlaceholder": "Rol",
+      "organisationDescriptionPlaceholder": "Açıklama (opsiyonel)",
+      "publicationsSectionTitle": "Yayınlar",
+      "addPublication": "Yayın ekle",
+      "publicationRecord": "Yayın kaydı",
+      "publicationTitlePlaceholder": "Yayın başlığı",
+      "publisherPlaceholder": "Yayıncı / platform",
+      "publicationDatePlaceholder": "Tarih (AA/YYYY)",
+      "publicationUrlPlaceholder": "Yayın linki (opsiyonel)",
+      "publicationDescriptionPlaceholder": "Yayın açıklaması (opsiyonel)",
+      "customSectionsTitle": "Özel bölümler",
+      "addCustomSection": "Özel bölüm ekle",
+      "customSectionRecord": "Özel bölüm kaydı",
+      "customSectionTitlePlaceholder": "Bölüm başlığı",
+      "removeCustomSection": "Bölümü sil",
+      "addCustomItem": "Madde ekle",
+      "customItemRecord": "Özel madde",
+      "customItemHeadingPlaceholder": "Başlık",
+      "customItemSubheadingPlaceholder": "Alt başlık",
+      "customItemDatePlaceholder": "Tarih",
+      "customItemDescriptionPlaceholder": "Açıklama",
       "atsTitle": "ATS analizi",
       "analyzeAts": "ATS analiz et",
       "analyzing": "Analiz ediliyor",
@@ -353,6 +432,46 @@
           "label": "Projeler",
           "description": "Öne çıkarmak istediğiniz projeleri ekleyin."
         },
+        "skills": {
+          "label": "Beceriler",
+          "description": "Teknik ve sosyal becerilerinizi seviyeleriyle ekleyin."
+        },
+        "languages": {
+          "label": "Diller",
+          "description": "Bildiğiniz dilleri ve seviyelerini ekleyin."
+        },
+        "certificates": {
+          "label": "Sertifikalar",
+          "description": "Sertifika ve belge bilgilerinizi ekleyin."
+        },
+        "awards": {
+          "label": "Ödüller",
+          "description": "Başarı ve ödüllerinizi ekleyin."
+        },
+        "interests": {
+          "label": "İlgi alanları",
+          "description": "Kariyerinizi destekleyen ilgi alanlarınızı ekleyin."
+        },
+        "courses": {
+          "label": "Kurslar",
+          "description": "Tamamladığınız kursları ve kaynaklarını ekleyin."
+        },
+        "references": {
+          "label": "Referanslar",
+          "description": "Gerekli durumlar için referans kişileri ekleyin."
+        },
+        "organisations": {
+          "label": "Organizasyonlar",
+          "description": "Üyelik veya gönüllü organizasyon deneyimlerini ekleyin."
+        },
+        "publications": {
+          "label": "Yayınlar",
+          "description": "Makale, yayın veya içerik üretimlerinizi ekleyin."
+        },
+        "customSections": {
+          "label": "Özel bölüm",
+          "description": "Standart alanlar dışında kalan içerikleri ekleyin."
+        },
         "ats": {
           "label": "ATS analizi",
           "description": "İş ilanına göre anahtar kelime analizini açın."
@@ -371,7 +490,30 @@
         "profile": "Profil",
         "experience": "Deneyim",
         "education": "Eğitim",
-        "projects": "Projeler"
+        "projects": "Projeler",
+        "skills": "Beceriler",
+        "languages": "Diller",
+        "certificates": "Sertifikalar",
+        "awards": "Ödüller",
+        "interests": "İlgi alanları",
+        "courses": "Kurslar",
+        "references": "Referanslar",
+        "organisations": "Organizasyonlar",
+        "publications": "Yayınlar",
+        "customSections": "Özel Bölüm"
+      },
+      "skillLevel": {
+        "beginner": "Başlangıç",
+        "intermediate": "Orta",
+        "advanced": "İleri",
+        "expert": "Uzman"
+      },
+      "languageLevel": {
+        "native": "Ana dil",
+        "fluent": "Akıcı",
+        "advanced": "İleri",
+        "intermediate": "Orta",
+        "basic": "Temel"
       },
       "range": {
         "ongoing": "Devam ediyor"

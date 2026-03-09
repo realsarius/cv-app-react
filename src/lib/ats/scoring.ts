@@ -147,6 +147,66 @@ function buildResumeText(content: ResumeContent) {
     )
     .join(' ');
 
+  const skillsText = content.skills
+    .map((item) => [item.name, item.level].join(' '))
+    .join(' ');
+
+  const languagesText = content.languages
+    .map((item) => [item.name, item.proficiency].join(' '))
+    .join(' ');
+
+  const certificatesText = content.certificates
+    .map((item) =>
+      [item.name, item.issuer, item.date, item.credentialId, item.url].join(' ')
+    )
+    .join(' ');
+
+  const awardsText = content.awards
+    .map((item) => [item.title, item.issuer, item.date, item.description].join(' '))
+    .join(' ');
+
+  const interestsText = content.interests.map((item) => item.name).join(' ');
+
+  const coursesText = content.courses
+    .map((item) => [item.name, item.institution, item.date, item.url].join(' '))
+    .join(' ');
+
+  const referencesText = content.references
+    .map((item) =>
+      [
+        item.name,
+        item.title,
+        item.company,
+        item.relationship,
+        item.email,
+        item.phone,
+      ].join(' ')
+    )
+    .join(' ');
+
+  const organisationsText = content.organisations
+    .map((item) =>
+      [item.name, item.role, item.startDate, item.endDate, item.description].join(' ')
+    )
+    .join(' ');
+
+  const publicationsText = content.publications
+    .map((item) =>
+      [item.title, item.publisher, item.date, item.url, item.description].join(' ')
+    )
+    .join(' ');
+
+  const customSectionsText = content.customSections
+    .map((section) =>
+      [
+        section.title,
+        ...section.items.map((item) =>
+          [item.heading, item.subheading, item.date, item.description].join(' ')
+        ),
+      ].join(' ')
+    )
+    .join(' ');
+
   return normalizeText(
     [
       content.personalDetails.fullName,
@@ -158,6 +218,16 @@ function buildResumeText(content: ResumeContent) {
       experiencesText,
       educationsText,
       projectsText,
+      skillsText,
+      languagesText,
+      certificatesText,
+      awardsText,
+      interestsText,
+      coursesText,
+      referencesText,
+      organisationsText,
+      publicationsText,
+      customSectionsText,
     ].join(' ')
   );
 }
@@ -206,6 +276,9 @@ export function calculateAtsScore(
     content.experiences.length > 0,
     content.educations.length > 0,
     content.projects.length > 0,
+    content.skills.length > 0,
+    content.languages.length > 0,
+    content.certificates.length > 0,
   ];
   const sectionCompletenessRatio =
     sectionChecks.filter(Boolean).length / sectionChecks.length;
@@ -256,6 +329,12 @@ export function calculateAtsScore(
 
   if (sectionCompletenessRatio < 0.8) {
     suggestions.push('Zorunlu alanlar (isim, e-posta, telefon, profil) tamamlanmali.');
+  }
+
+  if (content.skills.length === 0) {
+    suggestions.push(
+      'Beceriler bolumu eklenerek ilandaki teknik yetkinlikler acik sekilde listelenmeli.'
+    );
   }
 
   if (readabilityRatio < 0.8) {

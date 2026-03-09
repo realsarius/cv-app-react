@@ -8,16 +8,31 @@ import {
   normalizeResumeTemplateKey,
 } from '@/templates/resume/registry';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
+import {
+  ADDABLE_SECTION_REGISTRY,
+  type AddableSectionKey,
+} from './sections/addable-section-registry';
 import PaginatedResumePreview from './preview/PaginatedResumePreview';
 import {
   PREVIEW_PAGE_BASE_HEIGHT,
   PREVIEW_PAGE_BASE_WIDTH,
 } from './preview/paginate';
 import type {
+  ResumeAwardItem,
+  ResumeCertificateItem,
+  ResumeCustomSection,
+  ResumeCustomSectionItem,
+  ResumeCourseItem,
   ResumeContent,
   ResumeEducationItem,
   ResumeExperienceItem,
+  ResumeInterestItem,
+  ResumeLanguageItem,
+  ResumeOrganisationItem,
+  ResumePublicationItem,
   ResumeProjectItem,
+  ResumeReferenceItem,
+  ResumeSkillItem,
 } from './content';
 
 type ResumeEditorClientProps = {
@@ -85,12 +100,14 @@ type ResumeSettingsResponse = {
 };
 
 type AddableSection = {
-  key: 'profile' | 'experiences' | 'educations' | 'projects' | 'ats';
+  key: AddableSectionKey;
   label: string;
   description: string;
   isAdded: boolean;
   onAdd: () => void;
 };
+
+const ATS_SECTION_VISIBILITY_STORAGE_KEY = 'resume-editor:ats-section-visible';
 
 class AutosaveConflictError extends Error {
   readonly currentUpdatedAt: string | null;
@@ -121,6 +138,46 @@ function createItemId() {
   }
 
   return `item-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getAtsSectionVisibilityStorageKey(resumeId: string) {
+  return `${ATS_SECTION_VISIBILITY_STORAGE_KEY}:${resumeId}`;
+}
+
+function readAtsSectionVisibility(resumeId: string): boolean | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const value = window.localStorage.getItem(getAtsSectionVisibilityStorageKey(resumeId));
+    if (value === 'true') {
+      return true;
+    }
+
+    if (value === 'false') {
+      return false;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function writeAtsSectionVisibility(resumeId: string, isEnabled: boolean) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      getAtsSectionVisibilityStorageKey(resumeId),
+      String(isEnabled)
+    );
+  } catch {
+    // Ignore storage errors (private mode / disabled storage).
+  }
 }
 
 function createEmptyExperienceItem(): ResumeExperienceItem {
@@ -161,6 +218,112 @@ function createEmptyProjectItem(): ResumeProjectItem {
   };
 }
 
+function createEmptySkillItem(): ResumeSkillItem {
+  return {
+    id: createItemId(),
+    name: '',
+    level: 'intermediate',
+  };
+}
+
+function createEmptyLanguageItem(): ResumeLanguageItem {
+  return {
+    id: createItemId(),
+    name: '',
+    proficiency: 'intermediate',
+  };
+}
+
+function createEmptyCertificateItem(): ResumeCertificateItem {
+  return {
+    id: createItemId(),
+    name: '',
+    issuer: '',
+    date: '',
+    url: '',
+    credentialId: '',
+  };
+}
+
+function createEmptyAwardItem(): ResumeAwardItem {
+  return {
+    id: createItemId(),
+    title: '',
+    issuer: '',
+    date: '',
+    description: '',
+  };
+}
+
+function createEmptyInterestItem(): ResumeInterestItem {
+  return {
+    id: createItemId(),
+    name: '',
+  };
+}
+
+function createEmptyCourseItem(): ResumeCourseItem {
+  return {
+    id: createItemId(),
+    name: '',
+    institution: '',
+    date: '',
+    url: '',
+  };
+}
+
+function createEmptyReferenceItem(): ResumeReferenceItem {
+  return {
+    id: createItemId(),
+    name: '',
+    title: '',
+    company: '',
+    email: '',
+    phone: '',
+    relationship: '',
+  };
+}
+
+function createEmptyOrganisationItem(): ResumeOrganisationItem {
+  return {
+    id: createItemId(),
+    name: '',
+    role: '',
+    startDate: '',
+    endDate: '',
+    description: '',
+  };
+}
+
+function createEmptyPublicationItem(): ResumePublicationItem {
+  return {
+    id: createItemId(),
+    title: '',
+    publisher: '',
+    date: '',
+    url: '',
+    description: '',
+  };
+}
+
+function createEmptyCustomSectionItem(): ResumeCustomSectionItem {
+  return {
+    id: createItemId(),
+    heading: '',
+    subheading: '',
+    date: '',
+    description: '',
+  };
+}
+
+function createEmptyCustomSection(): ResumeCustomSection {
+  return {
+    id: createItemId(),
+    title: '',
+    items: [createEmptyCustomSectionItem()],
+  };
+}
+
 export default function ResumeEditorClient({
   resumeId,
   initialTitle,
@@ -195,6 +358,7 @@ export default function ResumeEditorClient({
   const [isAtsSectionEnabled, setIsAtsSectionEnabled] = useState(
     initialAtsHistory.length > 0
   );
+  const [isAtsVisibilityLoaded, setIsAtsVisibilityLoaded] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [company, setCompany] = useState('');
@@ -226,6 +390,22 @@ export default function ResumeEditorClient({
       colorScheme: initialSettings.colorScheme,
     })
   );
+
+  const defaultAtsSectionVisibility = initialAtsHistory.length > 0;
+
+  useEffect(() => {
+    const storedVisibility = readAtsSectionVisibility(resumeId);
+    setIsAtsSectionEnabled(storedVisibility ?? defaultAtsSectionVisibility);
+    setIsAtsVisibilityLoaded(true);
+  }, [defaultAtsSectionVisibility, resumeId]);
+
+  useEffect(() => {
+    if (!isAtsVisibilityLoaded) {
+      return;
+    }
+
+    writeAtsSectionVisibility(resumeId, isAtsSectionEnabled);
+  }, [isAtsSectionEnabled, isAtsVisibilityLoaded, resumeId]);
 
   const payload = useMemo(
     () => ({
@@ -535,6 +715,348 @@ export default function ResumeEditorClient({
     }));
   }, []);
 
+  const addSkill = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      skills: [...prev.skills, createEmptySkillItem()],
+    }));
+  }, []);
+
+  const addSkillsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      skills: prev.skills.length > 0 ? prev.skills : [createEmptySkillItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeSkill = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeSkillsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      skills: [],
+    }));
+  }, []);
+
+  const addLanguage = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      languages: [...prev.languages, createEmptyLanguageItem()],
+    }));
+  }, []);
+
+  const addLanguagesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      languages:
+        prev.languages.length > 0
+          ? prev.languages
+          : [createEmptyLanguageItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeLanguage = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      languages: prev.languages.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeLanguagesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      languages: [],
+    }));
+  }, []);
+
+  const addCertificate = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      certificates: [...prev.certificates, createEmptyCertificateItem()],
+    }));
+  }, []);
+
+  const addCertificatesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      certificates:
+        prev.certificates.length > 0
+          ? prev.certificates
+          : [createEmptyCertificateItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeCertificate = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      certificates: prev.certificates.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeCertificatesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      certificates: [],
+    }));
+  }, []);
+
+  const addAward = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      awards: [...prev.awards, createEmptyAwardItem()],
+    }));
+  }, []);
+
+  const addAwardsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      awards: prev.awards.length > 0 ? prev.awards : [createEmptyAwardItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeAward = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      awards: prev.awards.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeAwardsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      awards: [],
+    }));
+  }, []);
+
+  const addInterest = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      interests: [...prev.interests, createEmptyInterestItem()],
+    }));
+  }, []);
+
+  const addInterestsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      interests:
+        prev.interests.length > 0 ? prev.interests : [createEmptyInterestItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeInterest = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      interests: prev.interests.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeInterestsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      interests: [],
+    }));
+  }, []);
+
+  const addCourse = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      courses: [...prev.courses, createEmptyCourseItem()],
+    }));
+  }, []);
+
+  const addCoursesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      courses: prev.courses.length > 0 ? prev.courses : [createEmptyCourseItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeCourse = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      courses: prev.courses.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeCoursesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      courses: [],
+    }));
+  }, []);
+
+  const addReference = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      references: [...prev.references, createEmptyReferenceItem()],
+    }));
+  }, []);
+
+  const addReferencesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      references:
+        prev.references.length > 0
+          ? prev.references
+          : [createEmptyReferenceItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeReference = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      references: prev.references.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeReferencesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      references: [],
+    }));
+  }, []);
+
+  const addOrganisation = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      organisations: [...prev.organisations, createEmptyOrganisationItem()],
+    }));
+  }, []);
+
+  const addOrganisationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      organisations:
+        prev.organisations.length > 0
+          ? prev.organisations
+          : [createEmptyOrganisationItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeOrganisation = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      organisations: prev.organisations.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeOrganisationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      organisations: [],
+    }));
+  }, []);
+
+  const addPublication = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      publications: [...prev.publications, createEmptyPublicationItem()],
+    }));
+  }, []);
+
+  const addPublicationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      publications:
+        prev.publications.length > 0
+          ? prev.publications
+          : [createEmptyPublicationItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removePublication = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      publications: prev.publications.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removePublicationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      publications: [],
+    }));
+  }, []);
+
+  const addCustomSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: [...prev.customSections, createEmptyCustomSection()],
+    }));
+  }, []);
+
+  const addCustomSectionsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      customSections:
+        prev.customSections.length > 0
+          ? prev.customSections
+          : [createEmptyCustomSection()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeCustomSection = useCallback((sectionId: string) => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: prev.customSections.filter(
+        (section) => section.id !== sectionId
+      ),
+    }));
+  }, []);
+
+  const removeCustomSectionsAll = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: [],
+    }));
+  }, []);
+
+  const addCustomSectionItem = useCallback((sectionId: string) => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: prev.customSections.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              items: [...section.items, createEmptyCustomSectionItem()],
+            }
+          : section
+      ),
+    }));
+  }, []);
+
+  const removeCustomSectionItem = useCallback(
+    (sectionId: string, itemId: string) => {
+      setContent((prev) => ({
+        ...prev,
+        customSections: prev.customSections.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                items: section.items.filter((item) => item.id !== itemId),
+              }
+            : section
+        ),
+      }));
+    },
+    []
+  );
+
   const addAtsSection = useCallback(() => {
     setIsAtsSectionEnabled(true);
     setIsAddContentDialogOpen(false);
@@ -577,55 +1099,122 @@ export default function ResumeEditorClient({
   const isDirty = payloadString !== lastSavedPayloadRef.current;
   const isSettingsDirty = settingsPayloadString !== lastSavedSettingsRef.current;
   const canRunAtsAnalysis = jobDescription.trim().length >= 50;
-  const addableSections = useMemo<AddableSection[]>(
-    () => [
+
+  const addableSectionState = useMemo<
+    Record<
+      AddableSectionKey,
       {
-        key: 'profile',
-        label: t('addable.profile.label'),
-        description: t('addable.profile.description'),
+        isAdded: boolean;
+        onAdd: () => void;
+      }
+    >
+  >(
+    () => ({
+      profile: {
         isAdded: isProfileSectionEnabled,
         onAdd: addProfileSection,
       },
-      {
-        key: 'experiences',
-        label: t('addable.experiences.label'),
-        description: t('addable.experiences.description'),
+      experiences: {
         isAdded: content.experiences.length > 0,
         onAdd: addExperienceSection,
       },
-      {
-        key: 'educations',
-        label: t('addable.educations.label'),
-        description: t('addable.educations.description'),
+      educations: {
         isAdded: content.educations.length > 0,
         onAdd: addEducationSection,
       },
-      {
-        key: 'projects',
-        label: t('addable.projects.label'),
-        description: t('addable.projects.description'),
+      projects: {
         isAdded: content.projects.length > 0,
         onAdd: addProjectSection,
       },
-      {
-        key: 'ats',
-        label: t('addable.ats.label'),
-        description: t('addable.ats.description'),
+      skills: {
+        isAdded: content.skills.length > 0,
+        onAdd: addSkillsSection,
+      },
+      languages: {
+        isAdded: content.languages.length > 0,
+        onAdd: addLanguagesSection,
+      },
+      certificates: {
+        isAdded: content.certificates.length > 0,
+        onAdd: addCertificatesSection,
+      },
+      awards: {
+        isAdded: content.awards.length > 0,
+        onAdd: addAwardsSection,
+      },
+      interests: {
+        isAdded: content.interests.length > 0,
+        onAdd: addInterestsSection,
+      },
+      courses: {
+        isAdded: content.courses.length > 0,
+        onAdd: addCoursesSection,
+      },
+      references: {
+        isAdded: content.references.length > 0,
+        onAdd: addReferencesSection,
+      },
+      organisations: {
+        isAdded: content.organisations.length > 0,
+        onAdd: addOrganisationsSection,
+      },
+      publications: {
+        isAdded: content.publications.length > 0,
+        onAdd: addPublicationsSection,
+      },
+      customSections: {
+        isAdded: content.customSections.length > 0,
+        onAdd: addCustomSectionsSection,
+      },
+      ats: {
         isAdded: isAtsSectionEnabled,
         onAdd: addAtsSection,
       },
-    ],
+    }),
     [
       addAtsSection,
+      addAwardsSection,
+      addCertificatesSection,
+      addCustomSectionsSection,
+      addCoursesSection,
       addEducationSection,
       addExperienceSection,
+      addInterestsSection,
+      addLanguagesSection,
+      addOrganisationsSection,
+      addPublicationsSection,
       addProfileSection,
       addProjectSection,
+      addReferencesSection,
+      addSkillsSection,
+      content.awards.length,
+      content.certificates.length,
+      content.customSections.length,
+      content.courses.length,
       content.educations.length,
       content.experiences.length,
+      content.interests.length,
+      content.languages.length,
+      content.organisations.length,
+      content.publications.length,
       content.projects.length,
+      content.references.length,
+      content.skills.length,
       isAtsSectionEnabled,
       isProfileSectionEnabled,
+    ]
+  );
+
+  const addableSections = useMemo<AddableSection[]>(
+    () =>
+      ADDABLE_SECTION_REGISTRY.map((section) => ({
+        key: section.key,
+        label: t(section.labelKey),
+        description: t(section.descriptionKey),
+        ...addableSectionState[section.key],
+      })),
+    [
+      addableSectionState,
       t,
     ]
   );
@@ -1454,6 +2043,1254 @@ export default function ResumeEditorClient({
           ))}
         </div>
       </div>
+      ) : null}
+
+      {content.skills.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('skillsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addSkill}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addSkill')}
+              </button>
+              <button
+                type='button'
+                onClick={removeSkillsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.skills.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('skillRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeSkill(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        skills: prev.skills.map((skill) =>
+                          skill.id === item.id
+                            ? { ...skill, name: event.target.value }
+                            : skill
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('skillNamePlaceholder')}
+                  />
+                  <select
+                    value={item.level}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        skills: prev.skills.map((skill) =>
+                          skill.id === item.id
+                            ? {
+                                ...skill,
+                                level:
+                                  event.target.value === 'beginner' ||
+                                  event.target.value === 'advanced' ||
+                                  event.target.value === 'expert'
+                                    ? event.target.value
+                                    : 'intermediate',
+                              }
+                            : skill
+                        ),
+                      }))
+                    }
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  >
+                    <option value='beginner'>{t('skillLevel.beginner')}</option>
+                    <option value='intermediate'>
+                      {t('skillLevel.intermediate')}
+                    </option>
+                    <option value='advanced'>{t('skillLevel.advanced')}</option>
+                    <option value='expert'>{t('skillLevel.expert')}</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.languages.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('languagesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addLanguage}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addLanguage')}
+              </button>
+              <button
+                type='button'
+                onClick={removeLanguagesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.languages.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('languageRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeLanguage(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        languages: prev.languages.map((language) =>
+                          language.id === item.id
+                            ? { ...language, name: event.target.value }
+                            : language
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('languageNamePlaceholder')}
+                  />
+                  <select
+                    value={item.proficiency}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        languages: prev.languages.map((language) =>
+                          language.id === item.id
+                            ? {
+                                ...language,
+                                proficiency:
+                                  event.target.value === 'native' ||
+                                  event.target.value === 'fluent' ||
+                                  event.target.value === 'advanced' ||
+                                  event.target.value === 'basic'
+                                    ? event.target.value
+                                    : 'intermediate',
+                              }
+                            : language
+                        ),
+                      }))
+                    }
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  >
+                    <option value='native'>{t('languageLevel.native')}</option>
+                    <option value='fluent'>{t('languageLevel.fluent')}</option>
+                    <option value='advanced'>{t('languageLevel.advanced')}</option>
+                    <option value='intermediate'>
+                      {t('languageLevel.intermediate')}
+                    </option>
+                    <option value='basic'>{t('languageLevel.basic')}</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.certificates.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('certificatesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addCertificate}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addCertificate')}
+              </button>
+              <button
+                type='button'
+                onClick={removeCertificatesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.certificates.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('certificateRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeCertificate(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, name: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('certificateNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.issuer}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, issuer: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('issuerPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.date}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, date: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('certificateDatePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.credentialId}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        certificates: prev.certificates.map((certificate) =>
+                          certificate.id === item.id
+                            ? { ...certificate, credentialId: event.target.value }
+                            : certificate
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('credentialIdPlaceholder')}
+                  />
+                </div>
+
+                <input
+                  type='url'
+                  value={item.url}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      certificates: prev.certificates.map((certificate) =>
+                        certificate.id === item.id
+                          ? { ...certificate, url: event.target.value }
+                          : certificate
+                      ),
+                    }))
+                  }
+                  maxLength={240}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('certificateUrlPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.awards.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('awardsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addAward}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addAward')}
+              </button>
+              <button
+                type='button'
+                onClick={removeAwardsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.awards.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('awardRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeAward(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        awards: prev.awards.map((award) =>
+                          award.id === item.id
+                            ? { ...award, title: event.target.value }
+                            : award
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('awardTitlePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.issuer}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        awards: prev.awards.map((award) =>
+                          award.id === item.id
+                            ? { ...award, issuer: event.target.value }
+                            : award
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('issuerPlaceholder')}
+                  />
+                </div>
+
+                <input
+                  type='text'
+                  value={item.date}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      awards: prev.awards.map((award) =>
+                        award.id === item.id
+                          ? { ...award, date: event.target.value }
+                          : award
+                      ),
+                    }))
+                  }
+                  maxLength={20}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('awardDatePlaceholder')}
+                />
+
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      awards: prev.awards.map((award) =>
+                        award.id === item.id
+                          ? { ...award, description: event.target.value }
+                          : award
+                      ),
+                    }))
+                  }
+                  rows={3}
+                  maxLength={1000}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('awardDescriptionPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.interests.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('interestsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addInterest}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addInterest')}
+              </button>
+              <button
+                type='button'
+                onClick={removeInterestsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.interests.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('interestRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeInterest(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+                <input
+                  type='text'
+                  value={item.name}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      interests: prev.interests.map((interest) =>
+                        interest.id === item.id
+                          ? { ...interest, name: event.target.value }
+                          : interest
+                      ),
+                    }))
+                  }
+                  maxLength={120}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('interestNamePlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.courses.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('coursesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addCourse}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addCourse')}
+              </button>
+              <button
+                type='button'
+                onClick={removeCoursesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.courses.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('courseRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeCourse(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, name: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('courseNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.institution}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, institution: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('institutionPlaceholder')}
+                  />
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.date}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, date: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('courseDatePlaceholder')}
+                  />
+                  <input
+                    type='url'
+                    value={item.url}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, url: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={240}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('courseUrlPlaceholder')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.references.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('referencesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addReference}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addReference')}
+              </button>
+              <button
+                type='button'
+                onClick={removeReferencesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.references.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('referenceRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeReference(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, name: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referenceNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, title: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referenceTitlePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.company}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, company: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('companyPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.relationship}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, relationship: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('relationshipPlaceholder')}
+                  />
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='email'
+                    value={item.email}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, email: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referenceEmailPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.phone}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, phone: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={64}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referencePhonePlaceholder')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.organisations.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('organisationsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addOrganisation}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addOrganisation')}
+              </button>
+              <button
+                type='button'
+                onClick={removeOrganisationsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.organisations.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('organisationRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeOrganisation(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, name: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('organisationNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.role}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, role: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('organisationRolePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.startDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, startDate: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('startDatePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.endDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, endDate: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('endDatePlaceholder')}
+                  />
+                </div>
+
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      organisations: prev.organisations.map((organisation) =>
+                        organisation.id === item.id
+                          ? { ...organisation, description: event.target.value }
+                          : organisation
+                      ),
+                    }))
+                  }
+                  rows={3}
+                  maxLength={1200}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('organisationDescriptionPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.publications.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('publicationsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addPublication}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addPublication')}
+              </button>
+              <button
+                type='button'
+                onClick={removePublicationsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.publications.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('publicationRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removePublication(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, title: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={180}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publicationTitlePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.publisher}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, publisher: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publisherPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.date}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, date: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publicationDatePlaceholder')}
+                  />
+                  <input
+                    type='url'
+                    value={item.url}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, url: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={240}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publicationUrlPlaceholder')}
+                  />
+                </div>
+
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      publications: prev.publications.map((publication) =>
+                        publication.id === item.id
+                          ? { ...publication, description: event.target.value }
+                          : publication
+                      ),
+                    }))
+                  }
+                  rows={3}
+                  maxLength={1500}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('publicationDescriptionPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.customSections.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('customSectionsTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addCustomSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addCustomSection')}
+              </button>
+              <button
+                type='button'
+                onClick={removeCustomSectionsAll}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.customSections.map((section) => (
+              <div key={section.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex flex-wrap items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('customSectionRecord')}
+                  </p>
+                  <div className='flex items-center gap-2'>
+                    <button
+                      type='button'
+                      onClick={() => addCustomSectionItem(section.id)}
+                      className='rounded border border-stone-300 px-2 py-1 text-xs font-semibold text-stone-700 transition hover:border-stone-500'
+                    >
+                      {t('addCustomItem')}
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => removeCustomSection(section.id)}
+                      className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                    >
+                      {t('removeCustomSection')}
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  type='text'
+                  value={section.title}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      customSections: prev.customSections.map((customSection) =>
+                        customSection.id === section.id
+                          ? { ...customSection, title: event.target.value }
+                          : customSection
+                      ),
+                    }))
+                  }
+                  maxLength={120}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('customSectionTitlePlaceholder')}
+                />
+
+                <div className='mt-3 space-y-3'>
+                  {section.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className='rounded-md border border-stone-200 p-3'
+                    >
+                      <div className='flex items-center justify-between gap-2'>
+                        <p className='text-xs font-semibold text-stone-700'>
+                          {t('customItemRecord')}
+                        </p>
+                        <button
+                          type='button'
+                          onClick={() => removeCustomSectionItem(section.id, item.id)}
+                          className='rounded border border-red-200 px-2 py-1 text-[11px] font-semibold text-red-600 transition hover:bg-red-50'
+                        >
+                          {t('delete')}
+                        </button>
+                      </div>
+
+                      <div className='mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2'>
+                        <input
+                          type='text'
+                          value={item.heading}
+                          onChange={(event) =>
+                            setContent((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((customSection) =>
+                                customSection.id === section.id
+                                  ? {
+                                      ...customSection,
+                                      items: customSection.items.map((customItem) =>
+                                        customItem.id === item.id
+                                          ? {
+                                              ...customItem,
+                                              heading: event.target.value,
+                                            }
+                                          : customItem
+                                      ),
+                                    }
+                                  : customSection
+                              ),
+                            }))
+                          }
+                          maxLength={160}
+                          className='rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                          placeholder={t('customItemHeadingPlaceholder')}
+                        />
+                        <input
+                          type='text'
+                          value={item.subheading}
+                          onChange={(event) =>
+                            setContent((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((customSection) =>
+                                customSection.id === section.id
+                                  ? {
+                                      ...customSection,
+                                      items: customSection.items.map((customItem) =>
+                                        customItem.id === item.id
+                                          ? {
+                                              ...customItem,
+                                              subheading: event.target.value,
+                                            }
+                                          : customItem
+                                      ),
+                                    }
+                                  : customSection
+                              ),
+                            }))
+                          }
+                          maxLength={160}
+                          className='rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                          placeholder={t('customItemSubheadingPlaceholder')}
+                        />
+                      </div>
+
+                      <input
+                        type='text'
+                        value={item.date}
+                        onChange={(event) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            customSections: prev.customSections.map((customSection) =>
+                              customSection.id === section.id
+                                ? {
+                                    ...customSection,
+                                    items: customSection.items.map((customItem) =>
+                                      customItem.id === item.id
+                                        ? { ...customItem, date: event.target.value }
+                                        : customItem
+                                    ),
+                                  }
+                                : customSection
+                            ),
+                          }))
+                        }
+                        maxLength={20}
+                        className='mt-2 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                        placeholder={t('customItemDatePlaceholder')}
+                      />
+
+                      <textarea
+                        value={item.description}
+                        onChange={(event) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            customSections: prev.customSections.map((customSection) =>
+                              customSection.id === section.id
+                                ? {
+                                    ...customSection,
+                                    items: customSection.items.map((customItem) =>
+                                      customItem.id === item.id
+                                        ? {
+                                            ...customItem,
+                                            description: event.target.value,
+                                          }
+                                        : customItem
+                                    ),
+                                  }
+                                : customSection
+                            ),
+                          }))
+                        }
+                        rows={3}
+                        maxLength={1500}
+                        className='mt-2 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                        placeholder={t('customItemDescriptionPlaceholder')}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       {isAtsSectionEnabled ? (
