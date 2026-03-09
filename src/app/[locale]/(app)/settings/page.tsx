@@ -1,9 +1,11 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
+import { listRecentAuthEvents } from '@/lib/db/kvkk';
 import { ensureUserProfile, getOwnProfile } from '@/lib/db/profiles';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { DeleteAccountButton } from './DeleteAccountButton';
 import { updateProfileAction } from './actions';
 
 type SettingsPageProps = {
@@ -79,7 +81,10 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   }
 
   await ensureUserProfile(user.id, user.email);
-  const profile = await getOwnProfile(user.id);
+  const [profile, recentAuthEvents] = await Promise.all([
+    getOwnProfile(user.id),
+    listRecentAuthEvents(user.id, 10),
+  ]);
   const authProvider =
     typeof user.app_metadata?.provider === 'string'
       ? user.app_metadata.provider
@@ -182,6 +187,94 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             {t('submit')}
           </button>
         </form>
+      </div>
+
+      <div className='app-card space-y-5'>
+        <div>
+          <h2 className='text-lg font-semibold text-stone-900'>
+            {t('privacy.title')}
+          </h2>
+          <p className='mt-2 text-sm text-stone-600'>
+            {t('privacy.description')}
+          </p>
+        </div>
+
+        <div className='grid gap-3 sm:grid-cols-2'>
+          <div className='rounded-md border border-stone-200 bg-stone-50 p-4'>
+            <h3 className='text-sm font-semibold text-stone-900'>
+              {t('privacy.dataExport.title')}
+            </h3>
+            <p className='mt-2 text-sm text-stone-600'>
+              {t('privacy.dataExport.description')}
+            </p>
+            <a
+              href='/api/user/data-export'
+              className='btn-secondary mt-4 inline-flex'
+              target='_blank'
+              rel='noreferrer'
+            >
+              {t('privacy.dataExport.cta')}
+            </a>
+          </div>
+
+          <div className='rounded-md border border-red-200 bg-red-50 p-4'>
+            <h3 className='text-sm font-semibold text-red-800'>
+              {t('privacy.deleteAccount.title')}
+            </h3>
+            <p className='mt-2 text-sm text-red-700'>
+              {t('privacy.deleteAccount.description')}
+            </p>
+            <div className='mt-4'>
+              <DeleteAccountButton
+                confirmMessage={t('privacy.deleteAccount.confirmMessage')}
+                label={t('privacy.deleteAccount.cta')}
+                pendingLabel={t('privacy.deleteAccount.pending')}
+                errorMessage={t('privacy.deleteAccount.error')}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className='text-sm font-semibold text-stone-900'>
+            {t('privacy.loginHistory.title')}
+          </h3>
+          <p className='mt-2 text-sm text-stone-600'>
+            {t('privacy.loginHistory.description')}
+          </p>
+          {recentAuthEvents.length === 0 ? (
+            <p className='mt-3 text-sm text-stone-600'>
+              {t('privacy.loginHistory.empty')}
+            </p>
+          ) : (
+            <div className='mt-3 space-y-2'>
+              {recentAuthEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className='rounded-md border border-stone-200 bg-stone-50 px-3 py-2'
+                >
+                  <p className='text-sm font-medium text-stone-900'>
+                    {event.event === 'register'
+                      ? t('privacy.loginHistory.events.register')
+                      : event.event === 'logout'
+                        ? t('privacy.loginHistory.events.logout')
+                        : event.event === 'password_reset'
+                          ? t('privacy.loginHistory.events.passwordReset')
+                          : event.event === 'email_verified'
+                            ? t('privacy.loginHistory.events.emailVerified')
+                            : t('privacy.loginHistory.events.login')}
+                  </p>
+                  <p className='mt-1 text-xs text-stone-600'>
+                    {formatDateTime(event.createdAt, dateLocale, tCommon('unknown'))}
+                    {' · '}
+                    {(event.provider || 'email').toUpperCase()}
+                    {event.ip ? ` · ${event.ip}` : ''}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

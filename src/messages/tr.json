@@ -229,7 +229,36 @@
     "email": "E-posta",
     "fullName": "Ad soyad",
     "fullNamePlaceholder": "Ad soyad girin",
-    "submit": "Profili güncelle"
+    "submit": "Profili güncelle",
+    "privacy": {
+      "title": "Gizlilik ve verilerim",
+      "description": "Hesap verilerinizi dışa aktarabilir, giriş geçmişinizi inceleyebilir veya hesabınızı kalıcı olarak silebilirsiniz.",
+      "dataExport": {
+        "title": "Verilerimi indir",
+        "description": "Profil, özgeçmiş ve etkinlik verileriniz JSON formatında hazırlanır.",
+        "cta": "Verilerimi indir"
+      },
+      "deleteAccount": {
+        "title": "Hesabı kalıcı sil",
+        "description": "Bu işlem geri alınamaz. Tüm özgeçmişleriniz ve profil bilgileriniz kalıcı olarak silinir.",
+        "cta": "Hesabımı sil",
+        "pending": "Hesap siliniyor...",
+        "error": "Hesap silme işlemi tamamlanamadı. Lütfen tekrar deneyin.",
+        "confirmMessage": "Hesabınızı kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+      },
+      "loginHistory": {
+        "title": "Giriş geçmişi",
+        "description": "Son başarılı kimlik doğrulama olaylarınız burada listelenir.",
+        "empty": "Henüz kayıtlı giriş geçmişi bulunmuyor.",
+        "events": {
+          "login": "Giriş",
+          "logout": "Çıkış",
+          "register": "Kayıt",
+          "passwordReset": "Şifre sıfırlama",
+          "emailVerified": "E-posta doğrulama"
+        }
+      }
+    }
   },
   "resume": {
     "editor": {

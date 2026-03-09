@@ -229,7 +229,36 @@
     "email": "Email",
     "fullName": "Full name",
     "fullNamePlaceholder": "Enter full name",
-    "submit": "Update profile"
+    "submit": "Update profile",
+    "privacy": {
+      "title": "Privacy and my data",
+      "description": "You can export your account data, review sign-in history, or permanently delete your account.",
+      "dataExport": {
+        "title": "Download my data",
+        "description": "Your profile, resumes, and activity data are prepared in JSON format.",
+        "cta": "Download my data"
+      },
+      "deleteAccount": {
+        "title": "Permanently delete account",
+        "description": "This action cannot be undone. All resumes and profile details will be permanently removed.",
+        "cta": "Delete my account",
+        "pending": "Deleting account...",
+        "error": "Account deletion could not be completed. Please try again.",
+        "confirmMessage": "Are you sure you want to permanently delete your account? This action cannot be undone."
+      },
+      "loginHistory": {
+        "title": "Sign-in history",
+        "description": "Your most recent successful authentication events are listed here.",
+        "empty": "No sign-in history has been recorded yet.",
+        "events": {
+          "login": "Sign in",
+          "logout": "Sign out",
+          "register": "Registration",
+          "passwordReset": "Password reset",
+          "emailVerified": "Email verification"
+        }
+      }
+    }
   },
   "resume": {
     "editor": {
