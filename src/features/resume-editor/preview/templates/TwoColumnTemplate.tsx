@@ -390,6 +390,61 @@ export default function TwoColumnTemplate({
               </div>
             </section>
           ) : null}
+
+          {content.publications.length > 0 ? (
+            <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+              <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
+                {t('sections.publications')}
+              </h3>
+              <div className='mt-3 space-y-3'>
+                {content.publications.map((item) => (
+                  <div key={item.id}>
+                    <p className={`text-[0.94em] font-semibold ${theme.body}`}>{item.title}</p>
+                    <p className={`text-[0.78em] ${theme.muted}`}>
+                      {[item.publisher, item.date].filter(Boolean).join(' | ')}
+                    </p>
+                    {item.url ? <p className={`text-[0.78em] ${theme.muted}`}>{item.url}</p> : null}
+                    {item.description ? (
+                      <p className={`mt-1 whitespace-pre-wrap text-[0.9em] ${theme.body}`}>
+                        {item.description}
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {content.customSections.length > 0
+            ? content.customSections.map((section) => (
+                <section
+                  key={section.id}
+                  className={`border-t pt-4 ${theme.sectionDivider}`}
+                >
+                  <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.heading}`}>
+                    {section.title || t('sections.customSections')}
+                  </h3>
+                  <div className='mt-3 space-y-3'>
+                    {section.items.map((item) => (
+                      <div key={item.id}>
+                        {item.heading ? (
+                          <p className={`text-[0.94em] font-semibold ${theme.body}`}>
+                            {item.heading}
+                            {item.subheading ? ` - ${item.subheading}` : ''}
+                          </p>
+                        ) : null}
+                        {item.date ? <p className={`text-[0.78em] ${theme.muted}`}>{item.date}</p> : null}
+                        {item.description ? (
+                          <p className={`mt-1 whitespace-pre-wrap text-[0.9em] ${theme.body}`}>
+                            {item.description}
+                          </p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))
+            : null}
         </main>
       </div>
     </article>

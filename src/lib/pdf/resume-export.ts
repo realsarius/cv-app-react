@@ -740,5 +740,70 @@ export async function createResumePdf(input: ResumePdfInput) {
     });
   }
 
+  if (input.content.publications.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(
+      ctx,
+      'Publications',
+      headingFont,
+      baseSize * 0.95,
+      lineHeight,
+      palette
+    );
+
+    input.content.publications.forEach((item) => {
+      const subtitle = [item.publisher.trim(), item.date.trim()]
+        .filter(Boolean)
+        .join(' | ');
+      const body = [item.url.trim(), item.description.trim()]
+        .filter(Boolean)
+        .join('\n');
+
+      drawLabeledEntry(
+        ctx,
+        item.title.trim() || 'Publication',
+        subtitle,
+        body,
+        {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        }
+      );
+    });
+  }
+
+  if (input.content.customSections.length > 0) {
+    input.content.customSections.forEach((section) => {
+      ctx.y -= sectionGap * 0.4;
+      drawSectionTitle(
+        ctx,
+        section.title.trim() || 'Custom Section',
+        headingFont,
+        baseSize * 0.95,
+        lineHeight,
+        palette
+      );
+
+      section.items.forEach((item) => {
+        const title = `${item.heading.trim() || 'Item'}${
+          item.subheading.trim() ? ` - ${item.subheading.trim()}` : EMPTY_LINE
+        }`;
+
+        drawLabeledEntry(ctx, title, item.date.trim(), item.description.trim(), {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        });
+      });
+    });
+  }
+
   return doc.save();
 }

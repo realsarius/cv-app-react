@@ -362,6 +362,25 @@
       "organisationNamePlaceholder": "Organisation name",
       "organisationRolePlaceholder": "Role",
       "organisationDescriptionPlaceholder": "Description (optional)",
+      "publicationsSectionTitle": "Publications",
+      "addPublication": "Add publication",
+      "publicationRecord": "Publication record",
+      "publicationTitlePlaceholder": "Publication title",
+      "publisherPlaceholder": "Publisher / platform",
+      "publicationDatePlaceholder": "Date (MM/YYYY)",
+      "publicationUrlPlaceholder": "Publication link (optional)",
+      "publicationDescriptionPlaceholder": "Publication description (optional)",
+      "customSectionsTitle": "Custom sections",
+      "addCustomSection": "Add custom section",
+      "customSectionRecord": "Custom section record",
+      "customSectionTitlePlaceholder": "Section title",
+      "removeCustomSection": "Delete section",
+      "addCustomItem": "Add item",
+      "customItemRecord": "Custom item",
+      "customItemHeadingPlaceholder": "Heading",
+      "customItemSubheadingPlaceholder": "Subheading",
+      "customItemDatePlaceholder": "Date",
+      "customItemDescriptionPlaceholder": "Description",
       "atsTitle": "ATS analysis",
       "analyzeAts": "Run ATS analysis",
       "analyzing": "Analyzing",
@@ -445,6 +464,14 @@
           "label": "Organisations",
           "description": "Add memberships or volunteer organisations."
         },
+        "publications": {
+          "label": "Publications",
+          "description": "Add your articles, publications or content outputs."
+        },
+        "customSections": {
+          "label": "Custom section",
+          "description": "Add content that does not fit standard sections."
+        },
         "ats": {
           "label": "ATS analysis",
           "description": "Enable keyword analysis based on the job description."
@@ -471,7 +498,9 @@
         "interests": "Interests",
         "courses": "Courses",
         "references": "References",
-        "organisations": "Organisations"
+        "organisations": "Organisations",
+        "publications": "Publications",
+        "customSections": "Custom Section"
       },
       "skillLevel": {
         "beginner": "Beginner",

@@ -9,6 +9,22 @@ const LANGUAGE_PROFICIENCY_LEVELS = [
   'basic',
 ] as const;
 const SKILL_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert'] as const;
+const CONTENT_SECTION_ORDER_KEYS = [
+  'profile',
+  'experiences',
+  'educations',
+  'projects',
+  'skills',
+  'languages',
+  'certificates',
+  'awards',
+  'interests',
+  'courses',
+  'references',
+  'organisations',
+  'publications',
+  'customSections',
+] as const;
 
 export const personalDetailsSchema = z.object({
   fullName: shortText(120),
@@ -111,6 +127,29 @@ export const organisationItemSchema = z.object({
   description: shortText(1200),
 });
 
+export const publicationItemSchema = z.object({
+  id: shortText(64),
+  title: shortText(180),
+  publisher: shortText(120),
+  date: shortText(20),
+  url: shortText(240),
+  description: shortText(1500),
+});
+
+export const customSectionItemSchema = z.object({
+  id: shortText(64),
+  heading: shortText(160),
+  subheading: shortText(160),
+  date: shortText(20),
+  description: shortText(1500),
+});
+
+export const customSectionSchema = z.object({
+  id: shortText(64),
+  title: shortText(120),
+  items: z.array(customSectionItemSchema).max(30).default([]),
+});
+
 export const resumeContentSchema = z.object({
   personalDetails: personalDetailsSchema.default({
     fullName: '',
@@ -131,6 +170,12 @@ export const resumeContentSchema = z.object({
   courses: z.array(courseItemSchema).max(20).default([]),
   references: z.array(referenceItemSchema).max(20).default([]),
   organisations: z.array(organisationItemSchema).max(20).default([]),
+  publications: z.array(publicationItemSchema).max(20).default([]),
+  customSections: z.array(customSectionSchema).max(10).default([]),
+  sectionOrder: z
+    .array(z.enum(CONTENT_SECTION_ORDER_KEYS))
+    .max(20)
+    .default([...CONTENT_SECTION_ORDER_KEYS]),
 });
 
 export type ResumeContent = z.infer<typeof resumeContentSchema>;
@@ -146,6 +191,11 @@ export type ResumeInterestItem = z.infer<typeof interestItemSchema>;
 export type ResumeCourseItem = z.infer<typeof courseItemSchema>;
 export type ResumeReferenceItem = z.infer<typeof referenceItemSchema>;
 export type ResumeOrganisationItem = z.infer<typeof organisationItemSchema>;
+export type ResumePublicationItem = z.infer<typeof publicationItemSchema>;
+export type ResumeCustomSectionItem = z.infer<typeof customSectionItemSchema>;
+export type ResumeCustomSection = z.infer<typeof customSectionSchema>;
+export type ResumeContentSectionOrderKey =
+  (typeof CONTENT_SECTION_ORDER_KEYS)[number];
 export type ResumeLanguageProficiency = (typeof LANGUAGE_PROFICIENCY_LEVELS)[number];
 export type ResumeSkillLevel = (typeof SKILL_LEVELS)[number];
 
@@ -169,6 +219,9 @@ const EMPTY_RESUME_CONTENT: ResumeContent = {
   courses: [],
   references: [],
   organisations: [],
+  publications: [],
+  customSections: [],
+  sectionOrder: [...CONTENT_SECTION_ORDER_KEYS],
 };
 
 export function createEmptyResumeContent(): ResumeContent {
@@ -188,6 +241,9 @@ export function createEmptyResumeContent(): ResumeContent {
     courses: [...EMPTY_RESUME_CONTENT.courses],
     references: [...EMPTY_RESUME_CONTENT.references],
     organisations: [...EMPTY_RESUME_CONTENT.organisations],
+    publications: [...EMPTY_RESUME_CONTENT.publications],
+    customSections: [...EMPTY_RESUME_CONTENT.customSections],
+    sectionOrder: [...EMPTY_RESUME_CONTENT.sectionOrder],
   };
 }
 

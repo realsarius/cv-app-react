@@ -20,6 +20,8 @@ import {
 import type {
   ResumeAwardItem,
   ResumeCertificateItem,
+  ResumeCustomSection,
+  ResumeCustomSectionItem,
   ResumeCourseItem,
   ResumeContent,
   ResumeEducationItem,
@@ -27,6 +29,7 @@ import type {
   ResumeInterestItem,
   ResumeLanguageItem,
   ResumeOrganisationItem,
+  ResumePublicationItem,
   ResumeProjectItem,
   ResumeReferenceItem,
   ResumeSkillItem,
@@ -247,6 +250,35 @@ function createEmptyOrganisationItem(): ResumeOrganisationItem {
     startDate: '',
     endDate: '',
     description: '',
+  };
+}
+
+function createEmptyPublicationItem(): ResumePublicationItem {
+  return {
+    id: createItemId(),
+    title: '',
+    publisher: '',
+    date: '',
+    url: '',
+    description: '',
+  };
+}
+
+function createEmptyCustomSectionItem(): ResumeCustomSectionItem {
+  return {
+    id: createItemId(),
+    heading: '',
+    subheading: '',
+    date: '',
+    description: '',
+  };
+}
+
+function createEmptyCustomSection(): ResumeCustomSection {
+  return {
+    id: createItemId(),
+    title: '',
+    items: [createEmptyCustomSectionItem()],
   };
 }
 
@@ -869,6 +901,103 @@ export default function ResumeEditorClient({
     }));
   }, []);
 
+  const addPublication = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      publications: [...prev.publications, createEmptyPublicationItem()],
+    }));
+  }, []);
+
+  const addPublicationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      publications:
+        prev.publications.length > 0
+          ? prev.publications
+          : [createEmptyPublicationItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removePublication = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      publications: prev.publications.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removePublicationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      publications: [],
+    }));
+  }, []);
+
+  const addCustomSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: [...prev.customSections, createEmptyCustomSection()],
+    }));
+  }, []);
+
+  const addCustomSectionsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      customSections:
+        prev.customSections.length > 0
+          ? prev.customSections
+          : [createEmptyCustomSection()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeCustomSection = useCallback((sectionId: string) => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: prev.customSections.filter(
+        (section) => section.id !== sectionId
+      ),
+    }));
+  }, []);
+
+  const removeCustomSectionsAll = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: [],
+    }));
+  }, []);
+
+  const addCustomSectionItem = useCallback((sectionId: string) => {
+    setContent((prev) => ({
+      ...prev,
+      customSections: prev.customSections.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              items: [...section.items, createEmptyCustomSectionItem()],
+            }
+          : section
+      ),
+    }));
+  }, []);
+
+  const removeCustomSectionItem = useCallback(
+    (sectionId: string, itemId: string) => {
+      setContent((prev) => ({
+        ...prev,
+        customSections: prev.customSections.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                items: section.items.filter((item) => item.id !== itemId),
+              }
+            : section
+        ),
+      }));
+    },
+    []
+  );
+
   const addAtsSection = useCallback(() => {
     setIsAtsSectionEnabled(true);
     setIsAddContentDialogOpen(false);
@@ -970,6 +1099,14 @@ export default function ResumeEditorClient({
         isAdded: content.organisations.length > 0,
         onAdd: addOrganisationsSection,
       },
+      publications: {
+        isAdded: content.publications.length > 0,
+        onAdd: addPublicationsSection,
+      },
+      customSections: {
+        isAdded: content.customSections.length > 0,
+        onAdd: addCustomSectionsSection,
+      },
       ats: {
         isAdded: isAtsSectionEnabled,
         onAdd: addAtsSection,
@@ -979,24 +1116,28 @@ export default function ResumeEditorClient({
       addAtsSection,
       addAwardsSection,
       addCertificatesSection,
+      addCustomSectionsSection,
       addCoursesSection,
       addEducationSection,
       addExperienceSection,
       addInterestsSection,
       addLanguagesSection,
       addOrganisationsSection,
+      addPublicationsSection,
       addProfileSection,
       addProjectSection,
       addReferencesSection,
       addSkillsSection,
       content.awards.length,
       content.certificates.length,
+      content.customSections.length,
       content.courses.length,
       content.educations.length,
       content.experiences.length,
       content.interests.length,
       content.languages.length,
       content.organisations.length,
+      content.publications.length,
       content.projects.length,
       content.references.length,
       content.skills.length,
@@ -2749,6 +2890,344 @@ export default function ResumeEditorClient({
                   className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
                   placeholder={t('organisationDescriptionPlaceholder')}
                 />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.publications.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('publicationsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addPublication}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addPublication')}
+              </button>
+              <button
+                type='button'
+                onClick={removePublicationsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.publications.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('publicationRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removePublication(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, title: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={180}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publicationTitlePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.publisher}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, publisher: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publisherPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.date}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, date: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publicationDatePlaceholder')}
+                  />
+                  <input
+                    type='url'
+                    value={item.url}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        publications: prev.publications.map((publication) =>
+                          publication.id === item.id
+                            ? { ...publication, url: event.target.value }
+                            : publication
+                        ),
+                      }))
+                    }
+                    maxLength={240}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('publicationUrlPlaceholder')}
+                  />
+                </div>
+
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      publications: prev.publications.map((publication) =>
+                        publication.id === item.id
+                          ? { ...publication, description: event.target.value }
+                          : publication
+                      ),
+                    }))
+                  }
+                  rows={3}
+                  maxLength={1500}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('publicationDescriptionPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.customSections.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('customSectionsTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addCustomSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addCustomSection')}
+              </button>
+              <button
+                type='button'
+                onClick={removeCustomSectionsAll}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.customSections.map((section) => (
+              <div key={section.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex flex-wrap items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('customSectionRecord')}
+                  </p>
+                  <div className='flex items-center gap-2'>
+                    <button
+                      type='button'
+                      onClick={() => addCustomSectionItem(section.id)}
+                      className='rounded border border-stone-300 px-2 py-1 text-xs font-semibold text-stone-700 transition hover:border-stone-500'
+                    >
+                      {t('addCustomItem')}
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => removeCustomSection(section.id)}
+                      className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                    >
+                      {t('removeCustomSection')}
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  type='text'
+                  value={section.title}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      customSections: prev.customSections.map((customSection) =>
+                        customSection.id === section.id
+                          ? { ...customSection, title: event.target.value }
+                          : customSection
+                      ),
+                    }))
+                  }
+                  maxLength={120}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('customSectionTitlePlaceholder')}
+                />
+
+                <div className='mt-3 space-y-3'>
+                  {section.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className='rounded-md border border-stone-200 p-3'
+                    >
+                      <div className='flex items-center justify-between gap-2'>
+                        <p className='text-xs font-semibold text-stone-700'>
+                          {t('customItemRecord')}
+                        </p>
+                        <button
+                          type='button'
+                          onClick={() => removeCustomSectionItem(section.id, item.id)}
+                          className='rounded border border-red-200 px-2 py-1 text-[11px] font-semibold text-red-600 transition hover:bg-red-50'
+                        >
+                          {t('delete')}
+                        </button>
+                      </div>
+
+                      <div className='mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2'>
+                        <input
+                          type='text'
+                          value={item.heading}
+                          onChange={(event) =>
+                            setContent((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((customSection) =>
+                                customSection.id === section.id
+                                  ? {
+                                      ...customSection,
+                                      items: customSection.items.map((customItem) =>
+                                        customItem.id === item.id
+                                          ? {
+                                              ...customItem,
+                                              heading: event.target.value,
+                                            }
+                                          : customItem
+                                      ),
+                                    }
+                                  : customSection
+                              ),
+                            }))
+                          }
+                          maxLength={160}
+                          className='rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                          placeholder={t('customItemHeadingPlaceholder')}
+                        />
+                        <input
+                          type='text'
+                          value={item.subheading}
+                          onChange={(event) =>
+                            setContent((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((customSection) =>
+                                customSection.id === section.id
+                                  ? {
+                                      ...customSection,
+                                      items: customSection.items.map((customItem) =>
+                                        customItem.id === item.id
+                                          ? {
+                                              ...customItem,
+                                              subheading: event.target.value,
+                                            }
+                                          : customItem
+                                      ),
+                                    }
+                                  : customSection
+                              ),
+                            }))
+                          }
+                          maxLength={160}
+                          className='rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                          placeholder={t('customItemSubheadingPlaceholder')}
+                        />
+                      </div>
+
+                      <input
+                        type='text'
+                        value={item.date}
+                        onChange={(event) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            customSections: prev.customSections.map((customSection) =>
+                              customSection.id === section.id
+                                ? {
+                                    ...customSection,
+                                    items: customSection.items.map((customItem) =>
+                                      customItem.id === item.id
+                                        ? { ...customItem, date: event.target.value }
+                                        : customItem
+                                    ),
+                                  }
+                                : customSection
+                            ),
+                          }))
+                        }
+                        maxLength={20}
+                        className='mt-2 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                        placeholder={t('customItemDatePlaceholder')}
+                      />
+
+                      <textarea
+                        value={item.description}
+                        onChange={(event) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            customSections: prev.customSections.map((customSection) =>
+                              customSection.id === section.id
+                                ? {
+                                    ...customSection,
+                                    items: customSection.items.map((customItem) =>
+                                      customItem.id === item.id
+                                        ? {
+                                            ...customItem,
+                                            description: event.target.value,
+                                          }
+                                        : customItem
+                                    ),
+                                  }
+                                : customSection
+                            ),
+                          }))
+                        }
+                        rows={3}
+                        maxLength={1500}
+                        className='mt-2 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-500'
+                        placeholder={t('customItemDescriptionPlaceholder')}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

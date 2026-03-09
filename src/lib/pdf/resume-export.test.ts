@@ -117,6 +117,47 @@ const sampleContent: ResumeContent = {
       description: 'Mentoring junior developers.',
     },
   ],
+  publications: [
+    {
+      id: 'publication-1',
+      title: 'Modern Resume Design Principles',
+      publisher: 'Dev.to',
+      date: '2025',
+      url: '',
+      description: 'Publication on ATS-friendly resume writing practices.',
+    },
+  ],
+  customSections: [
+    {
+      id: 'custom-section-1',
+      title: 'Hackathon Highlights',
+      items: [
+        {
+          id: 'custom-item-1',
+          heading: 'Fintech Challenge',
+          subheading: '1st Place',
+          date: '2024',
+          description: 'Built a full-stack prototype within 48 hours.',
+        },
+      ],
+    },
+  ],
+  sectionOrder: [
+    'profile',
+    'experiences',
+    'educations',
+    'projects',
+    'skills',
+    'languages',
+    'certificates',
+    'awards',
+    'interests',
+    'courses',
+    'references',
+    'organisations',
+    'publications',
+    'customSections',
+  ],
 };
 
 const sampleSettings: ResumeVisualSettings = {

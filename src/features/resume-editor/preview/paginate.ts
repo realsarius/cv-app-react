@@ -2,12 +2,14 @@ import type {
   ResumeAwardItem,
   ResumeCertificateItem,
   ResumeContent,
+  ResumeCustomSection,
   ResumeCourseItem,
   ResumeEducationItem,
   ResumeExperienceItem,
   ResumeInterestItem,
   ResumeLanguageItem,
   ResumeOrganisationItem,
+  ResumePublicationItem,
   ResumeProjectItem,
   ResumeReferenceItem,
   ResumeSkillItem,
@@ -150,6 +152,33 @@ function estimateOrganisationCost(item: ResumeOrganisationItem) {
   );
 }
 
+function estimatePublicationCost(item: ResumePublicationItem) {
+  const heading = `${item.title} ${item.publisher}`.trim();
+  return (
+    3.6 +
+    estimateLineCount(heading, 62) * 1.05 +
+    estimateLineCount(item.date, 30) * 0.8 +
+    estimateLineCount(item.url, 74) * 0.9 +
+    estimateLineCount(item.description, 84) * 1.1
+  );
+}
+
+function estimateCustomSectionCost(section: ResumeCustomSection) {
+  const sectionTitleCost = 2.4 + estimateLineCount(section.title, 60) * 1;
+  const itemsCost = section.items.reduce((sum, item) => {
+    return (
+      sum +
+      2.8 +
+      estimateLineCount(item.heading, 64) * 1 +
+      estimateLineCount(item.subheading, 64) * 0.9 +
+      estimateLineCount(item.date, 30) * 0.8 +
+      estimateLineCount(item.description, 86) * 1.05
+    );
+  }, 0);
+
+  return sectionTitleCost + itemsCost;
+}
+
 function hasContent(page: ResumeContent) {
   return Boolean(
     page.profile ||
@@ -163,11 +192,16 @@ function hasContent(page: ResumeContent) {
       page.interests.length > 0 ||
       page.courses.length > 0 ||
       page.references.length > 0 ||
-      page.organisations.length > 0
+      page.organisations.length > 0 ||
+      page.publications.length > 0 ||
+      page.customSections.length > 0
   );
 }
 
-function createPageSkeleton(personalDetails: ResumeContent['personalDetails']) {
+function createPageSkeleton(
+  personalDetails: ResumeContent['personalDetails'],
+  sectionOrder: ResumeContent['sectionOrder']
+) {
   return {
     personalDetails,
     profile: '',
@@ -182,6 +216,9 @@ function createPageSkeleton(personalDetails: ResumeContent['personalDetails']) {
     courses: [],
     references: [],
     organisations: [],
+    publications: [],
+    customSections: [],
+    sectionOrder: [...sectionOrder],
   } satisfies ResumeContent;
 }
 
@@ -214,7 +251,9 @@ function addSectionItems<TItem>(
     | 'interests'
     | 'courses'
     | 'references'
-    | 'organisations',
+    | 'organisations'
+    | 'publications'
+    | 'customSections',
   items: TItem[],
   estimateCost: (item: TItem) => number
 ) {
@@ -228,7 +267,7 @@ function addSectionItems<TItem>(
     const required = itemCost + (isFirstForSectionOnPage ? sectionHeaderCost : 0);
 
     if (required > remainingRef.value && hasContent(current)) {
-      pages.push(createPageSkeleton(current.personalDetails));
+      pages.push(createPageSkeleton(current.personalDetails, current.sectionOrder));
       remainingRef.value = capacity;
     }
 
@@ -246,7 +285,9 @@ export function paginateResumeContent(
   settings: PreviewVisualSettings
 ) {
   const capacity = createPageCapacity(settings);
-  const pages: ResumeContent[] = [createPageSkeleton(content.personalDetails)];
+  const pages: ResumeContent[] = [
+    createPageSkeleton(content.personalDetails, content.sectionOrder),
+  ];
   const remaining = { value: capacity };
 
   if (content.profile.trim()) {
@@ -352,6 +393,24 @@ export function paginateResumeContent(
     'organisations',
     content.organisations,
     estimateOrganisationCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'publications',
+    content.publications,
+    estimatePublicationCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'customSections',
+    content.customSections,
+    estimateCustomSectionCost
   );
 
   if (pages.length === 1 && !hasContent(pages[0]!)) {

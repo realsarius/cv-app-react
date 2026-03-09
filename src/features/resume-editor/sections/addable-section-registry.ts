@@ -60,6 +60,16 @@ export const ADDABLE_SECTION_REGISTRY = [
     descriptionKey: 'addable.organisations.description',
   },
   {
+    key: 'publications',
+    labelKey: 'addable.publications.label',
+    descriptionKey: 'addable.publications.description',
+  },
+  {
+    key: 'customSections',
+    labelKey: 'addable.customSections.label',
+    descriptionKey: 'addable.customSections.description',
+  },
+  {
     key: 'ats',
     labelKey: 'addable.ats.label',
     descriptionKey: 'addable.ats.description',

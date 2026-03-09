@@ -117,6 +117,47 @@ const fullContent: ResumeContent = {
       description: 'Community events support.',
     },
   ],
+  publications: [
+    {
+      id: 'publication-1',
+      title: 'Scaling Frontend Performance',
+      publisher: 'Medium',
+      date: '2025',
+      url: '',
+      description: 'Article about performance optimizations in React apps.',
+    },
+  ],
+  customSections: [
+    {
+      id: 'custom-section-1',
+      title: 'Volunteer Work',
+      items: [
+        {
+          id: 'custom-item-1',
+          heading: 'Community Mentor',
+          subheading: 'Frontend Istanbul',
+          date: '2024',
+          description: 'Mentored junior developers in weekly sessions.',
+        },
+      ],
+    },
+  ],
+  sectionOrder: [
+    'profile',
+    'experiences',
+    'educations',
+    'projects',
+    'skills',
+    'languages',
+    'certificates',
+    'awards',
+    'interests',
+    'courses',
+    'references',
+    'organisations',
+    'publications',
+    'customSections',
+  ],
 };
 
 describe('calculateAtsScore', () => {
@@ -157,6 +198,24 @@ describe('calculateAtsScore', () => {
       courses: [],
       references: [],
       organisations: [],
+      publications: [],
+      customSections: [],
+      sectionOrder: [
+        'profile',
+        'experiences',
+        'educations',
+        'projects',
+        'skills',
+        'languages',
+        'certificates',
+        'awards',
+        'interests',
+        'courses',
+        'references',
+        'organisations',
+        'publications',
+        'customSections',
+      ],
     };
 
     const result = calculateAtsScore(

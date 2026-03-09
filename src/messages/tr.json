@@ -362,6 +362,25 @@
       "organisationNamePlaceholder": "Organizasyon adı",
       "organisationRolePlaceholder": "Rol",
       "organisationDescriptionPlaceholder": "Açıklama (opsiyonel)",
+      "publicationsSectionTitle": "Yayınlar",
+      "addPublication": "Yayın ekle",
+      "publicationRecord": "Yayın kaydı",
+      "publicationTitlePlaceholder": "Yayın başlığı",
+      "publisherPlaceholder": "Yayıncı / platform",
+      "publicationDatePlaceholder": "Tarih (AA/YYYY)",
+      "publicationUrlPlaceholder": "Yayın linki (opsiyonel)",
+      "publicationDescriptionPlaceholder": "Yayın açıklaması (opsiyonel)",
+      "customSectionsTitle": "Özel bölümler",
+      "addCustomSection": "Özel bölüm ekle",
+      "customSectionRecord": "Özel bölüm kaydı",
+      "customSectionTitlePlaceholder": "Bölüm başlığı",
+      "removeCustomSection": "Bölümü sil",
+      "addCustomItem": "Madde ekle",
+      "customItemRecord": "Özel madde",
+      "customItemHeadingPlaceholder": "Başlık",
+      "customItemSubheadingPlaceholder": "Alt başlık",
+      "customItemDatePlaceholder": "Tarih",
+      "customItemDescriptionPlaceholder": "Açıklama",
       "atsTitle": "ATS analizi",
       "analyzeAts": "ATS analiz et",
       "analyzing": "Analiz ediliyor",
@@ -445,6 +464,14 @@
           "label": "Organizasyonlar",
           "description": "Üyelik veya gönüllü organizasyon deneyimlerini ekleyin."
         },
+        "publications": {
+          "label": "Yayınlar",
+          "description": "Makale, yayın veya içerik üretimlerinizi ekleyin."
+        },
+        "customSections": {
+          "label": "Özel bölüm",
+          "description": "Standart alanlar dışında kalan içerikleri ekleyin."
+        },
         "ats": {
           "label": "ATS analizi",
           "description": "İş ilanına göre anahtar kelime analizini açın."
@@ -471,7 +498,9 @@
         "interests": "İlgi alanları",
         "courses": "Kurslar",
         "references": "Referanslar",
-        "organisations": "Organizasyonlar"
+        "organisations": "Organizasyonlar",
+        "publications": "Yayınlar",
+        "customSections": "Özel Bölüm"
       },
       "skillLevel": {
         "beginner": "Başlangıç",

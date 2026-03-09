@@ -190,6 +190,23 @@ function buildResumeText(content: ResumeContent) {
     )
     .join(' ');
 
+  const publicationsText = content.publications
+    .map((item) =>
+      [item.title, item.publisher, item.date, item.url, item.description].join(' ')
+    )
+    .join(' ');
+
+  const customSectionsText = content.customSections
+    .map((section) =>
+      [
+        section.title,
+        ...section.items.map((item) =>
+          [item.heading, item.subheading, item.date, item.description].join(' ')
+        ),
+      ].join(' ')
+    )
+    .join(' ');
+
   return normalizeText(
     [
       content.personalDetails.fullName,
@@ -209,6 +226,8 @@ function buildResumeText(content: ResumeContent) {
       coursesText,
       referencesText,
       organisationsText,
+      publicationsText,
+      customSectionsText,
     ].join(' ')
   );
 }
