@@ -234,7 +234,7 @@ function SortableSectionCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative transition-[transform,opacity,box-shadow] duration-200 ${
+      className={`group relative transition-[transform,opacity,box-shadow] duration-200 ${
         isDragging ? 'z-20 opacity-50 shadow-lg' : ''
       }`}
     >
@@ -243,7 +243,7 @@ function SortableSectionCard({
         {...attributes}
         {...listeners}
         aria-label={dragHandleAriaLabel}
-        className='absolute right-3 top-3 z-10 cursor-grab rounded border border-stone-300 bg-white p-1.5 text-stone-600 shadow-sm transition hover:border-stone-500 hover:text-stone-900 active:cursor-grabbing'
+        className='absolute right-3 top-3 z-10 cursor-grab p-1 text-stone-400 opacity-0 transition-opacity duration-150 group-hover:opacity-100 hover:text-stone-600 active:cursor-grabbing focus-visible:opacity-100 pointer-events-none group-hover:pointer-events-auto focus-visible:pointer-events-auto'
       >
         <GripVertical className='h-4 w-4' aria-hidden='true' />
       </button>
