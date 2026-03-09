@@ -161,81 +161,6 @@ function createEmptyProjectItem(): ResumeProjectItem {
   };
 }
 
-function createBerkansCvSeedContent(): ResumeContent {
-  return {
-    personalDetails: {
-      fullName: 'Berkan Sözer',
-      jobTitle: 'Full-Stack Developer',
-      email: 'berkansozer@outlook.com',
-      phone: '+90 5XX XXX XX XX',
-      address: 'Salihli, Manisa, Türkiye',
-    },
-    profile:
-      'Bilgisayar Mühendisliği mezunuyum. .NET ve Next.js ekosistemlerinde güvenlik, test disiplini ve modüler mimari odağıyla full-stack projeler geliştiriyorum. API tasarımı, veri modeli, kimlik doğrulama, loglama/izlenebilirlik ve CI doğrulama süreçlerini uçtan uca yönetiyorum.',
-    experiences: [
-      {
-        id: createItemId(),
-        title: 'Bilgisayar Teknik Servis',
-        company: 'Sistem Bilgisayar',
-        city: 'Salihli, Manisa',
-        country: 'Türkiye',
-        startDate: '07/2024',
-        endDate: 'Halen',
-        description:
-          'Son kullanıcı destek, arıza analizi, yazılım kurulumları ve sistem danışmanlığı süreçlerini yönettim. Windows Server kurulumu, ağ yapılandırması ve cihaz entegrasyonu ile altyapı sürekliliğini destekledim. Teknik servis süreçlerinde dijital takip yaklaşımını güçlendiren yazılım geliştirme çalışmalarına katkı sağladım.',
-      },
-    ],
-    educations: [
-      {
-        id: createItemId(),
-        school: 'İnönü Üniversitesi',
-        degree: 'Bilgisayar Mühendisliği (GNO: 3.44/4.00)',
-        city: 'Malatya',
-        country: 'Türkiye',
-        startDate: '2018',
-        endDate: '2022',
-        description:
-          'Yazılım mühendisliği, veri yapıları, algoritmalar, veritabanı ve web teknolojileri alanlarında proje temelli eğitim aldım.',
-      },
-    ],
-    projects: [
-      {
-        id: createItemId(),
-        title: 'Fiş Yönetim Sistemi',
-        subtitle: 'Modüler Monolith',
-        city: 'Uzaktan',
-        country: 'Türkiye',
-        stack:
-          'Next.js 15, React 19, TypeScript, Prisma, PostgreSQL, Tailwind CSS',
-        description:
-          '9 modül ve 36 API route ile modüler monolith mimari uyguladım. Auth/RBAC, CSRF, rate limit ve API boundary kontrollerini middleware + doğrulama scriptleri ile yönettim. Typecheck + test + boundary verify pipeline ile release gate yapısı kurdum.',
-      },
-      {
-        id: createItemId(),
-        title: 'Ecommerce Belediye Testcase',
-        subtitle: 'Clean Architecture',
-        city: 'Uzaktan',
-        country: 'Türkiye',
-        stack:
-          '.NET 8, C#, Clean Architecture, React, Redis, RabbitMQ, MassTransit, SignalR, Hangfire, Elasticsearch',
-        description:
-          '.NET 8 ve Clean Architecture ile JWT/refresh token, FluentValidation ve merkezi exception handling içeren backend geliştirdim. Redis distributed lock ile stok tutarlılığı sağladım. Asenkron event akışları, canlı destek ve zamanlanmış görev yapıları kurdum.',
-      },
-      {
-        id: createItemId(),
-        title: 'Fiyat Karşılaştırma ve Scraping Platformu',
-        subtitle: 'Veri Toplama ve Karşılaştırma',
-        city: 'Uzaktan',
-        country: 'Türkiye',
-        stack:
-          'FastAPI, Selenium, BeautifulSoup, Next.js, Firebase Auth, Firestore',
-        description:
-          'Birden fazla e-ticaret kaynağından ürün/fiyat verisi toplama ve normalize etme akışı geliştirdim. FastAPI servis katmanı ve frontend karşılaştırma/filtreleme deneyimi oluşturdum.',
-      },
-    ],
-  };
-}
-
 export default function ResumeEditorClient({
   resumeId,
   initialTitle,
@@ -284,7 +209,6 @@ export default function ResumeEditorClient({
 
   const saveSequenceRef = useRef(0);
   const isSaveInFlightRef = useRef(false);
-  const cheatCodeBufferRef = useRef('');
   const lastServerUpdatedAtRef = useRef(initialUpdatedAt);
   const previewViewportRef = useRef<HTMLDivElement | null>(null);
   const previewPaperRef = useRef<HTMLDivElement | null>(null);
@@ -505,25 +429,6 @@ export default function ResumeEditorClient({
       );
     }
   }, [resumeId, settingsPayloadString]);
-
-  const applyDevSeedContent = useCallback(() => {
-    const seededContent = createBerkansCvSeedContent();
-    setTitle('Berkan Sözer - Full-Stack Developer CV');
-    setContent(seededContent);
-    setIsProfileSectionEnabled(true);
-    setIsAtsSectionEnabled(true);
-    setIsAddContentDialogOpen(false);
-    setJobTitle('Senior Full-Stack Developer');
-    setCompany('Örnek Teknoloji A.Ş.');
-    setJobDescription(
-      'We are looking for a full-stack developer with strong .NET and Next.js experience. The candidate should build secure REST APIs, work with PostgreSQL, Redis and RabbitMQ, manage CI/CD pipelines, write automated tests, and improve observability with structured logging and monitoring.'
-    );
-    setAtsResult(null);
-    setAtsError(null);
-    setIsAutosaveBlocked(false);
-    setSaveStatus('idle');
-    setSaveError(null);
-  }, []);
 
   const addProfileSection = useCallback(() => {
     setIsProfileSectionEnabled(true);
@@ -746,55 +651,6 @@ export default function ResumeEditorClient({
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [isAddContentDialogOpen]);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') {
-      return;
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      const isEditableTarget =
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement ||
-        target?.isContentEditable;
-
-      if (isEditableTarget) {
-        cheatCodeBufferRef.current = '';
-        return;
-      }
-
-      if (event.metaKey || event.ctrlKey || event.altKey) {
-        return;
-      }
-
-      if (event.key === 'Escape') {
-        cheatCodeBufferRef.current = '';
-        return;
-      }
-
-      if (event.key.length !== 1) {
-        return;
-      }
-
-      const nextBuffer = `${cheatCodeBufferRef.current}${event.key.toUpperCase()}`
-        .replace(/[^A-Z]/g, '')
-        .slice(-7);
-      cheatCodeBufferRef.current = nextBuffer;
-
-      if (nextBuffer === 'BIGBANG') {
-        event.preventDefault();
-        cheatCodeBufferRef.current = '';
-        applyDevSeedContent();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [applyDevSeedContent]);
 
   useEffect(() => {
     const viewportNode = previewViewportRef.current;
