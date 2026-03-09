@@ -1,7 +1,33 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   RESUME_TEMPLATES,
@@ -33,7 +59,9 @@ import type {
   ResumeProjectItem,
   ResumeReferenceItem,
   ResumeSkillItem,
+  ResumeContentSectionOrderKey,
 } from './content';
+import { resolveSectionOrder } from './section-order';
 
 type ResumeEditorClientProps = {
   resumeId: string;
@@ -178,6 +206,50 @@ function writeAtsSectionVisibility(resumeId: string, isEnabled: boolean) {
   } catch {
     // Ignore storage errors (private mode / disabled storage).
   }
+}
+
+type SortableSectionCardProps = {
+  sectionKey: ResumeContentSectionOrderKey;
+  order: number;
+  dragHandleAriaLabel: string;
+  children: ReactNode;
+};
+
+function SortableSectionCard({
+  sectionKey,
+  order,
+  dragHandleAriaLabel,
+  children,
+}: SortableSectionCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: sectionKey,
+  });
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    order,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative transition-[transform,opacity,box-shadow] duration-200 ${
+        isDragging ? 'z-20 opacity-50 shadow-lg' : ''
+      }`}
+    >
+      <button
+        type='button'
+        {...attributes}
+        {...listeners}
+        aria-label={dragHandleAriaLabel}
+        className='absolute right-3 top-3 z-10 cursor-grab rounded border border-stone-300 bg-white p-1.5 text-stone-600 shadow-sm transition hover:border-stone-500 hover:text-stone-900 active:cursor-grabbing'
+      >
+        <GripVertical className='h-4 w-4' aria-hidden='true' />
+      </button>
+      <div className='pr-10'>{children}</div>
+    </div>
+  );
 }
 
 function createEmptyExperienceItem(): ResumeExperienceItem {
@@ -406,6 +478,101 @@ export default function ResumeEditorClient({
 
     writeAtsSectionVisibility(resumeId, isAtsSectionEnabled);
   }, [isAtsSectionEnabled, isAtsVisibilityLoaded, resumeId]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const visibleSectionKeys = useMemo<ResumeContentSectionOrderKey[]>(
+    () => [
+      ...(isProfileSectionEnabled ? (['profile'] as const) : []),
+      ...(content.experiences.length > 0 ? (['experiences'] as const) : []),
+      ...(content.educations.length > 0 ? (['educations'] as const) : []),
+      ...(content.projects.length > 0 ? (['projects'] as const) : []),
+      ...(content.skills.length > 0 ? (['skills'] as const) : []),
+      ...(content.languages.length > 0 ? (['languages'] as const) : []),
+      ...(content.certificates.length > 0 ? (['certificates'] as const) : []),
+      ...(content.awards.length > 0 ? (['awards'] as const) : []),
+      ...(content.interests.length > 0 ? (['interests'] as const) : []),
+      ...(content.courses.length > 0 ? (['courses'] as const) : []),
+      ...(content.references.length > 0 ? (['references'] as const) : []),
+      ...(content.organisations.length > 0 ? (['organisations'] as const) : []),
+      ...(content.publications.length > 0 ? (['publications'] as const) : []),
+      ...(content.customSections.length > 0 ? (['customSections'] as const) : []),
+    ],
+    [
+      content.awards.length,
+      content.certificates.length,
+      content.courses.length,
+      content.customSections.length,
+      content.educations.length,
+      content.experiences.length,
+      content.interests.length,
+      content.languages.length,
+      content.organisations.length,
+      content.projects.length,
+      content.publications.length,
+      content.references.length,
+      content.skills.length,
+      isProfileSectionEnabled,
+    ]
+  );
+
+  const resolvedSectionOrder = useMemo(
+    () => resolveSectionOrder(content.sectionOrder),
+    [content.sectionOrder]
+  );
+
+  const visibleSectionKeySet = useMemo(
+    () => new Set<ResumeContentSectionOrderKey>(visibleSectionKeys),
+    [visibleSectionKeys]
+  );
+
+  const orderedVisibleSectionKeys = useMemo(
+    () => resolvedSectionOrder.filter((key) => visibleSectionKeySet.has(key)),
+    [resolvedSectionOrder, visibleSectionKeySet]
+  );
+
+  const sectionOrderIndex = useMemo(() => {
+    return resolvedSectionOrder.reduce(
+      (acc, key, index) => {
+        acc[key] = index;
+        return acc;
+      },
+      {} as Record<ResumeContentSectionOrderKey, number>
+    );
+  }, [resolvedSectionOrder]);
+
+  const handleSectionDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const activeKey = String(active.id) as ResumeContentSectionOrderKey;
+    const overKey = String(over.id) as ResumeContentSectionOrderKey;
+
+    setContent((prev) => {
+      const currentOrder = resolveSectionOrder(prev.sectionOrder);
+      const oldIndex = currentOrder.indexOf(activeKey);
+      const newIndex = currentOrder.indexOf(overKey);
+      if (oldIndex === -1 || newIndex === -1) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        sectionOrder: arrayMove(currentOrder, oldIndex, newIndex),
+      };
+    });
+  }, []);
 
   const payload = useMemo(
     () => ({
@@ -1543,6 +1710,9 @@ export default function ResumeEditorClient({
             <p className='mt-1 text-sm text-stone-600'>
               {t('contentSectionsDescription')}
             </p>
+            {orderedVisibleSectionKeys.length > 1 ? (
+              <p className='mt-1 text-xs text-stone-500'>{t('reorderSectionsHint')}</p>
+            ) : null}
           </div>
           <button
             type='button'
@@ -1555,8 +1725,25 @@ export default function ResumeEditorClient({
         </div>
       </div>
 
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleSectionDragEnd}
+      >
+        <SortableContext
+          items={orderedVisibleSectionKeys}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className='flex flex-col gap-6'>
       {isProfileSectionEnabled ? (
-        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+        <SortableSectionCard
+          sectionKey='profile'
+          order={sectionOrderIndex.profile ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('profileSummaryTitle'),
+          })}
+        >
+          <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>{t('profileSummaryTitle')}</h2>
             <button
@@ -1580,10 +1767,18 @@ export default function ResumeEditorClient({
             className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
             placeholder={t('profileSummaryPlaceholder')}
           />
-        </div>
+          </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.experiences.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='experiences'
+          order={sectionOrderIndex.experiences ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('experienceSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <h2 className='text-lg font-semibold text-stone-900'>{t('experienceSectionTitle')}</h2>
@@ -1738,9 +1933,17 @@ export default function ResumeEditorClient({
           ))}
         </div>
       </div>
+      </SortableSectionCard>
       ) : null}
 
       {content.educations.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='educations'
+          order={sectionOrderIndex.educations ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('educationSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <h2 className='text-lg font-semibold text-stone-900'>{t('educationSectionTitle')}</h2>
@@ -1897,9 +2100,17 @@ export default function ResumeEditorClient({
           ))}
         </div>
       </div>
+      </SortableSectionCard>
       ) : null}
 
       {content.projects.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='projects'
+          order={sectionOrderIndex.projects ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('projectSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <h2 className='text-lg font-semibold text-stone-900'>{t('projectSectionTitle')}</h2>
@@ -2043,9 +2254,17 @@ export default function ResumeEditorClient({
           ))}
         </div>
       </div>
+      </SortableSectionCard>
       ) : null}
 
       {content.skills.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='skills'
+          order={sectionOrderIndex.skills ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('skillsSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2137,9 +2356,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.languages.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='languages'
+          order={sectionOrderIndex.languages ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('languagesSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2233,9 +2460,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.certificates.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='certificates'
+          order={sectionOrderIndex.certificates ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('certificatesSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2367,9 +2602,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.awards.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='awards'
+          order={sectionOrderIndex.awards ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('awardsSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2485,9 +2728,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.interests.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='interests'
+          order={sectionOrderIndex.interests ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('interestsSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2547,9 +2798,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.courses.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='courses'
+          order={sectionOrderIndex.courses ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('coursesSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2666,9 +2925,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.references.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='references'
+          order={sectionOrderIndex.references ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('referencesSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2819,9 +3086,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.organisations.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='organisations'
+          order={sectionOrderIndex.organisations ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('organisationsSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -2953,9 +3228,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.publications.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='publications'
+          order={sectionOrderIndex.publications ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('publicationsSectionTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -3087,9 +3370,17 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
 
       {content.customSections.length > 0 ? (
+        <SortableSectionCard
+          sectionKey='customSections'
+          order={sectionOrderIndex.customSections ?? 0}
+          dragHandleAriaLabel={t('dragHandleAria', {
+            section: t('customSectionsTitle'),
+          })}
+        >
         <div className='rounded-lg border border-stone-200 bg-white p-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <h2 className='text-lg font-semibold text-stone-900'>
@@ -3291,7 +3582,11 @@ export default function ResumeEditorClient({
             ))}
           </div>
         </div>
+        </SortableSectionCard>
       ) : null}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {isAtsSectionEnabled ? (
         <div className='rounded-lg border border-stone-200 bg-white p-6'>

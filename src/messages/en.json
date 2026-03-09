@@ -273,6 +273,8 @@
       "personalAddressPlaceholder": "Address",
       "contentSectionsTitle": "Content sections",
       "contentSectionsDescription": "Add only the sections you need.",
+      "reorderSectionsHint": "Drag sections to reorder them.",
+      "dragHandleAria": "Drag to move the {section} section",
       "addContent": "Add content",
       "allSectionsAdded": "All sections added",
       "profileSummaryTitle": "Profile summary",

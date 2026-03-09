@@ -273,6 +273,8 @@
       "personalAddressPlaceholder": "Adres",
       "contentSectionsTitle": "İçerik bölümleri",
       "contentSectionsDescription": "Sadece ihtiyacınız olan bölümleri ekleyin.",
+      "reorderSectionsHint": "Bölümleri sıralamak için sürükleyin.",
+      "dragHandleAria": "{section} bölümünü taşımak için sürükle",
       "addContent": "İçerik ekle",
       "allSectionsAdded": "Tüm bölümler eklendi",
       "profileSummaryTitle": "Profil özeti",
