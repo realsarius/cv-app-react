@@ -72,6 +72,51 @@ const sampleContent: ResumeContent = {
       credentialId: 'AWS-CCP-001',
     },
   ],
+  awards: [
+    {
+      id: 'award-1',
+      title: 'Hackathon Winner',
+      issuer: 'Acme',
+      date: '2024',
+      description: 'Won internal innovation hackathon.',
+    },
+  ],
+  interests: [
+    {
+      id: 'interest-1',
+      name: 'Developer communities',
+    },
+  ],
+  courses: [
+    {
+      id: 'course-1',
+      name: 'System Design Fundamentals',
+      institution: 'Udemy',
+      date: '2025',
+      url: '',
+    },
+  ],
+  references: [
+    {
+      id: 'reference-1',
+      name: 'Ahmet Kaya',
+      title: 'Tech Lead',
+      company: 'Acme',
+      email: 'ahmet@example.com',
+      phone: '',
+      relationship: 'Manager',
+    },
+  ],
+  organisations: [
+    {
+      id: 'organisation-1',
+      name: 'Women in Tech',
+      role: 'Mentor',
+      startDate: '2022',
+      endDate: '',
+      description: 'Mentoring junior developers.',
+    },
+  ],
 };
 
 const sampleSettings: ResumeVisualSettings = {

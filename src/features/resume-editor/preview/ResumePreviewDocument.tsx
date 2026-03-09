@@ -442,6 +442,175 @@ export default function ResumePreviewDocument({
           </div>
         </section>
       ) : null}
+
+      {content.awards.length > 0 ? (
+        <section className={sectionSpacing}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.awards')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.awards.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.title}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.issuer, item.date].filter(Boolean).join(' | ')}
+                </p>
+                {item.description ? (
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.interests.length > 0 ? (
+        <section className={sectionSpacing}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.interests')}
+          </h3>
+          <p
+            className={`mt-2 ${palette.body}`}
+            style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+          >
+            {content.interests
+              .map((item) => item.name)
+              .filter(Boolean)
+              .join(', ')}
+          </p>
+        </section>
+      ) : null}
+
+      {content.courses.length > 0 ? (
+        <section className={sectionSpacing}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.courses')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.courses.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.institution, item.date].filter(Boolean).join(' | ')}
+                </p>
+                {item.url ? (
+                  <p
+                    className={palette.sectionLabel}
+                    style={{ fontSize: `${typography.meta}em` }}
+                  >
+                    {item.url}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.references.length > 0 ? (
+        <section className={sectionSpacing}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.references')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.references.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.title, item.company, item.relationship]
+                    .filter(Boolean)
+                    .join(' | ')}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {[item.email, item.phone].filter(Boolean).join(' | ')}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.organisations.length > 0 ? (
+        <section className={sectionSpacing}>
+          <h3
+            className={`font-semibold ${palette.sectionLabel}`}
+            style={{ fontSize: `${typography.section}em` }}
+          >
+            {t('sections.organisations')}
+          </h3>
+          <div className={`mt-3 ${contentSpacing}`}>
+            {content.organisations.map((item) => (
+              <div key={item.id}>
+                <p
+                  className={`font-semibold ${palette.title}`}
+                  style={{ fontSize: `${typography.body}em` }}
+                >
+                  {item.name}
+                  {item.role ? ` - ${item.role}` : ''}
+                </p>
+                <p
+                  className={palette.sectionLabel}
+                  style={{ fontSize: `${typography.meta}em` }}
+                >
+                  {formatRange(item.startDate, item.endDate, t('range.ongoing'))}
+                </p>
+                {item.description ? (
+                  <p
+                    className={`mt-1 whitespace-pre-wrap ${palette.body}`}
+                    style={{ fontSize: `${typography.body}em`, lineHeight: articleLineHeight }}
+                  >
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </article>
   );
 }

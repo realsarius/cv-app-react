@@ -1,10 +1,15 @@
 import type {
+  ResumeAwardItem,
   ResumeCertificateItem,
   ResumeContent,
+  ResumeCourseItem,
   ResumeEducationItem,
   ResumeExperienceItem,
+  ResumeInterestItem,
   ResumeLanguageItem,
+  ResumeOrganisationItem,
   ResumeProjectItem,
+  ResumeReferenceItem,
   ResumeSkillItem,
 } from '@/features/resume-editor/content';
 import type { ResumeTemplateKey } from '@/templates/resume/types';
@@ -100,6 +105,51 @@ function estimateCertificateCost(item: ResumeCertificateItem) {
   );
 }
 
+function estimateAwardCost(item: ResumeAwardItem) {
+  const heading = `${item.title} ${item.issuer}`.trim();
+  return (
+    3.4 +
+    estimateLineCount(heading, 62) * 1.05 +
+    estimateLineCount(item.date, 30) * 0.8 +
+    estimateLineCount(item.description, 86) * 1.15
+  );
+}
+
+function estimateInterestCost(item: ResumeInterestItem) {
+  return 2.6 + estimateLineCount(item.name, 72) * 0.95;
+}
+
+function estimateCourseCost(item: ResumeCourseItem) {
+  const heading = `${item.name} ${item.institution}`.trim();
+  const meta = `${item.date} ${item.url}`.trim();
+  return (
+    3.2 +
+    estimateLineCount(heading, 66) * 1.05 +
+    estimateLineCount(meta, 78) * 0.9
+  );
+}
+
+function estimateReferenceCost(item: ResumeReferenceItem) {
+  const heading = `${item.name} ${item.title}`.trim();
+  const meta = `${item.company} ${item.relationship} ${item.email} ${item.phone}`.trim();
+  return (
+    3.4 +
+    estimateLineCount(heading, 66) * 1.05 +
+    estimateLineCount(meta, 78) * 1
+  );
+}
+
+function estimateOrganisationCost(item: ResumeOrganisationItem) {
+  const heading = `${item.name} ${item.role}`.trim();
+  const range = `${item.startDate} ${item.endDate}`.trim();
+  return (
+    3.6 +
+    estimateLineCount(heading, 64) * 1.05 +
+    estimateLineCount(range, 34) * 0.8 +
+    estimateLineCount(item.description, 86) * 1.1
+  );
+}
+
 function hasContent(page: ResumeContent) {
   return Boolean(
     page.profile ||
@@ -108,7 +158,12 @@ function hasContent(page: ResumeContent) {
       page.projects.length > 0 ||
       page.skills.length > 0 ||
       page.languages.length > 0 ||
-      page.certificates.length > 0
+      page.certificates.length > 0 ||
+      page.awards.length > 0 ||
+      page.interests.length > 0 ||
+      page.courses.length > 0 ||
+      page.references.length > 0 ||
+      page.organisations.length > 0
   );
 }
 
@@ -122,6 +177,11 @@ function createPageSkeleton(personalDetails: ResumeContent['personalDetails']) {
     skills: [],
     languages: [],
     certificates: [],
+    awards: [],
+    interests: [],
+    courses: [],
+    references: [],
+    organisations: [],
   } satisfies ResumeContent;
 }
 
@@ -149,7 +209,12 @@ function addSectionItems<TItem>(
     | 'projects'
     | 'skills'
     | 'languages'
-    | 'certificates',
+    | 'certificates'
+    | 'awards'
+    | 'interests'
+    | 'courses'
+    | 'references'
+    | 'organisations',
   items: TItem[],
   estimateCost: (item: TItem) => number
 ) {
@@ -242,6 +307,51 @@ export function paginateResumeContent(
     'certificates',
     content.certificates,
     estimateCertificateCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'awards',
+    content.awards,
+    estimateAwardCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'interests',
+    content.interests,
+    estimateInterestCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'courses',
+    content.courses,
+    estimateCourseCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'references',
+    content.references,
+    estimateReferenceCost
+  );
+
+  addSectionItems(
+    pages,
+    remaining,
+    capacity,
+    'organisations',
+    content.organisations,
+    estimateOrganisationCost
   );
 
   if (pages.length === 1 && !hasContent(pages[0]!)) {

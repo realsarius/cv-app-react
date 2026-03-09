@@ -282,6 +282,108 @@ export default function AtlanticBlueTemplate({
             </div>
           </section>
         ) : null}
+
+        {content.awards.length > 0 ? (
+          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
+              {t('sections.awards')}
+            </h3>
+            <div className='mt-3 space-y-3'>
+              {content.awards.map((item) => (
+                <div key={item.id}>
+                  <p className={`text-[0.95em] font-semibold ${theme.body}`}>{item.title}</p>
+                  <p className={`text-[0.8em] ${theme.meta}`}>
+                    {[item.issuer, item.date].filter(Boolean).join(' | ')}
+                  </p>
+                  {item.description ? (
+                    <p className={`mt-1 whitespace-pre-wrap text-[0.92em] ${theme.body}`}>
+                      {item.description}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {content.interests.length > 0 ? (
+          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
+              {t('sections.interests')}
+            </h3>
+            <p className={`mt-2 text-[0.92em] ${theme.body}`}>
+              {content.interests.map((item) => item.name).filter(Boolean).join(', ')}
+            </p>
+          </section>
+        ) : null}
+
+        {content.courses.length > 0 ? (
+          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
+              {t('sections.courses')}
+            </h3>
+            <div className='mt-3 space-y-3'>
+              {content.courses.map((item) => (
+                <div key={item.id}>
+                  <p className={`text-[0.95em] font-semibold ${theme.body}`}>{item.name}</p>
+                  <p className={`text-[0.8em] ${theme.meta}`}>
+                    {[item.institution, item.date].filter(Boolean).join(' | ')}
+                  </p>
+                  {item.url ? <p className={`text-[0.8em] ${theme.meta}`}>{item.url}</p> : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {content.references.length > 0 ? (
+          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
+              {t('sections.references')}
+            </h3>
+            <div className='mt-3 space-y-3'>
+              {content.references.map((item) => (
+                <div key={item.id}>
+                  <p className={`text-[0.95em] font-semibold ${theme.body}`}>{item.name}</p>
+                  <p className={`text-[0.8em] ${theme.meta}`}>
+                    {[item.title, item.company, item.relationship]
+                      .filter(Boolean)
+                      .join(' | ')}
+                  </p>
+                  <p className={`text-[0.8em] ${theme.meta}`}>
+                    {[item.email, item.phone].filter(Boolean).join(' | ')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {content.organisations.length > 0 ? (
+          <section className={`border-t pt-4 ${theme.sectionDivider}`}>
+            <h3 className={`text-[0.86em] font-bold uppercase tracking-wide ${theme.sectionTitle}`}>
+              {t('sections.organisations')}
+            </h3>
+            <div className='mt-3 space-y-3'>
+              {content.organisations.map((item) => (
+                <div key={item.id}>
+                  <p className={`text-[0.95em] font-semibold ${theme.body}`}>
+                    {item.name}
+                    {item.role ? ` - ${item.role}` : ''}
+                  </p>
+                  <p className={`text-[0.8em] ${theme.meta}`}>
+                    {formatRange(item.startDate, item.endDate, t('range.ongoing'))}
+                  </p>
+                  {item.description ? (
+                    <p className={`mt-1 whitespace-pre-wrap text-[0.92em] ${theme.body}`}>
+                      {item.description}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </article>
   );

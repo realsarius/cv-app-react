@@ -72,6 +72,51 @@ const fullContent: ResumeContent = {
       credentialId: 'PSM-I-001',
     },
   ],
+  awards: [
+    {
+      id: 'award-1',
+      title: 'Engineering Excellence Award',
+      issuer: 'Acme',
+      date: '2024',
+      description: 'Best cross-team delivery award.',
+    },
+  ],
+  interests: [
+    {
+      id: 'interest-1',
+      name: 'Open source',
+    },
+  ],
+  courses: [
+    {
+      id: 'course-1',
+      name: 'Advanced TypeScript',
+      institution: 'Frontend Masters',
+      date: '2025',
+      url: '',
+    },
+  ],
+  references: [
+    {
+      id: 'reference-1',
+      name: 'Jane Doe',
+      title: 'Engineering Manager',
+      company: 'Acme',
+      email: 'jane@example.com',
+      phone: '',
+      relationship: 'Manager',
+    },
+  ],
+  organisations: [
+    {
+      id: 'organisation-1',
+      name: 'GDG Istanbul',
+      role: 'Volunteer',
+      startDate: '2023',
+      endDate: '',
+      description: 'Community events support.',
+    },
+  ],
 };
 
 describe('calculateAtsScore', () => {
@@ -107,6 +152,11 @@ describe('calculateAtsScore', () => {
       skills: [],
       languages: [],
       certificates: [],
+      awards: [],
+      interests: [],
+      courses: [],
+      references: [],
+      organisations: [],
     };
 
     const result = calculateAtsScore(

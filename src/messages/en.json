@@ -331,6 +331,37 @@
       "certificateDatePlaceholder": "Date (MM/YYYY)",
       "credentialIdPlaceholder": "Credential ID",
       "certificateUrlPlaceholder": "Verification link (optional)",
+      "awardsSectionTitle": "Awards",
+      "addAward": "Add award",
+      "awardRecord": "Award record",
+      "awardTitlePlaceholder": "Award title",
+      "awardDatePlaceholder": "Date (MM/YYYY)",
+      "awardDescriptionPlaceholder": "Award description (optional)",
+      "interestsSectionTitle": "Interests",
+      "addInterest": "Add interest",
+      "interestRecord": "Interest record",
+      "interestNamePlaceholder": "Interest",
+      "coursesSectionTitle": "Courses",
+      "addCourse": "Add course",
+      "courseRecord": "Course record",
+      "courseNamePlaceholder": "Course name",
+      "institutionPlaceholder": "Institution",
+      "courseDatePlaceholder": "Date (MM/YYYY)",
+      "courseUrlPlaceholder": "Course link (optional)",
+      "referencesSectionTitle": "References",
+      "addReference": "Add reference",
+      "referenceRecord": "Reference record",
+      "referenceNamePlaceholder": "Full name",
+      "referenceTitlePlaceholder": "Title",
+      "relationshipPlaceholder": "Relationship (e.g. Team lead)",
+      "referenceEmailPlaceholder": "Email",
+      "referencePhonePlaceholder": "Phone",
+      "organisationsSectionTitle": "Organisations",
+      "addOrganisation": "Add organisation",
+      "organisationRecord": "Organisation record",
+      "organisationNamePlaceholder": "Organisation name",
+      "organisationRolePlaceholder": "Role",
+      "organisationDescriptionPlaceholder": "Description (optional)",
       "atsTitle": "ATS analysis",
       "analyzeAts": "Run ATS analysis",
       "analyzing": "Analyzing",
@@ -394,6 +425,26 @@
           "label": "Certificates",
           "description": "Add your certificates and credentials."
         },
+        "awards": {
+          "label": "Awards",
+          "description": "Add your recognitions and achievements."
+        },
+        "interests": {
+          "label": "Interests",
+          "description": "Add interests that support your career story."
+        },
+        "courses": {
+          "label": "Courses",
+          "description": "Add completed courses and relevant links."
+        },
+        "references": {
+          "label": "References",
+          "description": "Add references for applications when needed."
+        },
+        "organisations": {
+          "label": "Organisations",
+          "description": "Add memberships or volunteer organisations."
+        },
         "ats": {
           "label": "ATS analysis",
           "description": "Enable keyword analysis based on the job description."
@@ -415,7 +466,12 @@
         "projects": "Projects",
         "skills": "Skills",
         "languages": "Languages",
-        "certificates": "Certificates"
+        "certificates": "Certificates",
+        "awards": "Awards",
+        "interests": "Interests",
+        "courses": "Courses",
+        "references": "References",
+        "organisations": "Organisations"
       },
       "skillLevel": {
         "beginner": "Beginner",

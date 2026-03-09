@@ -618,5 +618,127 @@ export async function createResumePdf(input: ResumePdfInput) {
     });
   }
 
+  if (input.content.awards.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(ctx, 'Awards', headingFont, baseSize * 0.95, lineHeight, palette);
+
+    input.content.awards.forEach((item) => {
+      const subtitle = [item.issuer.trim(), item.date.trim()].filter(Boolean).join(' | ');
+      drawLabeledEntry(ctx, item.title.trim() || 'Award', subtitle, item.description, {
+        headingFont,
+        bodyFont,
+        headingSize,
+        bodySize: baseSize,
+        lineHeight,
+        palette,
+      });
+    });
+  }
+
+  if (input.content.interests.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(
+      ctx,
+      'Interests',
+      headingFont,
+      baseSize * 0.95,
+      lineHeight,
+      palette
+    );
+
+    drawWrappedText(
+      ctx,
+      input.content.interests
+        .map((item) => item.name.trim())
+        .filter(Boolean)
+        .join(', '),
+      {
+        font: bodyFont,
+        size: baseSize,
+        color: palette.body,
+        lineHeight,
+      }
+    );
+  }
+
+  if (input.content.courses.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(ctx, 'Courses', headingFont, baseSize * 0.95, lineHeight, palette);
+
+    input.content.courses.forEach((item) => {
+      const subtitle = [item.institution.trim(), item.date.trim()]
+        .filter(Boolean)
+        .join(' | ');
+      drawLabeledEntry(
+        ctx,
+        item.name.trim() || 'Course',
+        subtitle,
+        item.url.trim(),
+        {
+          headingFont,
+          bodyFont,
+          headingSize,
+          bodySize: baseSize,
+          lineHeight,
+          palette,
+        }
+      );
+    });
+  }
+
+  if (input.content.references.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(
+      ctx,
+      'References',
+      headingFont,
+      baseSize * 0.95,
+      lineHeight,
+      palette
+    );
+
+    input.content.references.forEach((item) => {
+      const subtitle = [item.title.trim(), item.company.trim(), item.relationship.trim()]
+        .filter(Boolean)
+        .join(' | ');
+      const body = [item.email.trim(), item.phone.trim()].filter(Boolean).join(' | ');
+      drawLabeledEntry(ctx, item.name.trim() || 'Reference', subtitle, body, {
+        headingFont,
+        bodyFont,
+        headingSize,
+        bodySize: baseSize,
+        lineHeight,
+        palette,
+      });
+    });
+  }
+
+  if (input.content.organisations.length > 0) {
+    ctx.y -= sectionGap * 0.4;
+    drawSectionTitle(
+      ctx,
+      'Organisations',
+      headingFont,
+      baseSize * 0.95,
+      lineHeight,
+      palette
+    );
+
+    input.content.organisations.forEach((item) => {
+      const title = `${item.name.trim() || 'Organisation'}${
+        item.role.trim() ? ` - ${item.role.trim()}` : EMPTY_LINE
+      }`;
+      const subtitle = formatRange(item.startDate, item.endDate);
+      drawLabeledEntry(ctx, title, subtitle, item.description, {
+        headingFont,
+        bodyFont,
+        headingSize,
+        bodySize: baseSize,
+        lineHeight,
+        palette,
+      });
+    });
+  }
+
   return doc.save();
 }

@@ -331,6 +331,37 @@
       "certificateDatePlaceholder": "Tarih (AA/YYYY)",
       "credentialIdPlaceholder": "Belge kimliği",
       "certificateUrlPlaceholder": "Doğrulama linki (opsiyonel)",
+      "awardsSectionTitle": "Ödüller",
+      "addAward": "Ödül ekle",
+      "awardRecord": "Ödül kaydı",
+      "awardTitlePlaceholder": "Ödül başlığı",
+      "awardDatePlaceholder": "Tarih (AA/YYYY)",
+      "awardDescriptionPlaceholder": "Ödül açıklaması (opsiyonel)",
+      "interestsSectionTitle": "İlgi alanları",
+      "addInterest": "İlgi alanı ekle",
+      "interestRecord": "İlgi alanı kaydı",
+      "interestNamePlaceholder": "İlgi alanı",
+      "coursesSectionTitle": "Kurslar",
+      "addCourse": "Kurs ekle",
+      "courseRecord": "Kurs kaydı",
+      "courseNamePlaceholder": "Kurs adı",
+      "institutionPlaceholder": "Kurum",
+      "courseDatePlaceholder": "Tarih (AA/YYYY)",
+      "courseUrlPlaceholder": "Kurs linki (opsiyonel)",
+      "referencesSectionTitle": "Referanslar",
+      "addReference": "Referans ekle",
+      "referenceRecord": "Referans kaydı",
+      "referenceNamePlaceholder": "Ad soyad",
+      "referenceTitlePlaceholder": "Pozisyon",
+      "relationshipPlaceholder": "İlişki (örn. Takım lideri)",
+      "referenceEmailPlaceholder": "E-posta",
+      "referencePhonePlaceholder": "Telefon",
+      "organisationsSectionTitle": "Organizasyonlar",
+      "addOrganisation": "Organizasyon ekle",
+      "organisationRecord": "Organizasyon kaydı",
+      "organisationNamePlaceholder": "Organizasyon adı",
+      "organisationRolePlaceholder": "Rol",
+      "organisationDescriptionPlaceholder": "Açıklama (opsiyonel)",
       "atsTitle": "ATS analizi",
       "analyzeAts": "ATS analiz et",
       "analyzing": "Analiz ediliyor",
@@ -394,6 +425,26 @@
           "label": "Sertifikalar",
           "description": "Sertifika ve belge bilgilerinizi ekleyin."
         },
+        "awards": {
+          "label": "Ödüller",
+          "description": "Başarı ve ödüllerinizi ekleyin."
+        },
+        "interests": {
+          "label": "İlgi alanları",
+          "description": "Kariyerinizi destekleyen ilgi alanlarınızı ekleyin."
+        },
+        "courses": {
+          "label": "Kurslar",
+          "description": "Tamamladığınız kursları ve kaynaklarını ekleyin."
+        },
+        "references": {
+          "label": "Referanslar",
+          "description": "Gerekli durumlar için referans kişileri ekleyin."
+        },
+        "organisations": {
+          "label": "Organizasyonlar",
+          "description": "Üyelik veya gönüllü organizasyon deneyimlerini ekleyin."
+        },
         "ats": {
           "label": "ATS analizi",
           "description": "İş ilanına göre anahtar kelime analizini açın."
@@ -415,7 +466,12 @@
         "projects": "Projeler",
         "skills": "Beceriler",
         "languages": "Diller",
-        "certificates": "Sertifikalar"
+        "certificates": "Sertifikalar",
+        "awards": "Ödüller",
+        "interests": "İlgi alanları",
+        "courses": "Kurslar",
+        "references": "Referanslar",
+        "organisations": "Organizasyonlar"
       },
       "skillLevel": {
         "beginner": "Başlangıç",

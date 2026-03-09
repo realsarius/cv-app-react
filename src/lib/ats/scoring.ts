@@ -161,6 +161,35 @@ function buildResumeText(content: ResumeContent) {
     )
     .join(' ');
 
+  const awardsText = content.awards
+    .map((item) => [item.title, item.issuer, item.date, item.description].join(' '))
+    .join(' ');
+
+  const interestsText = content.interests.map((item) => item.name).join(' ');
+
+  const coursesText = content.courses
+    .map((item) => [item.name, item.institution, item.date, item.url].join(' '))
+    .join(' ');
+
+  const referencesText = content.references
+    .map((item) =>
+      [
+        item.name,
+        item.title,
+        item.company,
+        item.relationship,
+        item.email,
+        item.phone,
+      ].join(' ')
+    )
+    .join(' ');
+
+  const organisationsText = content.organisations
+    .map((item) =>
+      [item.name, item.role, item.startDate, item.endDate, item.description].join(' ')
+    )
+    .join(' ');
+
   return normalizeText(
     [
       content.personalDetails.fullName,
@@ -175,6 +204,11 @@ function buildResumeText(content: ResumeContent) {
       skillsText,
       languagesText,
       certificatesText,
+      awardsText,
+      interestsText,
+      coursesText,
+      referencesText,
+      organisationsText,
     ].join(' ')
   );
 }

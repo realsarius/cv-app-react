@@ -35,6 +35,31 @@ export const ADDABLE_SECTION_REGISTRY = [
     descriptionKey: 'addable.certificates.description',
   },
   {
+    key: 'awards',
+    labelKey: 'addable.awards.label',
+    descriptionKey: 'addable.awards.description',
+  },
+  {
+    key: 'interests',
+    labelKey: 'addable.interests.label',
+    descriptionKey: 'addable.interests.description',
+  },
+  {
+    key: 'courses',
+    labelKey: 'addable.courses.label',
+    descriptionKey: 'addable.courses.description',
+  },
+  {
+    key: 'references',
+    labelKey: 'addable.references.label',
+    descriptionKey: 'addable.references.description',
+  },
+  {
+    key: 'organisations',
+    labelKey: 'addable.organisations.label',
+    descriptionKey: 'addable.organisations.description',
+  },
+  {
     key: 'ats',
     labelKey: 'addable.ats.label',
     descriptionKey: 'addable.ats.description',

@@ -18,12 +18,17 @@ import {
   PREVIEW_PAGE_BASE_WIDTH,
 } from './preview/paginate';
 import type {
+  ResumeAwardItem,
   ResumeCertificateItem,
+  ResumeCourseItem,
   ResumeContent,
   ResumeEducationItem,
   ResumeExperienceItem,
+  ResumeInterestItem,
   ResumeLanguageItem,
+  ResumeOrganisationItem,
   ResumeProjectItem,
+  ResumeReferenceItem,
   ResumeSkillItem,
 } from './content';
 
@@ -192,6 +197,56 @@ function createEmptyCertificateItem(): ResumeCertificateItem {
     date: '',
     url: '',
     credentialId: '',
+  };
+}
+
+function createEmptyAwardItem(): ResumeAwardItem {
+  return {
+    id: createItemId(),
+    title: '',
+    issuer: '',
+    date: '',
+    description: '',
+  };
+}
+
+function createEmptyInterestItem(): ResumeInterestItem {
+  return {
+    id: createItemId(),
+    name: '',
+  };
+}
+
+function createEmptyCourseItem(): ResumeCourseItem {
+  return {
+    id: createItemId(),
+    name: '',
+    institution: '',
+    date: '',
+    url: '',
+  };
+}
+
+function createEmptyReferenceItem(): ResumeReferenceItem {
+  return {
+    id: createItemId(),
+    name: '',
+    title: '',
+    company: '',
+    email: '',
+    phone: '',
+    relationship: '',
+  };
+}
+
+function createEmptyOrganisationItem(): ResumeOrganisationItem {
+  return {
+    id: createItemId(),
+    name: '',
+    role: '',
+    startDate: '',
+    endDate: '',
+    description: '',
   };
 }
 
@@ -662,6 +717,158 @@ export default function ResumeEditorClient({
     }));
   }, []);
 
+  const addAward = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      awards: [...prev.awards, createEmptyAwardItem()],
+    }));
+  }, []);
+
+  const addAwardsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      awards: prev.awards.length > 0 ? prev.awards : [createEmptyAwardItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeAward = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      awards: prev.awards.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeAwardsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      awards: [],
+    }));
+  }, []);
+
+  const addInterest = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      interests: [...prev.interests, createEmptyInterestItem()],
+    }));
+  }, []);
+
+  const addInterestsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      interests:
+        prev.interests.length > 0 ? prev.interests : [createEmptyInterestItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeInterest = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      interests: prev.interests.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeInterestsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      interests: [],
+    }));
+  }, []);
+
+  const addCourse = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      courses: [...prev.courses, createEmptyCourseItem()],
+    }));
+  }, []);
+
+  const addCoursesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      courses: prev.courses.length > 0 ? prev.courses : [createEmptyCourseItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeCourse = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      courses: prev.courses.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeCoursesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      courses: [],
+    }));
+  }, []);
+
+  const addReference = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      references: [...prev.references, createEmptyReferenceItem()],
+    }));
+  }, []);
+
+  const addReferencesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      references:
+        prev.references.length > 0
+          ? prev.references
+          : [createEmptyReferenceItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeReference = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      references: prev.references.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeReferencesSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      references: [],
+    }));
+  }, []);
+
+  const addOrganisation = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      organisations: [...prev.organisations, createEmptyOrganisationItem()],
+    }));
+  }, []);
+
+  const addOrganisationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      organisations:
+        prev.organisations.length > 0
+          ? prev.organisations
+          : [createEmptyOrganisationItem()],
+    }));
+    setIsAddContentDialogOpen(false);
+  }, []);
+
+  const removeOrganisation = useCallback((id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      organisations: prev.organisations.filter((item) => item.id !== id),
+    }));
+  }, []);
+
+  const removeOrganisationsSection = useCallback(() => {
+    setContent((prev) => ({
+      ...prev,
+      organisations: [],
+    }));
+  }, []);
+
   const addAtsSection = useCallback(() => {
     setIsAtsSectionEnabled(true);
     setIsAddContentDialogOpen(false);
@@ -743,6 +950,26 @@ export default function ResumeEditorClient({
         isAdded: content.certificates.length > 0,
         onAdd: addCertificatesSection,
       },
+      awards: {
+        isAdded: content.awards.length > 0,
+        onAdd: addAwardsSection,
+      },
+      interests: {
+        isAdded: content.interests.length > 0,
+        onAdd: addInterestsSection,
+      },
+      courses: {
+        isAdded: content.courses.length > 0,
+        onAdd: addCoursesSection,
+      },
+      references: {
+        isAdded: content.references.length > 0,
+        onAdd: addReferencesSection,
+      },
+      organisations: {
+        isAdded: content.organisations.length > 0,
+        onAdd: addOrganisationsSection,
+      },
       ats: {
         isAdded: isAtsSectionEnabled,
         onAdd: addAtsSection,
@@ -750,18 +977,28 @@ export default function ResumeEditorClient({
     }),
     [
       addAtsSection,
+      addAwardsSection,
       addCertificatesSection,
+      addCoursesSection,
       addEducationSection,
       addExperienceSection,
+      addInterestsSection,
       addLanguagesSection,
+      addOrganisationsSection,
       addProfileSection,
       addProjectSection,
+      addReferencesSection,
       addSkillsSection,
+      content.awards.length,
       content.certificates.length,
+      content.courses.length,
       content.educations.length,
       content.experiences.length,
+      content.interests.length,
       content.languages.length,
+      content.organisations.length,
       content.projects.length,
+      content.references.length,
       content.skills.length,
       isAtsSectionEnabled,
       isProfileSectionEnabled,
@@ -1925,6 +2162,592 @@ export default function ResumeEditorClient({
                   maxLength={240}
                   className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
                   placeholder={t('certificateUrlPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.awards.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('awardsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addAward}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addAward')}
+              </button>
+              <button
+                type='button'
+                onClick={removeAwardsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.awards.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('awardRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeAward(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        awards: prev.awards.map((award) =>
+                          award.id === item.id
+                            ? { ...award, title: event.target.value }
+                            : award
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('awardTitlePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.issuer}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        awards: prev.awards.map((award) =>
+                          award.id === item.id
+                            ? { ...award, issuer: event.target.value }
+                            : award
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('issuerPlaceholder')}
+                  />
+                </div>
+
+                <input
+                  type='text'
+                  value={item.date}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      awards: prev.awards.map((award) =>
+                        award.id === item.id
+                          ? { ...award, date: event.target.value }
+                          : award
+                      ),
+                    }))
+                  }
+                  maxLength={20}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('awardDatePlaceholder')}
+                />
+
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      awards: prev.awards.map((award) =>
+                        award.id === item.id
+                          ? { ...award, description: event.target.value }
+                          : award
+                      ),
+                    }))
+                  }
+                  rows={3}
+                  maxLength={1000}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('awardDescriptionPlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.interests.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('interestsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addInterest}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addInterest')}
+              </button>
+              <button
+                type='button'
+                onClick={removeInterestsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.interests.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('interestRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeInterest(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+                <input
+                  type='text'
+                  value={item.name}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      interests: prev.interests.map((interest) =>
+                        interest.id === item.id
+                          ? { ...interest, name: event.target.value }
+                          : interest
+                      ),
+                    }))
+                  }
+                  maxLength={120}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('interestNamePlaceholder')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.courses.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('coursesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addCourse}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addCourse')}
+              </button>
+              <button
+                type='button'
+                onClick={removeCoursesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.courses.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('courseRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeCourse(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, name: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('courseNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.institution}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, institution: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('institutionPlaceholder')}
+                  />
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.date}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, date: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('courseDatePlaceholder')}
+                  />
+                  <input
+                    type='url'
+                    value={item.url}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        courses: prev.courses.map((course) =>
+                          course.id === item.id
+                            ? { ...course, url: event.target.value }
+                            : course
+                        ),
+                      }))
+                    }
+                    maxLength={240}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('courseUrlPlaceholder')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.references.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('referencesSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addReference}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addReference')}
+              </button>
+              <button
+                type='button'
+                onClick={removeReferencesSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.references.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('referenceRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeReference(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, name: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referenceNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.title}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, title: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referenceTitlePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.company}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, company: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('companyPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.relationship}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, relationship: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('relationshipPlaceholder')}
+                  />
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='email'
+                    value={item.email}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, email: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referenceEmailPlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.phone}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        references: prev.references.map((reference) =>
+                          reference.id === item.id
+                            ? { ...reference, phone: event.target.value }
+                            : reference
+                        ),
+                      }))
+                    }
+                    maxLength={64}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('referencePhonePlaceholder')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {content.organisations.length > 0 ? (
+        <div className='rounded-lg border border-stone-200 bg-white p-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold text-stone-900'>
+              {t('organisationsSectionTitle')}
+            </h2>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={addOrganisation}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('addOrganisation')}
+              </button>
+              <button
+                type='button'
+                onClick={removeOrganisationsSection}
+                className='rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-stone-500'
+              >
+                {t('removeSection')}
+              </button>
+            </div>
+          </div>
+
+          <div className='mt-4 space-y-4'>
+            {content.organisations.map((item) => (
+              <div key={item.id} className='rounded-lg border border-stone-200 p-4'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='text-sm font-semibold text-stone-800'>
+                    {t('organisationRecord')}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => removeOrganisation(item.id)}
+                    className='rounded border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50'
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <input
+                    type='text'
+                    value={item.name}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, name: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={160}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('organisationNamePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.role}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, role: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={120}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('organisationRolePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.startDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, startDate: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('startDatePlaceholder')}
+                  />
+                  <input
+                    type='text'
+                    value={item.endDate}
+                    onChange={(event) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        organisations: prev.organisations.map((organisation) =>
+                          organisation.id === item.id
+                            ? { ...organisation, endDate: event.target.value }
+                            : organisation
+                        ),
+                      }))
+                    }
+                    maxLength={20}
+                    className='rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                    placeholder={t('endDatePlaceholder')}
+                  />
+                </div>
+
+                <textarea
+                  value={item.description}
+                  onChange={(event) =>
+                    setContent((prev) => ({
+                      ...prev,
+                      organisations: prev.organisations.map((organisation) =>
+                        organisation.id === item.id
+                          ? { ...organisation, description: event.target.value }
+                          : organisation
+                      ),
+                    }))
+                  }
+                  rows={3}
+                  maxLength={1200}
+                  className='mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 outline-none transition focus:border-stone-500'
+                  placeholder={t('organisationDescriptionPlaceholder')}
                 />
               </div>
             ))}

@@ -71,6 +71,46 @@ export const certificateItemSchema = z.object({
   credentialId: shortText(120),
 });
 
+export const awardItemSchema = z.object({
+  id: shortText(64),
+  title: shortText(160),
+  issuer: shortText(120),
+  date: shortText(20),
+  description: shortText(1000),
+});
+
+export const interestItemSchema = z.object({
+  id: shortText(64),
+  name: shortText(120),
+});
+
+export const courseItemSchema = z.object({
+  id: shortText(64),
+  name: shortText(160),
+  institution: shortText(120),
+  date: shortText(20),
+  url: shortText(240),
+});
+
+export const referenceItemSchema = z.object({
+  id: shortText(64),
+  name: shortText(120),
+  title: shortText(120),
+  company: shortText(120),
+  email: shortText(160),
+  phone: shortText(64),
+  relationship: shortText(120),
+});
+
+export const organisationItemSchema = z.object({
+  id: shortText(64),
+  name: shortText(160),
+  role: shortText(120),
+  startDate: shortText(20),
+  endDate: shortText(20),
+  description: shortText(1200),
+});
+
 export const resumeContentSchema = z.object({
   personalDetails: personalDetailsSchema.default({
     fullName: '',
@@ -86,6 +126,11 @@ export const resumeContentSchema = z.object({
   skills: z.array(skillItemSchema).max(40).default([]),
   languages: z.array(languageItemSchema).max(20).default([]),
   certificates: z.array(certificateItemSchema).max(20).default([]),
+  awards: z.array(awardItemSchema).max(20).default([]),
+  interests: z.array(interestItemSchema).max(30).default([]),
+  courses: z.array(courseItemSchema).max(20).default([]),
+  references: z.array(referenceItemSchema).max(20).default([]),
+  organisations: z.array(organisationItemSchema).max(20).default([]),
 });
 
 export type ResumeContent = z.infer<typeof resumeContentSchema>;
@@ -96,6 +141,11 @@ export type ResumeProjectItem = z.infer<typeof projectItemSchema>;
 export type ResumeSkillItem = z.infer<typeof skillItemSchema>;
 export type ResumeLanguageItem = z.infer<typeof languageItemSchema>;
 export type ResumeCertificateItem = z.infer<typeof certificateItemSchema>;
+export type ResumeAwardItem = z.infer<typeof awardItemSchema>;
+export type ResumeInterestItem = z.infer<typeof interestItemSchema>;
+export type ResumeCourseItem = z.infer<typeof courseItemSchema>;
+export type ResumeReferenceItem = z.infer<typeof referenceItemSchema>;
+export type ResumeOrganisationItem = z.infer<typeof organisationItemSchema>;
 export type ResumeLanguageProficiency = (typeof LANGUAGE_PROFICIENCY_LEVELS)[number];
 export type ResumeSkillLevel = (typeof SKILL_LEVELS)[number];
 
@@ -114,6 +164,11 @@ const EMPTY_RESUME_CONTENT: ResumeContent = {
   skills: [],
   languages: [],
   certificates: [],
+  awards: [],
+  interests: [],
+  courses: [],
+  references: [],
+  organisations: [],
 };
 
 export function createEmptyResumeContent(): ResumeContent {
@@ -128,6 +183,11 @@ export function createEmptyResumeContent(): ResumeContent {
     skills: [...EMPTY_RESUME_CONTENT.skills],
     languages: [...EMPTY_RESUME_CONTENT.languages],
     certificates: [...EMPTY_RESUME_CONTENT.certificates],
+    awards: [...EMPTY_RESUME_CONTENT.awards],
+    interests: [...EMPTY_RESUME_CONTENT.interests],
+    courses: [...EMPTY_RESUME_CONTENT.courses],
+    references: [...EMPTY_RESUME_CONTENT.references],
+    organisations: [...EMPTY_RESUME_CONTENT.organisations],
   };
 }
 
